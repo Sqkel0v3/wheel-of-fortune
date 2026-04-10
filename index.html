@@ -21,7 +21,8 @@
       --whoosh-radius-modal: 16px;
       --drum-item-h: 76px;
       --drum-card-gap: 8px;
-      --drum-view-h: calc(var(--drum-item-h) * 3 + var(--drum-card-gap) * 2);
+      /* Центральная карточка по центру окна, сверху/снизу — части соседей */
+      --drum-view-h: calc(3 * var(--drum-item-h) + 2 * var(--drum-card-gap));
     }
 
     * {
@@ -100,6 +101,69 @@
       margin-right: auto;
     }
 
+    .km-progress {
+      width: 100%;
+      max-width: min(100%, 380px);
+      flex-shrink: 0;
+    }
+
+    .km-progress__label {
+      font-size: clamp(0.65rem, 2.8vw, 0.78rem);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      color: #000000;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .km-progress__track {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #e4e4e8 0%, #dcdce2 100%);
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .km-progress__fill {
+      height: 100%;
+      width: 0%;
+      max-width: 100%;
+      border-radius: inherit;
+      background: linear-gradient(180deg, #ffe033 0%, #ffd500 55%, #e6bf00 100%);
+      box-shadow: 0 0 12px rgba(255, 213, 0, 0.45);
+      transition: width 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    .admin-km-panel--under-spin {
+      width: 100%;
+      max-width: 520px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .btn-admin-km--compact {
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: 1px solid rgba(0, 0, 0, 0.35);
+      border-radius: 999px;
+      cursor: pointer;
+      color: #000000;
+      background: rgba(255, 213, 0, 0.55);
+    }
+
+    .btn-admin-km--compact:active {
+      opacity: 0.88;
+    }
+
     .main-stack {
       flex: 1 1 auto;
       display: flex;
@@ -141,18 +205,16 @@
       right: 0;
       z-index: 2;
       pointer-events: none;
-      height: 48%;
+      height: 44%;
     }
 
     .drum-fade--top {
       top: 0;
       background: linear-gradient(
         to bottom,
-        #000000 0%,
-        rgba(0, 0, 0, 0.55) 18%,
-        rgba(0, 0, 0, 0.22) 42%,
-        rgba(245, 245, 247, 0) 72%,
-        transparent 100%
+        rgba(245, 245, 247, 1) 0%,
+        rgba(245, 245, 247, 0.72) 35%,
+        rgba(245, 245, 247, 0) 100%
       );
     }
 
@@ -160,11 +222,9 @@
       bottom: 0;
       background: linear-gradient(
         to top,
-        #000000 0%,
-        rgba(0, 0, 0, 0.55) 18%,
-        rgba(0, 0, 0, 0.22) 42%,
-        rgba(245, 245, 247, 0) 72%,
-        transparent 100%
+        rgba(245, 245, 247, 1) 0%,
+        rgba(245, 245, 247, 0.72) 35%,
+        rgba(245, 245, 247, 0) 100%
       );
     }
 
@@ -197,7 +257,7 @@
     .drum-card__icon {
       width: 48px;
       height: 48px;
-      background: var(--whoosh-accent);
+      background: #ffd500;
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -451,6 +511,41 @@
       word-break: break-all;
     }
 
+    .modal-physical-notice {
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.45;
+      color: #000000;
+      margin: 0 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-contact-tg {
+      display: block;
+      width: 100%;
+      padding: 16px 16px;
+      font-family: inherit;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      text-decoration: none;
+      border: 2px solid #000000;
+      border-radius: var(--whoosh-radius-btn);
+      cursor: pointer;
+      color: #000000;
+      background: var(--whoosh-accent);
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    .btn-contact-tg:active {
+      opacity: 0.88;
+    }
+
     .btn-copy-promo {
       padding: 16px 16px;
       font-family: inherit;
@@ -529,6 +624,13 @@
     </header>
 
     <div class="main-stack">
+      <div class="km-progress" id="kmProgress">
+        <p class="km-progress__label" id="kmProgressLabel">ВАШ ПРОБЕГ: 0 / 250 КМ</p>
+        <div class="km-progress__track" aria-hidden="true">
+          <div class="km-progress__fill" id="kmProgressFill"></div>
+        </div>
+      </div>
+
       <div class="drum-assembly" id="drumAssembly" aria-hidden="true">
         <div class="drum-pointer" aria-hidden="true"></div>
         <div class="drum-viewport" id="drumViewport">
@@ -545,11 +647,14 @@
       </p>
 
       <p class="staff-hint" id="staffHintMain">
-        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+                        НАКОПИТЕ 250 КМ ПРОБЕГА В WHOOSH, ЧТОБЫ КРУТИТЬ БАРАБАН. ОДНА ПРОКРУТКА СПИСЫВАЕТ 250 КМ.
       </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
-      <div class="cooldown-timer" id="cooldownBar" hidden></div>
+
+      <div class="admin-km-panel--under-spin" id="adminKmPanel" hidden>
+        <button type="button" class="btn-admin-km--compact" id="addKmBtn">+50 КМ</button>
+      </div>
     </div>
   </div>
 
@@ -557,13 +662,17 @@
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
       <p class="staff-hint">
-        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+        ПРОКРУТКА: 250 КМ ПРОБЕГА. ПРОМОКОД — 24 ЧАСА ПОСЛЕ АКТИВАЦИИ.
       </p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
+      <p class="modal-physical-notice" id="modalPhysicalNotice" hidden>
+        ПОЗДРАВЛЯЕМ! Для получения приза свяжитесь с администрацией.
+      </p>
       <p class="modal-promo-label" id="modalPromoLabel">Промокод</p>
       <p class="modal-promo-code" id="modalPromoCode" aria-live="polite"></p>
       <div class="modal-actions">
+        <a class="btn-contact-tg" id="contactTgBtn" href="https://t.me/graceqqq" target="_blank" rel="noopener noreferrer" hidden>СВЯЗАТЬСЯ С МЕНЕДЖЕРОМ</a>
         <button type="button" class="btn-copy-promo" id="copyPromoBtn"></button>
         <button type="button" class="btn-claim" id="claimBtn"></button>
         <button type="button" class="btn-secondary" id="closeModalBtn">Закрыть</button>
@@ -572,9 +681,23 @@
   </div>
 
   <script>
-    const LS_LAST_SPIN = "whoosh_last_spin";
-    const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
-    const STRIP_REPEATS = 100;
+    const LS_MILEAGE = "whoosh_mileage";
+    const LS_MILEAGE_LEGACY = "whoosh_km_balance";
+    const KM_PER_SPIN = 250;
+    const STRIP_REPEATS = 50;
+    const PHYSICAL_PRIZE_CHAT_URL = "https://t.me/graceqqq";
+
+    function migrateMileageKey() {
+      try {
+        if (localStorage.getItem(LS_MILEAGE) == null) {
+          const leg = localStorage.getItem(LS_MILEAGE_LEGACY);
+          if (leg != null) localStorage.setItem(LS_MILEAGE, leg);
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    migrateMileageKey();
     const WHOOSH_LOGO_SRC = "/whoosh.png";
     const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
     const LABEL_COPY_PROMO =
@@ -582,16 +705,16 @@
     const LABEL_COPIED = "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u041d\u041e";
     const LABEL_GET_PRIZE =
       "\u041f\u041e\u041b\u0423\u0427\u0418\u0422\u042c \u041f\u0420\u0418\u0417";
-
-    let cooldownTickerId = null;
+    const LABEL_CONTACT_MANAGER =
+      "\u0421\u0412\u042f\u0417\u0410\u0422\u042c\u0421\u042f \u0421 \u041c\u0415\u041d\u0415\u0414\u0416\u0415\u0420\u041e\u041c";
 
     /**
      * Призы и вероятности (сумма весов = 100).
      * Выбор: случайное число r в [0, 100), приз с наименьшим cum > r по накопленным весам.
      */
     const PRIZE_POOL = [
-      { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01, promoBase: "IPHONE16" },
-      { title: "AirPods 4", big: "4", small: "AirPods", weight: 0.05, promoBase: "AIRPODS4" },
+      { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01 },
+      { title: "AirPods 4", big: "4", small: "AirPods", weight: 0.05 },
       {
         title: "Whoosh Pass на год",
         big: "365",
@@ -655,9 +778,38 @@
       return s;
     }
 
+    function isPhysicalPrize(entry) {
+      const t = entry && entry.title;
+      return t === "iPhone 16" || t === "AirPods 4";
+    }
+
     function makePromoCode(entry) {
+      if (isPhysicalPrize(entry)) return "";
       const base = entry.promoBase || "WHOOSH";
       return base + "-" + randomPromoSuffix(4);
+    }
+
+    function getKm() {
+      try {
+        const raw = localStorage.getItem(LS_MILEAGE);
+        const v = raw == null ? 0 : parseFloat(raw);
+        return Number.isFinite(v) && v >= 0 ? v : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function setKm(n) {
+      try {
+        const v = Math.max(0, n);
+        localStorage.setItem(LS_MILEAGE, String(v));
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    function addKm(delta) {
+      setKm(getKm() + delta);
     }
 
     function renderStripRow(entry) {
@@ -759,19 +911,28 @@
     const spinBtn = document.getElementById("spinBtn");
     const overlay = document.getElementById("overlay");
     const modalPrize = document.getElementById("modalPrize");
+    const modalPromoLabel = document.getElementById("modalPromoLabel");
     const modalPromoCode = document.getElementById("modalPromoCode");
+    const modalPhysicalNotice = document.getElementById("modalPhysicalNotice");
+    const contactTgBtn = document.getElementById("contactTgBtn");
     const copyPromoBtn = document.getElementById("copyPromoBtn");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const subtitleLine = document.getElementById("subtitleLine");
-    const cooldownBar = document.getElementById("cooldownBar");
+    const kmProgressLabel = document.getElementById("kmProgressLabel");
+    const kmProgressFill = document.getElementById("kmProgressFill");
+    const adminKmPanel = document.getElementById("adminKmPanel");
+    const addKmBtn = document.getElementById("addKmBtn");
 
     copyPromoBtn.textContent = LABEL_COPY_PROMO;
     claimBtn.textContent = LABEL_GET_PRIZE;
+    contactTgBtn.href = PHYSICAL_PRIZE_CHAT_URL;
+    contactTgBtn.textContent = LABEL_CONTACT_MANAGER;
 
     let itemHeightPx = 76;
     let currentPrizeText = "";
     let currentPromoCode = "";
+    let currentIsPhysical = false;
     let spinning = false;
 
     function readItemHeight() {
@@ -810,78 +971,35 @@
       }
     }
 
-    function getCooldownRemainingMs() {
-      if (isAdmin()) return 0;
-      try {
-        const raw = localStorage.getItem(LS_LAST_SPIN);
-        if (!raw) return 0;
-        const last = parseInt(raw, 10);
-        if (!Number.isFinite(last)) return 0;
-        const elapsed = Date.now() - last;
-        return Math.max(0, COOLDOWN_MS - elapsed);
-      } catch (e) {
-        return 0;
-      }
+    function updateKmProgressUI() {
+      if (!kmProgressLabel || !kmProgressFill) return;
+      const km = getKm();
+      const pct = Math.min(100, (km / KM_PER_SPIN) * 100);
+      kmProgressFill.style.width = pct + "%";
+      kmProgressLabel.textContent =
+        "\u0412\u0410\u0428 \u041f\u0420\u041e\u0411\u0415\u0413: " +
+        Math.floor(km) +
+        " / " +
+        KM_PER_SPIN +
+        " \u041a\u041c";
     }
 
-    function formatCooldown(ms) {
-      const sec = Math.ceil(ms / 1000);
-      const d = Math.floor(sec / 86400);
-      const h = Math.floor((sec % 86400) / 3600);
-      const m = Math.floor((sec % 3600) / 60);
-      return (
-        "\u0421\u041b\u0415\u0414\u0423\u042e\u0429\u0418\u0419 \u0428\u0410\u041d\u0421 \u0427\u0415\u0420\u0415\u0417: " +
-        d +
-        "\u0434 " +
-        h +
-        "\u0447 " +
-        m +
-        "\u043c"
-      );
-    }
-
-    function stopCooldownTicker() {
-      if (cooldownTickerId !== null) {
-        clearInterval(cooldownTickerId);
-        cooldownTickerId = null;
-      }
-    }
-
-    function refreshSpinOrTimer() {
-      stopCooldownTicker();
-      if (!spinBtn || !cooldownBar) return;
+    function refreshKmAndSpin() {
+      updateKmProgressUI();
+      if (!spinBtn || spinning) return;
+      spinBtn.hidden = false;
       if (isAdmin()) {
-        spinBtn.hidden = false;
-        cooldownBar.hidden = true;
         spinBtn.disabled = false;
         spinBtn.textContent = SPIN_BTN_LABEL;
         return;
       }
-      const left = getCooldownRemainingMs();
-      if (left <= 0) {
-        spinBtn.hidden = false;
-        cooldownBar.hidden = true;
-        spinBtn.disabled = false;
-        spinBtn.textContent = SPIN_BTN_LABEL;
-        return;
-      }
-      spinBtn.hidden = true;
-      cooldownBar.hidden = false;
-      function tick() {
-        const rem = getCooldownRemainingMs();
-        if (rem <= 0) {
-          refreshSpinOrTimer();
-          return;
-        }
-        cooldownBar.textContent = formatCooldown(rem);
-      }
-      tick();
-      cooldownTickerId = setInterval(tick, 1000);
+      spinBtn.disabled = getKm() < KM_PER_SPIN;
+      spinBtn.textContent = SPIN_BTN_LABEL;
     }
 
     function spin() {
       if (spinning) return;
-      if (!isAdmin() && getCooldownRemainingMs() > 0) return;
+      if (!isAdmin() && getKm() < KM_PER_SPIN) return;
       cancelSpinAnimation();
 
       itemHeightPx = readItemHeight();
@@ -934,26 +1052,40 @@
         spinSound.pause();
         spinSound.currentTime = 0;
         currentPrizeText = won.title;
-        currentPromoCode = makePromoCode(won);
+        currentIsPhysical = isPhysicalPrize(won);
+        currentPromoCode = currentIsPhysical ? "" : makePromoCode(won);
         spinning = false;
         spinBtn.classList.remove("is-waiting");
         if (!isAdmin()) {
-          try {
-            localStorage.setItem(LS_LAST_SPIN, String(Date.now()));
-          } catch (e) {
-            /* ignore */
-          }
+          setKm(getKm() - KM_PER_SPIN);
         }
-        refreshSpinOrTimer();
-        openModal(currentPrizeText, currentPromoCode);
+        refreshKmAndSpin();
+        openModal(currentPrizeText, currentPromoCode, currentIsPhysical);
       }, SPIN_MS);
     }
 
-    function openModal(prize, promoCode) {
+    function openModal(prize, promoCode, isPhysical) {
+      currentIsPhysical = !!isPhysical;
       modalPrize.textContent = prize;
-      modalPromoCode.textContent = promoCode;
-      copyPromoBtn.disabled = false;
-      copyPromoBtn.textContent = LABEL_COPY_PROMO;
+      if (isPhysical) {
+        modalPhysicalNotice.hidden = false;
+        contactTgBtn.hidden = false;
+        contactTgBtn.href = PHYSICAL_PRIZE_CHAT_URL;
+        contactTgBtn.textContent = LABEL_CONTACT_MANAGER;
+        modalPromoLabel.hidden = true;
+        modalPromoCode.hidden = true;
+        copyPromoBtn.hidden = true;
+        modalPromoCode.textContent = "";
+      } else {
+        modalPhysicalNotice.hidden = true;
+        contactTgBtn.hidden = true;
+        modalPromoLabel.hidden = false;
+        modalPromoCode.hidden = false;
+        copyPromoBtn.hidden = false;
+        modalPromoCode.textContent = promoCode;
+        copyPromoBtn.disabled = false;
+        copyPromoBtn.textContent = LABEL_COPY_PROMO;
+      }
       claimBtn.textContent = LABEL_GET_PRIZE;
       claimBtn.disabled = false;
       overlay.classList.add("is-open");
@@ -961,22 +1093,47 @@
 
     function closeModal() {
       overlay.classList.remove("is-open");
-      refreshSpinOrTimer();
+      refreshKmAndSpin();
     }
 
     function initSubtitle() {
       if (!subtitleLine) return;
       if (isAdmin()) {
-        subtitleLine.textContent = "Админ-режим: доступно бесконечно";
+        subtitleLine.textContent =
+          "\u0410\u0434\u043c\u0438\u043d: \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0430 \u0431\u0435\u0437 \u0441\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u043a\u043c, +50 \u043a\u043c \u0434\u043b\u044f \u0442\u0435\u0441\u0442\u0430.";
       } else {
-        subtitleLine.textContent = "Крути барабан и забирай приз";
+        subtitleLine.textContent =
+          "\u041a\u043e\u043f\u0438\u0442\u0435 250 \u043a\u043c \u043f\u0440\u043e\u0431\u0435\u0433\u0430 \u0434\u043b\u044f \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0438.";
       }
     }
+
+    if (adminKmPanel) {
+      adminKmPanel.hidden = !isAdmin();
+    }
+    if (addKmBtn) {
+      addKmBtn.addEventListener("click", function () {
+        if (!isAdmin()) return;
+        addKm(50);
+        updateKmProgressUI();
+        refreshKmAndSpin();
+      });
+    }
+
+    contactTgBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      const url = PHYSICAL_PRIZE_CHAT_URL;
+      if (tg && typeof tg.openTelegramLink === "function") {
+        tg.openTelegramLink(url);
+      } else {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    });
 
     spinBtn.addEventListener("click", spin);
     closeModalBtn.addEventListener("click", closeModal);
 
     async function copyPromoToClipboard() {
+      if (copyPromoBtn.hidden) return;
       const text = currentPromoCode || (modalPromoCode && modalPromoCode.textContent) || "";
       if (!text) return;
       try {
@@ -1024,7 +1181,8 @@
           body: JSON.stringify({
             name: tg?.initDataUnsafe?.user?.first_name || "Инкогнито",
             prize: winnerPrizeName,
-            promoCode: promoCode,
+            promoCode: currentIsPhysical ? "" : promoCode,
+            isPhysical: !!currentIsPhysical,
           }),
         });
       } catch (e) {
@@ -1067,12 +1225,6 @@
       claimBtn.disabled = true;
       closeModal();
 
-      if (isAdmin()) {
-        spinBtn.disabled = false;
-        spinBtn.textContent = SPIN_BTN_LABEL;
-        spinBtn.classList.remove("is-waiting");
-      }
-
       if (tg && typeof tg.showAlert === "function") {
         tg.showAlert("Приз отправлен!");
       }
@@ -1085,7 +1237,8 @@
     });
 
     initSubtitle();
-    refreshSpinOrTimer();
+    updateKmProgressUI();
+    refreshKmAndSpin();
 
     window.addEventListener("resize", function () {
       if (!spinning && drumStrip.children.length) {
