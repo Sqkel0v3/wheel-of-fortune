@@ -363,32 +363,6 @@
       drawWheel();
     }
 
-    function drawSectorLabel(mid, label, wheelR, textInset) {
-      ctx.save();
-      ctx.rotate(mid);
-      ctx.textAlign = "right";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = ACCENT;
-
-      const maxW = wheelR * 0.88;
-      let fontPx = Math.round(Math.min(18, Math.max(16, layoutSize * 0.048)));
-      ctx.font =
-        "bold " + fontPx + "px Inter, system-ui, -apple-system, Arial, sans-serif";
-
-      let line = label;
-      while (ctx.measureText(line).width > maxW && fontPx > 12) {
-        fontPx -= 1;
-        ctx.font =
-          "bold " + fontPx + "px Inter, system-ui, -apple-system, Arial, sans-serif";
-      }
-      if (ctx.measureText(line).width > maxW && line.length > 2) {
-        line = line.slice(0, Math.max(2, line.length - 2)) + "…";
-      }
-
-      ctx.fillText(line, wheelR - textInset, 0);
-      ctx.restore();
-    }
-
     function drawWheel() {
       const w = layoutSize;
       const h = layoutSize;
@@ -423,7 +397,32 @@
         ctx.stroke();
 
         const mid = start + sectorAngle / 2;
-        drawSectorLabel(mid, PRIZES[i], r, textInset);
+
+        ctx.save();
+        ctx.rotate(mid);
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.direction = "ltr";
+        ctx.fillStyle = "#CCFF00";
+
+        const hubPad = r * 0.2;
+        const textX = r - textInset;
+        const maxTextWidth = Math.max(24, textX - hubPad);
+
+        let fontPx = Math.round(Math.min(20, Math.max(18, layoutSize * 0.058)));
+        let textLine = PRIZES[i];
+        ctx.font = "bold " + fontPx + "px Inter, sans-serif";
+
+        while (ctx.measureText(textLine).width > maxTextWidth && fontPx > 14) {
+          fontPx -= 1;
+          ctx.font = "bold " + fontPx + "px Inter, sans-serif";
+        }
+        if (ctx.measureText(textLine).width > maxTextWidth && textLine.length > 1) {
+          textLine = textLine.slice(0, -1) + "…";
+        }
+
+        ctx.fillText(textLine, textX, 0);
+        ctx.restore();
       }
 
       ctx.beginPath();
