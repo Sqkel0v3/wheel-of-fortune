@@ -95,29 +95,11 @@
       left: 50%;
       top: 0;
       transform: translateX(-50%);
-      transform-origin: 50% 0%;
       z-index: 3;
       width: 26px;
       height: 22px;
       margin-top: -1px;
       pointer-events: none;
-      --tick-dur: 0.08s;
-    }
-
-    @keyframes pointer-tick {
-      0% {
-        transform: translateX(-50%) rotate(-14deg);
-      }
-      40% {
-        transform: translateX(-50%) rotate(12deg);
-      }
-      100% {
-        transform: translateX(-50%) rotate(0deg);
-      }
-    }
-
-    .pointer.pointer-tick {
-      animation: pointer-tick var(--tick-dur, 0.08s) cubic-bezier(0.4, 0, 0.2, 1) both;
     }
 
     .pointer svg {
@@ -136,9 +118,9 @@
     .btn-spin {
       width: 100%;
       max-width: 520px;
-      padding: 22px 24px;
+      padding: 26px 28px;
       font-family: inherit;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       font-weight: 800;
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -146,7 +128,7 @@
       border-radius: 0;
       cursor: pointer;
       color: #000000;
-      background: #ccff00;
+      background: #CCFF00;
       transition: opacity 0.15s ease;
     }
 
@@ -290,7 +272,7 @@
     </header>
 
     <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
-      <div class="pointer" id="wheelPointer" aria-hidden="true">
+      <div class="pointer" aria-hidden="true">
         <svg viewBox="-1 -1 30 28" xmlns="http://www.w3.org/2000/svg">
           <polygon points="14,24 4,2 24,2" fill="#CCFF00"/>
         </svg>
@@ -324,13 +306,12 @@
       "Сэмпл",
     ];
 
-    const SECTOR_FILL = ["#ffffff", "#f5f5f5"];
-    const DIVIDER = "#eeeeee";
-    const ACCENT_RING = "#ccff00";
+    const SECTOR_FILL = ["#FFFFFF", "#F7F7F7"];
+    const DIVIDER = "#EBEBEB";
+    const RIM_STROKE = "#1a1a1a";
     const LABEL_COLOR = "#000000";
-    const HUB_FILL = "#ffffff";
-    const HUB_STROKE = "#eeeeee";
-    const PEG_COLOR = "#2a2a2a";
+    const HUB_FILL = "#FFFFFF";
+    const HUB_STROKE = "#E5E5E5";
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -361,10 +342,6 @@
         cancelAnimationFrame(spinRafId);
         spinRafId = null;
       }
-      const wp = document.getElementById("wheelPointer");
-      if (wp) {
-        wp.classList.remove("pointer-tick");
-      }
     }
 
     /** Прогресс по времени t in [0,1] для CSS cubic-bezier(x1,y1,x2,y2) */
@@ -391,21 +368,8 @@
     }
 
     const easeSpin = function (t) {
-      return easeCubicBezier(t, 0.17, 0.67, 0.1, 1.1);
+      return easeCubicBezier(t, 0.2, 0, 0.3, 1);
     };
-
-    function triggerPointerTick(omegaRadPerMs) {
-      if (!wheelPointer) return;
-      const w = Math.max(1e-6, omegaRadPerMs);
-      const durSec = Math.max(
-        0.035,
-        Math.min(0.16, 0.022 / Math.sqrt(w * 0.001 + 0.00008))
-      );
-      wheelPointer.style.setProperty("--tick-dur", durSec + "s");
-      wheelPointer.classList.remove("pointer-tick");
-      void wheelPointer.offsetWidth;
-      wheelPointer.classList.add("pointer-tick");
-    }
 
     function showErr(msg) {
       if (tg && typeof tg.showAlert === "function") {
@@ -423,7 +387,6 @@
     const modalPrize = document.getElementById("modalPrize");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
-    const wheelPointer = document.getElementById("wheelPointer");
 
     const N = PRIZES.length;
     const TAU = Math.PI * 2;
@@ -431,7 +394,6 @@
 
     let layoutSize = 300;
     let rotation = 0;
-    let spinning = false;
     let currentPrizeText = "";
 
     function syncCanvasSize() {
@@ -449,11 +411,11 @@
     function drawWheel() {
       const centerX = layoutSize / 2;
       const centerY = layoutSize / 2;
-      const ringW = Math.max(2, Math.min(3, Math.round(layoutSize * 0.009)));
-      const radius = layoutSize / 2 - ringW / 2 - 1;
+      const rimW = Math.max(1, Math.min(2, Math.round(layoutSize * 0.006)));
+      const radius = layoutSize / 2 - rimW / 2 - 1;
       const labelRadius = radius * 0.6;
       const maxTextWidth = 2 * labelRadius * Math.sin(arc / 2) - 10;
-      const fontPx = 15;
+      const fontPx = 16;
 
       ctx.clearRect(0, 0, layoutSize, layoutSize);
 
@@ -505,23 +467,10 @@
         ctx.restore();
       }
 
-      const pegR = Math.max(1.8, layoutSize * 0.012);
-      for (let k = 0; k < N; k++) {
-        const pegAngle = k * arc - Math.PI / 2;
-        ctx.save();
-        ctx.rotate(pegAngle);
-        ctx.translate(radius, 0);
-        ctx.beginPath();
-        ctx.arc(0, 0, pegR, 0, TAU);
-        ctx.fillStyle = PEG_COLOR;
-        ctx.fill();
-        ctx.restore();
-      }
-
       ctx.beginPath();
       ctx.arc(0, 0, radius, 0, TAU);
-      ctx.strokeStyle = ACCENT_RING;
-      ctx.lineWidth = ringW;
+      ctx.strokeStyle = RIM_STROKE;
+      ctx.lineWidth = rimW;
       ctx.stroke();
 
       ctx.restore();
@@ -539,14 +488,9 @@
     }
 
     const SPIN_MS = 4500;
-    const SPIN_MAIN_MS = 4400;
-    const OVERSHOOT_RAD = (1.5 * Math.PI) / 180;
 
     function spin() {
       cancelSpinAnimation();
-      if (wheelPointer) {
-        wheelPointer.classList.remove("pointer-tick");
-      }
       resetSpinSoundFade();
       spinSound.pause();
       spinSound.currentTime = 0;
@@ -555,7 +499,6 @@
 
       spinBtn.classList.add("is-waiting");
       spinBtn.disabled = true;
-      spinning = true;
 
       const winnerIndex = Math.floor(Math.random() * N);
       const fullSpins = 8 + Math.floor(Math.random() * 3);
@@ -567,42 +510,17 @@
 
       const startRot = rotation;
       const startTime = performance.now();
-      let prevRotation = startRot;
-      let prevFrameTime = startTime;
-      let lastUnwrappedNotch = (startRot + Math.PI / 2) / arc;
 
       function frame(now) {
         const elapsed = now - startTime;
-        if (elapsed >= SPIN_MS) {
-          rotation = targetRotation;
-          drawWheel();
-          spinRafId = null;
-          return;
-        }
-        if (elapsed < SPIN_MAIN_MS) {
-          const t = elapsed / SPIN_MAIN_MS;
-          rotation = startRot + (targetRotation - startRot) * easeSpin(t);
-          const unwrapped = (rotation + Math.PI / 2) / arc;
-          const dt = now - prevFrameTime;
-          if (dt > 0 && wheelPointer) {
-            const omega = (rotation - prevRotation) / dt;
-            const prevFloor = Math.floor(lastUnwrappedNotch);
-            const currFloor = Math.floor(unwrapped);
-            const pegCount = currFloor - prevFloor;
-            if (pegCount > 0) {
-              const boost = Math.sqrt(1 + Math.min(pegCount, 12) * 0.35);
-              triggerPointerTick(omega * boost);
-            }
-          }
-          lastUnwrappedNotch = unwrapped;
-        } else {
-          const u = (elapsed - SPIN_MAIN_MS) / (SPIN_MS - SPIN_MAIN_MS);
-          rotation = targetRotation - OVERSHOOT_RAD * Math.sin(u * Math.PI);
-        }
-        prevRotation = rotation;
-        prevFrameTime = now;
+        const t = Math.min(1, elapsed / SPIN_MS);
+        rotation = startRot + (targetRotation - startRot) * easeSpin(t);
         drawWheel();
-        spinRafId = requestAnimationFrame(frame);
+        if (t < 1) {
+          spinRafId = requestAnimationFrame(frame);
+        } else {
+          spinRafId = null;
+        }
       }
       spinRafId = requestAnimationFrame(frame);
 
@@ -618,7 +536,6 @@
         spinSound.pause();
         spinSound.currentTime = 0;
         currentPrizeText = PRIZES[winnerIndex];
-        spinning = false;
         spinBtn.disabled = false;
         spinBtn.classList.remove("is-waiting");
         openModal(currentPrizeText);
