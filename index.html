@@ -130,8 +130,9 @@
       width: 0%;
       max-width: 100%;
       border-radius: inherit;
-      background: #ffd500;
+      background: #FFD500;
       transition: width 0.35s ease;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
     }
 
     .admin-km-panel--under-spin {
@@ -191,23 +192,8 @@
       height: var(--drum-view-h);
       overflow: hidden;
       background: transparent;
-      border-radius: 0;
       border: none;
       box-shadow: none;
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        #000 14%,
-        #000 86%,
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        #000 14%,
-        #000 86%,
-        transparent 100%
-      );
     }
 
     .drum-fade {
@@ -216,15 +202,16 @@
       right: 0;
       z-index: 2;
       pointer-events: none;
-      height: 40%;
+      height: 42%;
     }
 
     .drum-fade--top {
       top: 0;
       background: linear-gradient(
         to bottom,
-        rgba(245, 245, 247, 1) 0%,
-        rgba(245, 245, 247, 0.55) 45%,
+        #f5f5f7 0%,
+        rgba(245, 245, 247, 0.92) 22%,
+        rgba(245, 245, 247, 0.35) 55%,
         rgba(245, 245, 247, 0) 100%
       );
     }
@@ -233,8 +220,9 @@
       bottom: 0;
       background: linear-gradient(
         to top,
-        rgba(245, 245, 247, 1) 0%,
-        rgba(245, 245, 247, 0.55) 45%,
+        #f5f5f7 0%,
+        rgba(245, 245, 247, 0.92) 22%,
+        rgba(245, 245, 247, 0.35) 55%,
         rgba(245, 245, 247, 0) 100%
       );
     }
@@ -376,13 +364,24 @@
       opacity: 0.75;
     }
 
-    .btn-spin:disabled {
-      opacity: 0.72;
+    .btn-spin:disabled.is-waiting {
+      background: var(--whoosh-accent);
+      color: #000000;
+      opacity: 0.75;
+      font-size: 0.9rem;
+      letter-spacing: 0.14em;
+      padding: 26px 28px;
+    }
+
+    .btn-spin:disabled:not(.is-waiting) {
+      opacity: 1;
       cursor: not-allowed;
       font-size: clamp(0.62rem, 2.8vw, 0.78rem);
       letter-spacing: 0.1em;
       line-height: 1.25;
       padding: 22px 16px;
+      background: #c7c7cc;
+      color: #3a3a3c;
     }
 
     .promo-instruction {
@@ -622,7 +621,7 @@
 
     <div class="main-stack">
       <div class="km-progress" id="kmProgress">
-        <p class="km-progress__label" id="kmProgressLabel">ВАШ ПРОБЕГ: 0 / 200 КМ</p>
+        <p class="km-progress__label" id="kmProgressLabel">ВАШ ПРОБЕГ: 0 / 250 КМ</p>
         <div class="km-progress__track" aria-hidden="true">
           <div class="km-progress__fill" id="kmProgressFill"></div>
         </div>
@@ -644,14 +643,10 @@
       </p>
 
       <p class="staff-hint" id="staffHintMain">
-        ОДНА ПРОКРУТКА — 200 КМ ПРОБЕГА. НАКАПЛИВАЙТЕ КИЛОМЕТРЫ В ПОЕЗДКАХ WHOOSH.
+        НОВЫМ ПОЛЬЗОВАТЕЛЯМ — 200 КМ В ПОДАРОК. ПРОКРУТКА СТОИТ 250 КМ. КОПИТЕ ПРОБЕГ В WHOOSH.
       </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
-
-      <div class="admin-km-panel--under-spin" id="adminKmPanel" hidden>
-        <button type="button" class="btn-admin-km--compact" id="addKmBtn">+50 КМ</button>
-      </div>
     </div>
   </div>
 
@@ -659,7 +654,7 @@
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
       <p class="staff-hint">
-        ПРОКРУТКА: 200 КМ. ПРОМОКОД — 24 ЧАСА ПОСЛЕ АКТИВАЦИИ.
+        ПРОКРУТКА: 250 КМ. ПРОМОКОД — 24 ЧАСА ПОСЛЕ АКТИВАЦИИ.
       </p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
@@ -680,21 +675,27 @@
   <script>
     const LS_MILEAGE = "whoosh_mileage";
     const LS_MILEAGE_LEGACY = "whoosh_km_balance";
-    const KM_PER_SPIN = 200;
+    const STARTER_BONUS_KM = 200;
+    const KM_PER_SPIN = 250;
     const MIN_STRIP_CARDS = 100;
     const PHYSICAL_PRIZE_CHAT_URL = "https://t.me/graceqqq";
+    const ADMIN_USER_ID = 821470232;
 
-    function migrateMileageKey() {
+    /** Первый запуск: нет whoosh_mileage → перенос из legacy или стартовый бонус 200 км. */
+    function initMileageStorage() {
       try {
-        if (localStorage.getItem(LS_MILEAGE) == null) {
-          const leg = localStorage.getItem(LS_MILEAGE_LEGACY);
-          if (leg != null) localStorage.setItem(LS_MILEAGE, leg);
+        if (localStorage.getItem(LS_MILEAGE) !== null) return;
+        const leg = localStorage.getItem(LS_MILEAGE_LEGACY);
+        if (leg != null) {
+          localStorage.setItem(LS_MILEAGE, leg);
+        } else {
+          localStorage.setItem(LS_MILEAGE, String(STARTER_BONUS_KM));
         }
       } catch (e) {
         /* ignore */
       }
     }
-    migrateMileageKey();
+    initMileageStorage();
     const WHOOSH_LOGO_SRC = "/whoosh.png";
     const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
     const LABEL_COPY_PROMO =
@@ -772,9 +773,13 @@
       return t === "iPhone 16" || t === "AirPods 4";
     }
 
-    /** Формат: WHOOSH-{prefix}-A9B2 (новый суффикс при каждом вызове). */
+    /** Формат: WHOOSH-XXX-XXXX (3 символа из префикса приза + случайный хвост). */
     function generatePromo(prefix) {
-      const mid = String(prefix || "BONUS").replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "BONUS";
+      let mid = String(prefix || "BONUS").replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "BONUS";
+      mid = mid.slice(0, 3);
+      while (mid.length < 3) {
+        mid += PROMO_RND.charAt(Math.floor(Math.random() * PROMO_RND.length));
+      }
       let tail = "";
       for (let i = 0; i < 4; i++) {
         tail += PROMO_RND.charAt(Math.floor(Math.random() * PROMO_RND.length));
@@ -856,7 +861,8 @@
     }
 
     function isAdmin() {
-      return tg?.initDataUnsafe?.user?.id === 821470232;
+      const id = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
+      return id == ADMIN_USER_ID;
     }
 
     const spinSound = new Audio("wheel-of-fortune.mp3");
@@ -924,8 +930,6 @@
     const subtitleLine = document.getElementById("subtitleLine");
     const kmProgressLabel = document.getElementById("kmProgressLabel");
     const kmProgressFill = document.getElementById("kmProgressFill");
-    const adminKmPanel = document.getElementById("adminKmPanel");
-    const addKmBtn = document.getElementById("addKmBtn");
 
     copyPromoBtn.textContent = LABEL_COPY_PROMO;
     claimBtn.textContent = LABEL_GET_PRIZE;
@@ -1116,20 +1120,25 @@
           "\u0410\u0434\u043c\u0438\u043d: \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0430 \u0431\u0435\u0437 \u0441\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u043a\u043c. +50 \u043a\u043c \u0434\u043b\u044f \u0442\u0435\u0441\u0442\u0430.";
       } else {
         subtitleLine.textContent =
-          "\u041b\u043e\u044f\u043b\u044c\u043d\u043e\u0441\u0442\u044c Whoosh: 200 \u043a\u043c \u0437\u0430 \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0443.";
+          "\u0421\u0442\u0430\u0440\u0442 \u0441 200 \u043a\u043c. \u041f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0430 \u2014 250 \u043a\u043c.";
       }
     }
 
-    if (adminKmPanel) {
-      adminKmPanel.hidden = !isAdmin();
-    }
-    if (addKmBtn) {
-      addKmBtn.addEventListener("click", function () {
+    if (isAdmin() && spinBtn && spinBtn.parentNode) {
+      const wrap = document.createElement("div");
+      wrap.className = "admin-km-panel--under-spin";
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "btn-admin-km--compact";
+      addBtn.textContent = "+50 \u041a\u041c";
+      addBtn.addEventListener("click", function () {
         if (!isAdmin()) return;
         addKm(50);
         updateKmProgressUI();
         refreshKmAndSpin();
       });
+      wrap.appendChild(addBtn);
+      spinBtn.insertAdjacentElement("afterend", wrap);
     }
 
     contactTgBtn.addEventListener("click", function (e) {
@@ -1195,7 +1204,6 @@
             name: tg?.initDataUnsafe?.user?.first_name || "Инкогнито",
             prize: winnerPrizeName,
             promoCode: currentIsPhysical ? "" : promoCode,
-            isPhysical: !!currentIsPhysical,
           }),
         });
       } catch (e) {

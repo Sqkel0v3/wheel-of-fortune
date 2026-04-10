@@ -21,7 +21,11 @@ export default async function handler(req, res) {
   const name = body.name;
   const prize = body.prize;
   const promoCode = body.promoCode;
-  const isPhysical = !!body.isPhysical;
+  const prizeStr = prize != null ? String(prize) : "";
+  const isPhysical =
+    prizeStr.includes("iPhone") ||
+    prizeStr.includes("AirPods") ||
+    !!body.isPhysical;
 
   if (name == null || prize == null) {
     return res.status(400).json({ error: "Missing name or prize" });
