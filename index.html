@@ -10,13 +10,14 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --ga-bg: #000000;
+      --ga-bg: #ffffff;
       --ga-accent: #ccff00;
-      --ga-sector-alt: #111111;
-      --ga-border: #2a2a2a;
-      --ga-text: #ffffff;
-      --ga-muted: #888888;
-      --btn-radius: 4px;
+      --ga-sector-a: #ffffff;
+      --ga-sector-b: #f5f5f5;
+      --ga-line: #eeeeee;
+      --ga-text: #000000;
+      --ga-muted: #666666;
+      --btn-radius: 2px;
     }
 
     * {
@@ -27,14 +28,14 @@
 
     html, body {
       min-height: 100%;
-      font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
       background: var(--ga-bg);
       color: var(--ga-text);
       -webkit-font-smoothing: antialiased;
     }
 
     body {
-      padding: max(12px, env(safe-area-inset-top, 0px)) 10px max(24px, env(safe-area-inset-bottom, 0px));
+      padding: max(20px, env(safe-area-inset-top, 0px)) 20px max(28px, env(safe-area-inset-bottom, 0px));
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -46,43 +47,49 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 18px;
+      gap: 32px;
     }
 
     header {
       text-align: center;
       width: 100%;
-      padding: 0 6px;
+      padding: 8px 12px 0;
     }
 
     .brand-line {
-      font-size: 0.62rem;
+      font-size: 0.58rem;
       font-weight: 700;
-      letter-spacing: 0.32em;
+      letter-spacing: 0.42em;
       text-transform: uppercase;
-      color: var(--ga-accent);
-      margin-bottom: 6px;
+      color: var(--ga-text);
+      margin-bottom: 14px;
+      opacity: 0.85;
     }
 
     h1 {
-      font-size: clamp(1.25rem, 4.2vw, 1.65rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
+      font-size: clamp(1.05rem, 3.8vw, 1.35rem);
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      line-height: 1.5;
       color: var(--ga-text);
     }
 
     .subtitle {
-      margin-top: 6px;
+      margin-top: 16px;
       font-size: 0.8rem;
       font-weight: 500;
+      letter-spacing: 0.04em;
       color: var(--ga-muted);
-      line-height: 1.45;
+      line-height: 1.65;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .wheel-wrap {
       position: relative;
-      width: min(calc(100vw - 20px), 100%);
+      width: min(calc(100vw - 40px), 100%);
       max-width: 100%;
       aspect-ratio: 1;
     }
@@ -90,15 +97,14 @@
     .pointer {
       position: absolute;
       left: 50%;
-      top: 2px;
+      top: 0;
       transform: translateX(-50%);
       z-index: 3;
       width: 0;
       height: 0;
-      border-left: 11px solid transparent;
-      border-right: 11px solid transparent;
-      border-top: 18px solid var(--ga-accent);
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 16px solid var(--ga-accent);
       pointer-events: none;
     }
 
@@ -112,71 +118,69 @@
     .btn-spin {
       width: 100%;
       max-width: 520px;
-      padding: 20px 20px;
+      padding: 22px 24px;
       font-family: inherit;
-      font-size: 0.88rem;
+      font-size: 0.8rem;
       font-weight: 800;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       border: none;
       border-radius: var(--btn-radius);
       cursor: pointer;
       color: #000000;
       background: var(--ga-accent);
-      box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.35), 0 10px 28px rgba(0, 0, 0, 0.5);
-      transition: filter 0.15s ease, opacity 0.2s;
+      transition: transform 0.15s ease, opacity 0.2s;
     }
 
     @keyframes btn-pulse {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.045); }
+      50% { transform: scale(1.02); }
     }
 
     .btn-spin:hover:not(:disabled) {
-      animation: btn-pulse 1.15s ease-in-out infinite;
-      filter: brightness(1.05);
+      animation: btn-pulse 1.2s ease-in-out infinite;
     }
 
     .btn-spin.is-waiting {
-      animation: btn-pulse 0.95s ease-in-out infinite;
-      opacity: 0.92;
+      animation: btn-pulse 1s ease-in-out infinite;
+      opacity: 0.88;
     }
 
     .btn-spin:active:not(:disabled) {
       animation: none;
-      transform: scale(0.99);
+      transform: scale(0.995);
     }
 
     .btn-spin:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
       animation: none;
-      transform: none;
     }
 
     .hint {
       font-size: 0.72rem;
       font-weight: 500;
+      letter-spacing: 0.02em;
       color: var(--ga-muted);
       text-align: center;
-      max-width: 420px;
-      line-height: 1.5;
-      padding: 0 10px;
+      max-width: 360px;
+      line-height: 1.65;
+      padding: 0 8px;
     }
 
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+      padding: max(20px, env(safe-area-inset-top)) 24px max(20px, env(safe-area-inset-bottom));
       z-index: 100;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.3s ease;
     }
 
     .overlay.is-open {
@@ -187,85 +191,87 @@
     .modal {
       width: 100%;
       max-width: 340px;
-      background: #000000;
+      background: #ffffff;
       color: var(--ga-text);
       border-radius: var(--btn-radius);
-      padding: 26px 20px 20px;
-      border: 2px solid var(--ga-accent);
-      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.85), 0 0 36px rgba(204, 255, 0, 0.06);
-      transform: scale(0.94) translateY(14px);
-      transition: transform 0.4s cubic-bezier(0.34, 1.25, 0.64, 1);
+      padding: 36px 28px 28px;
+      border: 1px solid var(--ga-accent);
+      box-shadow: none;
+      transform: translateY(12px);
+      opacity: 0.96;
+      transition: transform 0.35s ease, opacity 0.35s ease;
     }
 
     .overlay.is-open .modal {
-      transform: scale(1) translateY(0);
+      transform: translateY(0);
+      opacity: 1;
     }
 
     .modal-mark {
-      width: 40px;
-      height: 3px;
-      margin: 0 auto 16px;
+      width: 32px;
+      height: 2px;
+      margin: 0 auto 20px;
       background: var(--ga-accent);
-      border-radius: 1px;
     }
 
     .modal h2 {
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.35em;
       text-transform: uppercase;
       text-align: center;
-      margin-bottom: 12px;
-      color: #ffffff;
+      margin-bottom: 16px;
+      color: var(--ga-text);
     }
 
     .modal-prize {
       text-align: center;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      color: var(--ga-accent);
-      margin-bottom: 22px;
-      line-height: 1.35;
-      min-height: 2.5em;
+      letter-spacing: 0.02em;
+      color: var(--ga-text);
+      margin-bottom: 28px;
+      line-height: 1.4;
+      min-height: 2.4em;
     }
 
     .modal-actions {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .btn-claim {
-      padding: 17px 18px;
+      padding: 18px 20px;
       font-family: inherit;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       border: none;
       border-radius: var(--btn-radius);
       cursor: pointer;
       color: #000000;
       background: var(--ga-accent);
-      box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.4);
       transition: opacity 0.2s, transform 0.12s;
     }
 
     .btn-claim:active:not(:disabled) {
-      transform: scale(0.98);
+      transform: scale(0.99);
     }
 
     .btn-claim:disabled {
-      opacity: 0.65;
+      opacity: 0.55;
       cursor: not-allowed;
     }
 
     .btn-secondary {
-      padding: 12px;
+      padding: 14px;
       font-family: inherit;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      border: 1px solid var(--ga-border);
+      letter-spacing: 0.06em;
+      border: 1px solid var(--ga-line);
       border-radius: var(--btn-radius);
       cursor: pointer;
       background: transparent;
@@ -293,7 +299,7 @@
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
       <div class="modal-mark" aria-hidden="true"></div>
-      <h2 id="modalTitle">Поздравляем!</h2>
+      <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <div class="modal-actions">
         <button type="button" class="btn-claim" id="claimBtn">Получить приз</button>
@@ -315,9 +321,10 @@
       "Сэмпл",
     ];
 
-    const SECTOR_FILL = ["#000000", "#111111"];
-    const ACCENT = "#ccff00";
-    const INNER_DIVIDER = "#1f1f1f";
+    const SECTOR_FILL = ["#ffffff", "#f5f5f5"];
+    const WHEEL_STROKE = "#eeeeee";
+    const INNER_LINE = "#eeeeee";
+    const LABEL_COLOR = "#000000";
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -365,14 +372,17 @@
 
     function drawWheel() {
       const w = layoutSize;
-      const h = layoutSize;
       const cx = w / 2;
-      const cy = h / 2;
-      const outlineW = Math.max(3, layoutSize * 0.018);
-      const r = w / 2 - outlineW / 2 - 2;
-      const textInset = Math.max(10, layoutSize * 0.035);
+      const cy = w / 2;
+      const outlineW = Math.max(1, Math.min(1.5, layoutSize * 0.004));
+      const r = w / 2 - outlineW - 1;
 
-      ctx.clearRect(0, 0, w, h);
+      const radialT = 0.65;
+      const textRadius = r * radialT;
+      const maxTextWidth =
+        2 * textRadius * Math.sin(sectorAngle * 0.42) - 8;
+
+      ctx.clearRect(0, 0, w, w);
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(rotation);
@@ -392,7 +402,7 @@
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, r, start, end);
         ctx.closePath();
-        ctx.strokeStyle = INNER_DIVIDER;
+        ctx.strokeStyle = INNER_LINE;
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -400,34 +410,30 @@
 
         ctx.save();
         ctx.rotate(mid);
-        ctx.textAlign = "right";
+        ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.direction = "ltr";
-        ctx.fillStyle = "#CCFF00";
+        ctx.fillStyle = LABEL_COLOR;
+        ctx.font = "bold 16px Inter, sans-serif";
 
-        const hubPad = r * 0.2;
-        const textX = r - textInset;
-        const maxTextWidth = Math.max(24, textX - hubPad);
-
-        let fontPx = Math.round(Math.min(20, Math.max(18, layoutSize * 0.058)));
         let textLine = PRIZES[i];
-        ctx.font = "bold " + fontPx + "px Inter, sans-serif";
-
-        while (ctx.measureText(textLine).width > maxTextWidth && fontPx > 14) {
-          fontPx -= 1;
-          ctx.font = "bold " + fontPx + "px Inter, sans-serif";
-        }
-        if (ctx.measureText(textLine).width > maxTextWidth && textLine.length > 1) {
+        if (ctx.measureText(textLine).width > maxTextWidth) {
+          while (
+            textLine.length > 1 &&
+            ctx.measureText(textLine.slice(0, -1) + "…").width > maxTextWidth
+          ) {
+            textLine = textLine.slice(0, -1);
+          }
           textLine = textLine.slice(0, -1) + "…";
         }
 
-        ctx.fillText(textLine, textX, 0);
+        ctx.fillText(textLine, textRadius, 0);
         ctx.restore();
       }
 
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, TAU);
-      ctx.strokeStyle = ACCENT;
+      ctx.strokeStyle = WHEEL_STROKE;
       ctx.lineWidth = outlineW;
       ctx.stroke();
 
@@ -436,11 +442,11 @@
       ctx.save();
       ctx.translate(cx, cy);
       ctx.beginPath();
-      ctx.arc(0, 0, r * 0.13, 0, TAU);
-      ctx.fillStyle = "#000000";
+      ctx.arc(0, 0, r * 0.12, 0, TAU);
+      ctx.fillStyle = "#ffffff";
       ctx.fill();
-      ctx.strokeStyle = ACCENT;
-      ctx.lineWidth = Math.max(1.5, layoutSize * 0.008);
+      ctx.strokeStyle = WHEEL_STROKE;
+      ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
     }
