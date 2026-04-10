@@ -107,6 +107,10 @@
       flex-shrink: 0;
     }
 
+    .km-progress.is-hidden {
+      display: none;
+    }
+
     .km-progress__label {
       font-size: clamp(0.65rem, 2.8vw, 0.78rem);
       font-weight: 800;
@@ -251,12 +255,13 @@
       border-radius: 12px;
       background: var(--whoosh-surface);
       box-sizing: border-box;
+      box-shadow: none;
     }
 
     .drum-card__icon {
       width: 48px;
       height: 48px;
-      background: #ffd500;
+      background: #FFD500;
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -306,7 +311,6 @@
       border-width: 11px 0 11px 18px;
       border-color: transparent transparent transparent #000000;
       margin-right: 8px;
-      filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.18));
     }
 
     @media (max-height: 700px) {
@@ -382,6 +386,12 @@
       padding: 22px 16px;
       background: #c7c7cc;
       color: #3a3a3c;
+    }
+
+    .btn-spin--long {
+      font-size: clamp(0.52rem, 3.1vw, 0.72rem);
+      letter-spacing: 0.08em;
+      padding: 22px 12px;
     }
 
     .promo-instruction {
@@ -643,7 +653,7 @@
       </p>
 
       <p class="staff-hint" id="staffHintMain">
-        НОВЫМ ПОЛЬЗОВАТЕЛЯМ — 200 КМ В ПОДАРОК. ПРОКРУТКА СТОИТ 250 КМ. КОПИТЕ ПРОБЕГ В WHOOSH.
+        ПЕРВЫЙ ПРИЗ — БЕСПЛАТНО. ДАЛЕЕ ПРОКРУТКА ЗА 250 КМ ПРОБЕГА В ПРИЛОЖЕНИИ WHOOSH.
       </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
@@ -675,34 +685,101 @@
   <script>
     const LS_MILEAGE = "whoosh_mileage";
     const LS_MILEAGE_LEGACY = "whoosh_km_balance";
-    const STARTER_BONUS_KM = 200;
+    const LS_FIRST_SPIN_DONE = "whoosh_first_spin_done";
+    const LS_PENDING_FREE_CLAIM = "whoosh_pending_free_claim";
     const KM_PER_SPIN = 250;
-    const MIN_STRIP_CARDS = 100;
+    const STRIP_POOL_REPEATS = 100;
     const PHYSICAL_PRIZE_CHAT_URL = "https://t.me/graceqqq";
     const ADMIN_USER_ID = 821470232;
 
-    /** Первый запуск: нет whoosh_mileage → перенос из legacy или стартовый бонус 200 км. */
-    function initMileageStorage() {
+    function firstSpinDone() {
       try {
-        if (localStorage.getItem(LS_MILEAGE) !== null) return;
+        const v = localStorage.getItem(LS_FIRST_SPIN_DONE);
+        return v === "1" || v === "true";
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function setFirstSpinDone() {
+      try {
+        localStorage.setItem(LS_FIRST_SPIN_DONE, "true");
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    function getPendingFreeClaim() {
+      if (firstSpinDone()) return null;
+      try {
+        const raw = localStorage.getItem(LS_PENDING_FREE_CLAIM);
+        if (!raw) return null;
+        const d = JSON.parse(raw);
+        if (!d || typeof d.prize !== "string") return null;
+        return d;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setPendingFreeClaim(payload) {
+      try {
+        localStorage.setItem(LS_PENDING_FREE_CLAIM, JSON.stringify(payload));
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    function clearPendingFreeClaim() {
+      try {
+        localStorage.removeItem(LS_PENDING_FREE_CLAIM);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    /**
+     * Этап 2: ключ whoosh_first_spin_done или уже ведётся пробег.
+     * Legacy: был whoosh_mileage / whoosh_km_balance — сразу этап с километрами.
+     */
+    function initStorage() {
+      try {
+        if (firstSpinDone()) {
+          try {
+            localStorage.removeItem(LS_PENDING_FREE_CLAIM);
+          } catch (e) {
+            /* ignore */
+          }
+          if (localStorage.getItem(LS_MILEAGE) === null) {
+            localStorage.setItem(LS_MILEAGE, "0");
+          }
+          return;
+        }
+        if (localStorage.getItem(LS_MILEAGE) !== null) {
+          setFirstSpinDone();
+          return;
+        }
         const leg = localStorage.getItem(LS_MILEAGE_LEGACY);
         if (leg != null) {
           localStorage.setItem(LS_MILEAGE, leg);
-        } else {
-          localStorage.setItem(LS_MILEAGE, String(STARTER_BONUS_KM));
+          localStorage.removeItem(LS_MILEAGE_LEGACY);
+          setFirstSpinDone();
         }
       } catch (e) {
         /* ignore */
       }
     }
-    initMileageStorage();
+    initStorage();
+
     const WHOOSH_LOGO_SRC = "/whoosh.png";
     const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
+    const FREE_SPIN_BTN_LABEL =
+      "\u041f\u041e\u041b\u0423\u0427\u0418\u0422\u042c \u0411\u0415\u0421\u041f\u041b\u0410\u0422\u041d\u042b\u0419 \u041f\u0420\u0418\u0417";
     const LABEL_COPY_PROMO =
       "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u0422\u042c \u041f\u0420\u041e\u041c\u041e\u041a\u041e\u0414";
     const LABEL_COPIED = "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u041d\u041e";
     const LABEL_GET_PRIZE =
-      "\u041f\u041e\u041b\u0423\u0427\u0418\u0422\u042c \u041f\u0420\u0418\u0417";
+      "\u0417\u0410\u0411\u0420\u0410\u0422\u042c \u041f\u0420\u0418\u0417";
     const LABEL_CONTACT =
       "\u0421\u0412\u042f\u0417\u0410\u0422\u042c\u0421\u042f";
 
@@ -838,14 +915,9 @@
       return row;
     }
 
-    function stripRepeatCount() {
-      return Math.max(1, Math.ceil(MIN_STRIP_CARDS / PRIZE_POOL.length));
-    }
-
     function buildStrip(winnerEntry) {
       const strip = [];
-      const reps = stripRepeatCount();
-      for (let rep = 0; rep < reps; rep++) {
+      for (let rep = 0; rep < STRIP_POOL_REPEATS; rep++) {
         for (let i = 0; i < PRIZE_POOL.length; i++) {
           strip.push(cloneEntry(PRIZE_POOL[i]));
         }
@@ -928,8 +1000,10 @@
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const subtitleLine = document.getElementById("subtitleLine");
+    const kmProgress = document.getElementById("kmProgress");
     const kmProgressLabel = document.getElementById("kmProgressLabel");
     const kmProgressFill = document.getElementById("kmProgressFill");
+    const staffHintMain = document.getElementById("staffHintMain");
 
     copyPromoBtn.textContent = LABEL_COPY_PROMO;
     claimBtn.textContent = LABEL_GET_PRIZE;
@@ -992,12 +1066,26 @@
     }
 
     function refreshKmAndSpin() {
+      if (kmProgress) {
+        kmProgress.classList.toggle("is-hidden", !firstSpinDone());
+      }
       updateKmProgressUI();
       if (!spinBtn || spinning) return;
       spinBtn.hidden = false;
+      spinBtn.classList.remove("btn-spin--long");
       if (isAdmin()) {
         spinBtn.disabled = false;
         spinBtn.textContent = SPIN_BTN_LABEL;
+        return;
+      }
+      if (!firstSpinDone()) {
+        spinBtn.disabled = false;
+        if (getPendingFreeClaim()) {
+          spinBtn.textContent = LABEL_GET_PRIZE;
+        } else {
+          spinBtn.textContent = FREE_SPIN_BTN_LABEL;
+        }
+        spinBtn.classList.add("btn-spin--long");
         return;
       }
       const km = getKm();
@@ -1014,10 +1102,20 @@
 
     function spin() {
       if (spinning) return;
-      if (!isAdmin() && getKm() < KM_PER_SPIN) return;
+      if (!isAdmin()) {
+        const pend = getPendingFreeClaim();
+        if (!firstSpinDone() && pend) {
+          currentPrizeText = pend.prize;
+          currentPromoCode = pend.promoCode || "";
+          currentIsPhysical = !!pend.isPhysical;
+          openModal(currentPrizeText, currentPromoCode, currentIsPhysical);
+          return;
+        }
+        if (firstSpinDone() && getKm() < KM_PER_SPIN) return;
+      }
       cancelSpinAnimation();
 
-      if (!isAdmin()) {
+      if (!isAdmin() && firstSpinDone()) {
         setKm(getKm() - KM_PER_SPIN);
         updateKmProgressUI();
       }
@@ -1074,6 +1172,13 @@
         currentPrizeText = won.title;
         currentIsPhysical = isPhysicalPrize(won);
         currentPromoCode = currentIsPhysical ? "" : promoForEntry(won);
+        if (!isAdmin() && !firstSpinDone()) {
+          setPendingFreeClaim({
+            prize: currentPrizeText,
+            promoCode: currentPromoCode,
+            isPhysical: currentIsPhysical,
+          });
+        }
         spinning = false;
         spinBtn.classList.remove("is-waiting");
         refreshKmAndSpin();
@@ -1113,14 +1218,28 @@
       refreshKmAndSpin();
     }
 
+    function syncStaffHint() {
+      if (!staffHintMain) return;
+      if (!firstSpinDone()) {
+        staffHintMain.textContent =
+          "\u041f\u0415\u0420\u0412\u042b\u0419 \u041f\u0420\u0418\u0417 \u2014 \u0411\u0415\u0421\u041f\u041b\u0410\u0422\u041d\u041e. \u0414\u0410\u041b\u0415\u0415 \u041f\u0420\u041e\u041a\u0420\u0423\u0422\u041a\u0410 \u0417\u0410 250 \u041a\u041c \u041f\u0420\u041e\u0411\u0415\u0413\u0410 \u0412 WHOOSH.";
+      } else {
+        staffHintMain.textContent =
+          "\u041a\u041e\u041f\u0418\u0422\u0415 250 \u041a\u041c \u041f\u0420\u041e\u0411\u0415\u0413\u0410, \u0427\u0422\u041e\u0411\u042b \u0421\u041d\u041e\u0412\u0410 \u041a\u0420\u0423\u0422\u0418\u0422\u042c \u0411\u0410\u0420\u0410\u0411\u0410\u041d.";
+      }
+    }
+
     function initSubtitle() {
       if (!subtitleLine) return;
       if (isAdmin()) {
         subtitleLine.textContent =
-          "\u0410\u0434\u043c\u0438\u043d: \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0430 \u0431\u0435\u0437 \u0441\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u043a\u043c. +50 \u043a\u043c \u0434\u043b\u044f \u0442\u0435\u0441\u0442\u0430.";
+          "\u0410\u0434\u043c\u0438\u043d: \u043a\u043d\u043e\u043f\u043a\u0430 \u0432\u0441\u0435\u0433\u0434\u0430 \u0430\u043a\u0442\u0438\u0432\u043d\u0430, +50 \u043a\u043c \u0432\u0441\u0435\u0433\u0434\u0430 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430.";
+      } else if (!firstSpinDone()) {
+        subtitleLine.textContent =
+          "\u041f\u0435\u0440\u0432\u044b\u0439 \u043f\u0440\u0438\u0437 \u2014 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e. \u0417\u0430\u0431\u0435\u0440\u0438\u0442\u0435 \u0435\u0433\u043e \u0438 \u043d\u0430\u0447\u043d\u0438\u0442\u0435 \u043a\u043e\u043f\u0438\u0442\u044c \u043f\u0440\u043e\u0431\u0435\u0433.";
       } else {
         subtitleLine.textContent =
-          "\u0421\u0442\u0430\u0440\u0442 \u0441 200 \u043a\u043c. \u041f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0430 \u2014 250 \u043a\u043c.";
+          "\u041a\u0440\u0443\u0442\u0438\u0442\u0435 \u0431\u0430\u0440\u0430\u0431\u0430\u043d \u0437\u0430 250 \u043a\u043c \u043d\u0430\u043a\u043e\u043f\u043b\u0435\u043d\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0431\u0435\u0433\u0430.";
       }
     }
 
@@ -1242,9 +1361,22 @@
         return;
       }
 
+      const wasFreePhase = !isAdmin() && !firstSpinDone();
+      if (wasFreePhase) {
+        try {
+          clearPendingFreeClaim();
+          localStorage.setItem(LS_FIRST_SPIN_DONE, "true");
+          localStorage.setItem(LS_MILEAGE, "0");
+        } catch (e) {
+          /* ignore */
+        }
+      }
+
       claimBtn.textContent = "Отправлено";
       claimBtn.disabled = true;
       closeModal();
+      initSubtitle();
+      syncStaffHint();
 
       if (tg && typeof tg.showAlert === "function") {
         tg.showAlert("Приз отправлен!");
@@ -1257,9 +1389,20 @@
       }, 1200);
     });
 
+    function tryResumePendingModal() {
+      if (isAdmin() || firstSpinDone()) return;
+      const pend = getPendingFreeClaim();
+      if (!pend) return;
+      currentPrizeText = pend.prize;
+      currentPromoCode = pend.promoCode || "";
+      currentIsPhysical = !!pend.isPhysical;
+      openModal(currentPrizeText, currentPromoCode, currentIsPhysical);
+    }
+
     initSubtitle();
-    updateKmProgressUI();
+    syncStaffHint();
     refreshKmAndSpin();
+    tryResumePendingModal();
 
     window.addEventListener("resize", function () {
       if (!spinning && drumStrip.children.length) {
