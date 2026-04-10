@@ -54,6 +54,14 @@
       padding: 4px 8px 0;
     }
 
+    .brand-wordmark {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.5em;
+      color: #000000;
+      margin-bottom: 18px;
+    }
+
     h1 {
       font-size: clamp(0.95rem, 4vw, 1.15rem);
       font-weight: 800;
@@ -110,11 +118,11 @@
     .btn-spin {
       width: 100%;
       max-width: 520px;
-      padding: 32px 22px;
+      padding: 22px 24px;
       font-family: inherit;
-      font-size: 1.05rem;
+      font-size: 0.88rem;
       font-weight: 800;
-      letter-spacing: 0.11em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       border: none;
       border-radius: var(--btn-radius);
@@ -186,8 +194,8 @@
 
     .modal-accent {
       width: calc(100% + 48px);
-      height: 3px;
-      background: #ccff00;
+      height: 1px;
+      background: #eeeeee;
       margin: -32px -24px 24px;
     }
 
@@ -218,17 +226,17 @@
     }
 
     .btn-claim {
-      padding: 20px 18px;
+      padding: 18px 18px;
       font-family: inherit;
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.1em;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      border: none;
+      border: 1px solid #000000;
       border-radius: 0;
       cursor: pointer;
-      color: #000000;
-      background: #ccff00;
+      color: #ffffff;
+      background: #000000;
       transition: opacity 0.15s;
     }
 
@@ -258,14 +266,15 @@
 <body>
   <div class="app">
     <header>
+      <p class="brand-wordmark">GOLDEN APPLE</p>
       <h1>ПОЛУЧИТЕ ПОДАРОК</h1>
       <p class="subtitle">Крутите колесо в Золотом Яблоке</p>
     </header>
 
     <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
       <div class="pointer" aria-hidden="true">
-        <svg viewBox="-2 -1 32 28" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="14,23 3,2 25,2" fill="#000000" stroke="#ccff00" stroke-width="1.75" stroke-linejoin="miter"/>
+        <svg viewBox="-1 -1 30 28" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="14,24 4,2 24,2" fill="#ccff00"/>
         </svg>
       </div>
       <canvas id="wheel"></canvas>
@@ -300,12 +309,12 @@
       "Сэмпл",
     ];
 
-    const SECTOR_BG_DARK = "#000000";
-    const SECTOR_BG_ACCENT = "#ccff00";
-    const LABEL_ON_DARK = "#ffffff";
-    const LABEL_ON_ACCENT = "#000000";
-    const WHEEL_BORDER = "#000000";
-    const HUB_LIME = "#ccff00";
+    const SECTOR_FILL = ["#ffffff", "#f5f5f5"];
+    const DIVIDER = "#eeeeee";
+    const ACCENT_RING = "#ccff00";
+    const LABEL_COLOR = "#000000";
+    const HUB_FILL = "#ffffff";
+    const HUB_STROKE = "#eeeeee";
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -354,12 +363,11 @@
     function drawWheel() {
       const centerX = layoutSize / 2;
       const centerY = layoutSize / 2;
-      const borderW = Math.max(4, Math.min(5, Math.round(layoutSize * 0.018)));
-      const radius = layoutSize / 2 - borderW / 2 - 1;
+      const ringW = Math.max(2, Math.min(3, Math.round(layoutSize * 0.009)));
+      const radius = layoutSize / 2 - ringW / 2 - 1;
       const labelRadius = radius * 0.6;
       const maxTextWidth = 2 * labelRadius * Math.sin(arc / 2) - 10;
-
-      const fontPx = Math.min(16, Math.max(14, Math.round(layoutSize * 0.042)));
+      const fontPx = 15;
 
       ctx.clearRect(0, 0, layoutSize, layoutSize);
 
@@ -371,23 +379,30 @@
         const startAngle = i * arc - Math.PI / 2;
         const endAngle = startAngle + arc;
         const middleAngle = startAngle + arc / 2;
-        const isDark = i % 2 === 0;
 
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = isDark ? SECTOR_BG_DARK : SECTOR_BG_ACCENT;
+        ctx.fillStyle = SECTOR_FILL[i % 2];
         ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.strokeStyle = DIVIDER;
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
         ctx.save();
         ctx.rotate(middleAngle);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.direction = "ltr";
-        ctx.fillStyle = isDark ? LABEL_ON_DARK : LABEL_ON_ACCENT;
+        ctx.fillStyle = LABEL_COLOR;
         ctx.font =
-          "800 " + fontPx + "px Inter, system-ui, -apple-system, sans-serif";
+          "700 " + fontPx + "px Inter, system-ui, -apple-system, sans-serif";
 
         let text = PRIZES[i];
         if (ctx.measureText(text).width > maxTextWidth) {
@@ -406,8 +421,8 @@
 
       ctx.beginPath();
       ctx.arc(0, 0, radius, 0, TAU);
-      ctx.strokeStyle = WHEEL_BORDER;
-      ctx.lineWidth = borderW;
+      ctx.strokeStyle = ACCENT_RING;
+      ctx.lineWidth = ringW;
       ctx.stroke();
 
       ctx.restore();
@@ -416,10 +431,10 @@
       ctx.translate(centerX, centerY);
       ctx.beginPath();
       ctx.arc(0, 0, radius * 0.12, 0, TAU);
-      ctx.fillStyle = SECTOR_BG_DARK;
+      ctx.fillStyle = HUB_FILL;
       ctx.fill();
-      ctx.strokeStyle = HUB_LIME;
-      ctx.lineWidth = Math.max(1, Math.round(layoutSize * 0.006));
+      ctx.strokeStyle = HUB_STROKE;
+      ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
     }
