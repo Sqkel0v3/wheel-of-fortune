@@ -322,6 +322,8 @@
     const spinSound = new Audio('wheel-of-fortune.mp3');
     spinSound.preload = "auto";
     let spinSoundFadeTimer = null;
+    let spinRafId = null;
+    let spinTimeoutId = null;
 
     function resetSpinSoundFade() {
       if (spinSoundFadeTimer !== null) {
@@ -331,24 +333,43 @@
       spinSound.volume = 1;
     }
 
-    function fadeOutSpinSound() {
-      resetSpinSoundFade();
-      const steps = 12;
-      const stepMs = 35;
-      let i = 0;
-      const v0 = spinSound.volume;
-      spinSoundFadeTimer = setInterval(function () {
-        i++;
-        spinSound.volume = Math.max(0, v0 * (1 - i / steps));
-        if (i >= steps) {
-          clearInterval(spinSoundFadeTimer);
-          spinSoundFadeTimer = null;
-          spinSound.pause();
-          spinSound.currentTime = 0;
-          spinSound.volume = 1;
-        }
-      }, stepMs);
+    function cancelSpinAnimation() {
+      if (spinTimeoutId !== null) {
+        clearTimeout(spinTimeoutId);
+        spinTimeoutId = null;
+      }
+      if (spinRafId !== null) {
+        cancelAnimationFrame(spinRafId);
+        spinRafId = null;
+      }
     }
+
+    /** CSS cubic-bezier(0.15, 0, 0.2, 1) — t по времени, результат по прогрессу */
+    function easeCubicBezier015_02(t, x1, y1, x2, y2) {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      let lo = 0;
+      let hi = 1;
+      for (let i = 0; i < 28; i++) {
+        const u = (lo + hi) / 2;
+        const bx =
+          3 * (1 - u) * (1 - u) * u * x1 +
+          3 * (1 - u) * u * u * x2 +
+          u * u * u;
+        if (bx < t) lo = u;
+        else hi = u;
+      }
+      const u = (lo + hi) / 2;
+      return (
+        3 * (1 - u) * (1 - u) * u * y1 +
+        3 * (1 - u) * u * u * y2 +
+        u * u * u
+      );
+    }
+
+    const easeSpin = function (t) {
+      return easeCubicBezier015_02(t, 0.15, 0, 0.2, 1);
+    };
 
     function showErr(msg) {
       if (tg && typeof tg.showAlert === "function") {
@@ -467,25 +488,22 @@
       ctx.restore();
     }
 
-    function easeOutQuint(t) {
-      return 1 - Math.pow(1 - t, 5);
-    }
+    const SPIN_MS = 4500;
 
     function spin() {
-      if (spinning) return;
-      spinning = true;
-      spinBtn.disabled = true;
-      spinBtn.classList.add("is-waiting");
-
+      cancelSpinAnimation();
       resetSpinSoundFade();
+      spinSound.pause();
       spinSound.currentTime = 0;
       spinSound.volume = 1;
       spinSound.play().catch(function () {});
 
-      const winnerIndex = Math.floor(Math.random() * N);
-      const fullSpins = 8 + Math.floor(Math.random() * 4);
-      const duration = 4000;
+      spinBtn.classList.add("is-waiting");
+      spinBtn.disabled = true;
+      spinning = true;
 
+      const winnerIndex = Math.floor(Math.random() * N);
+      const fullSpins = 8 + Math.floor(Math.random() * 3);
       const localCenter = winnerIndex * arc + arc / 2 - Math.PI / 2;
       const pointerAngle = (3 * Math.PI) / 2;
       let delta = pointerAngle - localCenter - rotation;
@@ -496,24 +514,36 @@
       const startTime = performance.now();
 
       function frame(now) {
-        const t = Math.min(1, (now - startTime) / duration);
-        const e = easeOutQuint(t);
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / SPIN_MS);
+        const e = easeSpin(t);
         rotation = startRot + (targetRotation - startRot) * e;
         drawWheel();
         if (t < 1) {
-          requestAnimationFrame(frame);
+          spinRafId = requestAnimationFrame(frame);
         } else {
-          rotation = targetRotation;
-          drawWheel();
-          fadeOutSpinSound();
-          currentPrizeText = PRIZES[winnerIndex];
-          spinning = false;
-          spinBtn.disabled = false;
-          spinBtn.classList.remove("is-waiting");
-          openModal(currentPrizeText);
+          spinRafId = null;
         }
       }
-      requestAnimationFrame(frame);
+      spinRafId = requestAnimationFrame(frame);
+
+      spinTimeoutId = setTimeout(function () {
+        spinTimeoutId = null;
+        if (spinRafId !== null) {
+          cancelAnimationFrame(spinRafId);
+          spinRafId = null;
+        }
+        rotation = targetRotation;
+        drawWheel();
+        resetSpinSoundFade();
+        spinSound.pause();
+        spinSound.currentTime = 0;
+        currentPrizeText = PRIZES[winnerIndex];
+        spinning = false;
+        spinBtn.disabled = false;
+        spinBtn.classList.remove("is-waiting");
+        openModal(currentPrizeText);
+      }, SPIN_MS);
     }
 
     function openModal(prize) {
