@@ -297,9 +297,6 @@
   </div>
 
   <script>
-    const BOT_TOKEN = "8392003499:AAG5RkZOn2TPkD75b3rVcsZvXMgny1rW-hA";
-    const ADMIN_CHAT_ID = "821470232";
-
     const PRIZES = [
       "Скидка 5%",
       "100 бонусов",
@@ -514,30 +511,15 @@
         else if (user.username) name = user.username;
       }
 
-      const text =
-        "\uD83C\uDF81 Победитель: " + name + " \nПриз: " + prize;
-
-      const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
-
       claimBtn.disabled = true;
 
-      let data;
+      let res;
       try {
-        const res = await fetch(url, {
+        res = await fetch("/api/send-prize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: ADMIN_CHAT_ID,
-            text: text,
-          }),
+          body: JSON.stringify({ name, prize }),
         });
-        try {
-          data = await res.json();
-        } catch {
-          showErr("Не удалось разобрать ответ сервера.");
-          claimBtn.disabled = false;
-          return;
-        }
       } catch (e) {
         showErr(
           "Ошибка сети: " + (e && e.message ? e.message : "проверьте подключение")
@@ -546,8 +528,19 @@
         return;
       }
 
-      if (!data.ok) {
-        showErr(data.description || "Не удалось отправить уведомление.");
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        showErr("Не удалось разобрать ответ сервера.");
+        claimBtn.disabled = false;
+        return;
+      }
+
+      if (!res.ok || !data.success) {
+        showErr(
+          (data && data.error) || "Не удалось отправить уведомление."
+        );
         claimBtn.disabled = false;
         return;
       }
