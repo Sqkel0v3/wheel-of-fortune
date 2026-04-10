@@ -198,9 +198,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.35rem;
-      line-height: 1;
       flex-shrink: 0;
+      padding: 6px;
+      overflow: hidden;
+    }
+
+    .drum-card__icon .drum-card__logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      pointer-events: none;
     }
 
     .drum-card__text {
@@ -444,8 +453,8 @@
   <div class="app" id="app">
     <header>
       <p class="brand-wordmark">WHOOSH</p>
-      <h1>БОНУСЫ ОТ WHOOSH</h1>
-      <p class="subtitle">Крути барабан и забирай приз</p>
+      <h1>БОНУСЫ WHOOSH</h1>
+      <p class="subtitle" id="subtitleLine">Крути барабан и забирай приз</p>
     </header>
 
     <div class="main-stack">
@@ -481,24 +490,25 @@
 
   <script>
     const LS_PLAYED = "whoosh_played";
+    const ADMIN_TELEGRAM_ID = 821470232;
+    const WHOOSH_LOGO_SRC = "whoosh.png";
 
     /**
      * Призы и вероятности (сумма весов = 100).
      * Выбор: случайное число r в [0, 100), приз с наименьшим cum > r по накопленным весам.
      */
     const PRIZE_POOL = [
-      { title: "iPhone 16", big: "16", small: "iPhone", icon: "\u{1F4F1}", weight: 0.01 },
-      { title: "AirPods 4", big: "4", small: "AirPods", icon: "\u{1F3A7}", weight: 0.05 },
-      { title: "Whoosh Pass на год", big: "365", small: "дней Pass", icon: "\u{1F3AB}", weight: 0.1 },
-      { title: "Whoosh Pass на месяц", big: "30", small: "дней Pass", icon: "\u{1F3AB}", weight: 1 },
-      { title: "500 бонусов", big: "500", small: "бонусов", icon: "\u{1F4B0}", weight: 3 },
-      { title: "3 бесплатных старта", big: "3", small: "бесплатных старта", icon: "\u26A1", weight: 15 },
-      { title: "100 бонусов", big: "100", small: "бонусов", icon: "\u2728", weight: 35 },
+      { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01 },
+      { title: "AirPods 4", big: "4", small: "AirPods", weight: 0.05 },
+      { title: "Whoosh Pass на год", big: "365", small: "дней Pass", weight: 0.1 },
+      { title: "Whoosh Pass на месяц", big: "30", small: "дней Pass", weight: 1 },
+      { title: "500 бонусов", big: "500", small: "бонусов", weight: 3 },
+      { title: "3 бесплатных старта", big: "3", small: "бесплатных старта", weight: 15 },
+      { title: "100 бонусов", big: "100", small: "бонусов", weight: 35 },
       {
         title: "Скидка 10% на поездку",
         big: "10%",
         small: "на поездку",
-        icon: "\u{1F3F7}",
         weight: 45.84,
       },
     ];
@@ -524,7 +534,6 @@
         title: entry.title,
         big: entry.big,
         small: entry.small,
-        icon: entry.icon,
       };
     }
 
@@ -532,12 +541,15 @@
       const row = document.createElement("div");
       row.className = "drum-card";
       row.innerHTML =
-        '<div class="drum-card__icon" aria-hidden="true"></div>' +
+        '<div class="drum-card__icon" aria-hidden="true">' +
+        '<img class="drum-card__logo" src="' +
+        WHOOSH_LOGO_SRC +
+        '" alt="" width="36" height="36" decoding="async" />' +
+        "</div>" +
         '<div class="drum-card__text">' +
         '<div class="drum-card__big"></div>' +
         '<div class="drum-card__small"></div>' +
         "</div>";
-      row.querySelector(".drum-card__icon").textContent = entry.icon;
       row.querySelector(".drum-card__big").textContent = entry.big;
       row.querySelector(".drum-card__small").textContent = entry.small;
       row.dataset.prizeTitle = entry.title;
@@ -558,6 +570,11 @@
     if (tg) {
       tg.ready();
       tg.expand();
+    }
+
+    function isAdmin() {
+      const id = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
+      return id === ADMIN_TELEGRAM_ID;
     }
 
     const spinSound = new Audio("wheel-of-fortune.mp3");
@@ -618,6 +635,7 @@
     const modalPrize = document.getElementById("modalPrize");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
+    const subtitleLine = document.getElementById("subtitleLine");
 
     let itemHeightPx = 76;
     let currentPrizeText = "";
@@ -650,7 +668,8 @@
     }
 
     function spin() {
-      if (spinning || appEl.classList.contains("app--played")) return;
+      if (spinning) return;
+      if (appEl.classList.contains("app--played") && !isAdmin()) return;
       cancelSpinAnimation();
 
       itemHeightPx = readItemHeight();
@@ -731,11 +750,20 @@
 
     function initPlayedGate() {
       try {
-        if (localStorage.getItem(LS_PLAYED) === "true") {
+        if (localStorage.getItem(LS_PLAYED) === "true" && !isAdmin()) {
           applyPlayedState();
         }
       } catch (e) {
         /* ignore */
+      }
+    }
+
+    function initSubtitle() {
+      if (!subtitleLine) return;
+      if (isAdmin()) {
+        subtitleLine.textContent = "Админ-режим: доступно бесконечно";
+      } else {
+        subtitleLine.textContent = "Крути барабан и забирай приз";
       }
     }
 
@@ -745,8 +773,7 @@
     claimBtn.addEventListener("click", async function () {
       if (claimBtn.disabled) return;
 
-      const prize = currentPrizeText;
-      const name = tg?.initDataUnsafe?.user?.first_name || "Пользователь";
+      const winnerPrizeName = currentPrizeText;
 
       claimBtn.disabled = true;
 
@@ -755,10 +782,13 @@
         res = await fetch("/api/send-prize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, prize }),
+          body: JSON.stringify({
+            name: tg?.initDataUnsafe?.user?.first_name || "Инкогнито",
+            prize: winnerPrizeName,
+          }),
         });
       } catch (e) {
-        showErr(
+        alert(
           "Ошибка сети: " + (e && e.message ? e.message : "проверьте подключение")
         );
         claimBtn.disabled = false;
@@ -769,41 +799,51 @@
       try {
         data = await res.json();
       } catch {
-        showErr("Не удалось разобрать ответ сервера.");
+        alert("Не удалось разобрать ответ сервера.");
         claimBtn.disabled = false;
         return;
       }
 
       if (!res.ok || !data.success) {
-        showErr(
-          (data && data.error) || "Не удалось отправить уведомление."
+        alert(
+          (data && data.error) || "Запрос не прошёл: " + res.status + " " + res.statusText
         );
         claimBtn.disabled = false;
         return;
       }
 
-      try {
-        localStorage.setItem(LS_PLAYED, "true");
-      } catch (e) {
-        /* ignore */
+      if (!isAdmin()) {
+        try {
+          localStorage.setItem(LS_PLAYED, "true");
+        } catch (e) {
+          /* ignore */
+        }
       }
 
       claimBtn.textContent = "Отправлено";
       claimBtn.disabled = true;
       closeModal();
-      applyPlayedState();
+
+      if (!isAdmin()) {
+        applyPlayedState();
+      } else {
+        spinBtn.disabled = false;
+        spinBtn.textContent = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
+        spinBtn.classList.remove("is-waiting");
+      }
 
       if (tg && typeof tg.showAlert === "function") {
         tg.showAlert("Приз отправлен!");
       }
 
       setTimeout(function () {
-        if (tg && typeof tg.close === "function") {
+        if (tg && typeof tg.close === "function" && !isAdmin()) {
           tg.close();
         }
       }, 1200);
     });
 
+    initSubtitle();
     initPlayedGate();
 
     window.addEventListener("resize", function () {
