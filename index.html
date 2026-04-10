@@ -141,7 +141,7 @@
       right: 0;
       z-index: 2;
       pointer-events: none;
-      height: 38%;
+      height: 42%;
     }
 
     .drum-fade--top {
@@ -149,9 +149,9 @@
       background: linear-gradient(
         to bottom,
         var(--whoosh-bg) 0%,
-        rgba(0, 0, 0, 0.07) 22%,
-        rgba(245, 245, 247, 0.35) 45%,
-        rgba(245, 245, 247, 0) 72%,
+        rgba(0, 0, 0, 0.18) 28%,
+        rgba(0, 0, 0, 0.06) 52%,
+        rgba(245, 245, 247, 0) 78%,
         transparent 100%
       );
     }
@@ -161,9 +161,9 @@
       background: linear-gradient(
         to top,
         var(--whoosh-bg) 0%,
-        rgba(0, 0, 0, 0.07) 22%,
-        rgba(245, 245, 247, 0.35) 45%,
-        rgba(245, 245, 247, 0) 72%,
+        rgba(0, 0, 0, 0.18) 28%,
+        rgba(0, 0, 0, 0.06) 52%,
+        rgba(245, 245, 247, 0) 78%,
         transparent 100%
       );
     }
@@ -477,7 +477,7 @@
       </div>
 
       <p class="staff-hint" id="staffHintMain">
-        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+        ОДИН ШАНС В СУТКИ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
       </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
@@ -489,7 +489,7 @@
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
       <p class="staff-hint">
-        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+        ОДИН ШАНС В СУТКИ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
       </p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
@@ -502,8 +502,8 @@
 
   <script>
     const LS_LAST_SPIN = "whoosh_last_spin";
-    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-    const WHOOSH_LOGO_SRC = "whoosh.png";
+    const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    const WHOOSH_LOGO_SRC = "/whoosh.png";
     const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
 
     let cooldownTickerId = null;
@@ -540,10 +540,6 @@
       return PRIZE_POOL[PRIZE_POOL.length - 1];
     }
 
-    function randomPoolEntry() {
-      return PRIZE_POOL[Math.floor(Math.random() * PRIZE_POOL.length)];
-    }
-
     function cloneEntry(entry) {
       return {
         title: entry.title,
@@ -576,10 +572,11 @@
     }
 
     function buildStrip(winnerEntry) {
-      const preCount = 49 + Math.floor(Math.random() * 24);
       const strip = [];
-      for (let i = 0; i < preCount; i++) {
-        strip.push(cloneEntry(randomPoolEntry()));
+      for (let rep = 0; rep < 20; rep++) {
+        for (let i = 0; i < PRIZE_POOL.length; i++) {
+          strip.push(cloneEntry(PRIZE_POOL[i]));
+        }
       }
       strip.push(cloneEntry(winnerEntry));
       return strip;
@@ -693,7 +690,7 @@
         const last = parseInt(raw, 10);
         if (!Number.isFinite(last)) return 0;
         const elapsed = Date.now() - last;
-        return Math.max(0, WEEK_MS - elapsed);
+        return Math.max(0, COOLDOWN_MS - elapsed);
       } catch (e) {
         return 0;
       }
