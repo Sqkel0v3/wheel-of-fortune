@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Whoosh — Колесо бонусов</title>
+  <title>Whoosh — Барабан бонусов</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -18,6 +18,8 @@
       --whoosh-muted: #666666;
       --whoosh-radius-btn: 12px;
       --whoosh-radius-modal: 16px;
+      --drum-item-h: 76px;
+      --drum-view-h: calc(var(--drum-item-h) * 3);
     }
 
     * {
@@ -108,17 +110,118 @@
       padding: 8px 0 4px;
     }
 
-    .wheel-wrap {
+    .drum-assembly {
       position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: min(100%, 380px);
       flex-shrink: 0;
-      width: min(calc(100vw - 32px), 100%, 85vmin, calc(100dvh - 220px));
-      max-width: 100%;
-      aspect-ratio: 1;
+    }
+
+    .drum-viewport {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      height: var(--drum-view-h);
+      overflow: hidden;
+      background: var(--whoosh-surface);
+      border-radius: 12px;
+      border: 2px solid #000000;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .drum-fade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      pointer-events: none;
+      height: 38%;
+    }
+
+    .drum-fade--top {
+      top: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    .drum-fade--bottom {
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    .drum-strip-wrap {
+      position: relative;
+      z-index: 0;
+    }
+
+    .drum-strip {
+      will-change: transform;
+    }
+
+    .drum-card {
+      height: var(--drum-item-h);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--whoosh-line);
+      background: var(--whoosh-surface);
+    }
+
+    .drum-card__icon {
+      width: 48px;
+      height: 48px;
+      background: var(--whoosh-accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .drum-card__text {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+
+    .drum-card__big {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .drum-card__small {
+      margin-top: 2px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #444444;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .drum-pointer {
+      flex-shrink: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 14px 0 14px 18px;
+      border-color: transparent transparent transparent #000000;
+      margin-left: 2px;
+      filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.15));
     }
 
     @media (max-height: 700px) {
-      .wheel-wrap {
-        width: min(calc(100vw - 28px), 100%, min(72vw, calc(100dvh - 200px)));
+      :root {
+        --drum-item-h: 70px;
       }
       .brand-wordmark {
         margin-bottom: 6px;
@@ -138,37 +241,12 @@
     }
 
     @media (max-height: 620px) {
-      .wheel-wrap {
-        width: min(calc(100vw - 24px), 100%, min(68vw, calc(100dvh - 185px)));
+      :root {
+        --drum-item-h: 64px;
       }
       h1 {
         font-size: clamp(0.78rem, 3.5vw, 1rem);
       }
-    }
-
-    .pointer {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      transform: translateX(-50%);
-      z-index: 3;
-      width: 26px;
-      height: 22px;
-      margin-top: -1px;
-      pointer-events: none;
-    }
-
-    .pointer svg {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    #wheel {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
     }
 
     .btn-spin {
@@ -201,6 +279,20 @@
       cursor: not-allowed;
     }
 
+    .played-msg {
+      width: 100%;
+      max-width: 520px;
+      padding: 22px 20px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--whoosh-muted);
+      background: var(--whoosh-surface);
+      border: 1px solid var(--whoosh-line);
+      border-radius: var(--whoosh-radius-btn);
+    }
+
     .staff-hint {
       font-size: clamp(11px, 3.2vw, 13px);
       font-weight: 500;
@@ -209,7 +301,7 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
       line-height: 1.45;
-      max-width: 300px;
+      max-width: 320px;
       margin: 0;
       padding: 0 10px;
       flex-shrink: 0;
@@ -326,61 +418,120 @@
       background: var(--whoosh-surface);
       color: var(--whoosh-muted);
     }
+
+    .app--played .drum-assembly {
+      opacity: 0.55;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="app" id="app">
     <header>
       <p class="brand-wordmark">WHOOSH</p>
       <h1>БОНУСЫ ОТ WHOOSH</h1>
-      <p class="subtitle">Крути колесо и забирай подарки от Whoosh</p>
+      <p class="subtitle">Крути барабан и забирай приз</p>
     </header>
 
     <div class="main-stack">
-      <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
-        <div class="pointer" aria-hidden="true">
-          <svg viewBox="-1 -1 30 28" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="14,24 4,2 24,2" fill="#FFD500"/>
-          </svg>
+      <div class="drum-assembly" id="drumAssembly" aria-hidden="true">
+        <div class="drum-viewport" id="drumViewport">
+          <div class="drum-fade drum-fade--top" aria-hidden="true"></div>
+          <div class="drum-fade drum-fade--bottom" aria-hidden="true"></div>
+          <div class="drum-strip-wrap">
+            <div class="drum-strip" id="drumStrip"></div>
+          </div>
         </div>
-        <canvas id="wheel"></canvas>
+        <div class="drum-pointer" aria-hidden="true"></div>
       </div>
 
-      <p class="staff-hint">Один спин — один подарок. Покажите экран сотруднику.</p>
+      <p class="staff-hint">Один аккаунт — одна попытка. Покажите экран сотруднику.</p>
 
-      <button type="button" class="btn-spin" id="spinBtn">Испытать удачу</button>
+      <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
+      <p class="played-msg" id="playedMsg" hidden>Вы уже использовали свой шанс. Возвращайтесь завтра!</p>
     </div>
   </div>
 
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
-      <p class="staff-hint">Один спин — один подарок. Покажите экран сотруднику.</p>
+      <p class="staff-hint">Один аккаунт — одна попытка. Покажите экран сотруднику.</p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <div class="modal-actions">
-        <button type="button" class="btn-claim" id="claimBtn">Получить приз</button>
+        <button type="button" class="btn-claim" id="claimBtn">Забрать приз</button>
         <button type="button" class="btn-secondary" id="closeModalBtn">Закрыть</button>
       </div>
     </div>
   </div>
 
   <script>
-    const PRIZES = [
-      "Скидка 5%",
-      "100 бонусов",
-      "Пробник",
-      "Скидка 10%",
-      "Маска",
-      "Сэмпл",
+    const LS_PLAYED = "whoosh_played";
+
+    /**
+     * Призы и вероятности (сумма весов = 100).
+     * Выбор: случайное число r в [0, 100), приз с наименьшим cum > r по накопленным весам.
+     */
+    const PRIZE_POOL = [
+      { title: "iPhone 16", big: "16", small: "iPhone", icon: "\u{1F4F1}", weight: 0.1 },
+      { title: "Неделя поездок", big: "7", small: "дней поездок", icon: "\u{1F6F4}", weight: 1 },
+      { title: "Whoosh Pass на месяц", big: "Pass", small: "30 дней", icon: "\u{1F3AB}", weight: 5 },
+      { title: "500 бонусов", big: "500", small: "бонусов", icon: "\u{1F4B0}", weight: 10 },
+      { title: "Бесплатный старт (3 шт)", big: "3", small: "бесплатных старта", icon: "\u26A1", weight: 25 },
+      { title: "Скидка 20%", big: "20%", small: "скидка", icon: "\u{1F3F7}", weight: 25 },
+      { title: "100 бонусов", big: "100", small: "бонусов", icon: "\u2728", weight: 33.9 },
     ];
 
-    const SECTOR_FILL = ["#FFFFFF", "#F5F5F5"];
-    const DIVIDER = "#EBEBEB";
-    const RIM_STROKE = "#FFD500";
-    const LABEL_COLOR = "#000000";
-    const HUB_FILL = "#FFFFFF";
-    const HUB_STROKE = "#E8E8E8";
+    function pickWeightedPrize() {
+      const r = Math.random() * 100;
+      let cum = 0;
+      for (let i = 0; i < PRIZE_POOL.length; i++) {
+        cum += PRIZE_POOL[i].weight;
+        if (r < cum) {
+          return PRIZE_POOL[i];
+        }
+      }
+      return PRIZE_POOL[PRIZE_POOL.length - 1];
+    }
+
+    function randomPoolEntry() {
+      return PRIZE_POOL[Math.floor(Math.random() * PRIZE_POOL.length)];
+    }
+
+    function cloneEntry(entry) {
+      return {
+        title: entry.title,
+        big: entry.big,
+        small: entry.small,
+        icon: entry.icon,
+      };
+    }
+
+    function renderStripRow(entry) {
+      const row = document.createElement("div");
+      row.className = "drum-card";
+      row.innerHTML =
+        '<div class="drum-card__icon" aria-hidden="true"></div>' +
+        '<div class="drum-card__text">' +
+        '<div class="drum-card__big"></div>' +
+        '<div class="drum-card__small"></div>' +
+        "</div>";
+      row.querySelector(".drum-card__icon").textContent = entry.icon;
+      row.querySelector(".drum-card__big").textContent = entry.big;
+      row.querySelector(".drum-card__small").textContent = entry.small;
+      row.dataset.prizeTitle = entry.title;
+      return row;
+    }
+
+    function buildStrip(winnerEntry) {
+      const preCount = 32 + Math.floor(Math.random() * 10);
+      const strip = [];
+      for (let i = 0; i < preCount; i++) {
+        strip.push(cloneEntry(randomPoolEntry()));
+      }
+      strip.push(cloneEntry(winnerEntry));
+      return strip;
+    }
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -404,7 +555,6 @@
       }
     }
 
-    /** Прогресс по времени t in [0,1] для CSS cubic-bezier(x1,y1,x2,y2) */
     function easeCubicBezier(t, x1, y1, x2, y2) {
       if (t <= 0) return 0;
       if (t >= 1) return 1;
@@ -439,118 +589,58 @@
       }
     }
 
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
-    const wheelWrap = document.getElementById("wheelWrap");
+    const drumStrip = document.getElementById("drumStrip");
+    const drumViewport = document.getElementById("drumViewport");
     const spinBtn = document.getElementById("spinBtn");
+    const playedMsg = document.getElementById("playedMsg");
+    const appEl = document.getElementById("app");
     const overlay = document.getElementById("overlay");
     const modalPrize = document.getElementById("modalPrize");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
 
-    const N = PRIZES.length;
-    const TAU = Math.PI * 2;
-    const arc = TAU / N;
-
-    let layoutSize = 300;
-    let rotation = 0;
+    let itemHeightPx = 76;
     let currentPrizeText = "";
+    let spinning = false;
 
-    function syncCanvasSize() {
-      const rect = wheelWrap.getBoundingClientRect();
-      const w = Math.max(180, Math.floor(rect.width));
-      layoutSize = w;
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      const px = Math.max(1, Math.floor(w * dpr));
-      canvas.width = px;
-      canvas.height = px;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      drawWheel();
+    function readItemHeight() {
+      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-item-h").trim();
+      const parsed = parseFloat(v);
+      return Number.isFinite(parsed) ? parsed : 76;
     }
 
-    function drawWheel() {
-      const centerX = layoutSize / 2;
-      const centerY = layoutSize / 2;
-      const rimW = Math.max(4, Math.min(5, Math.round(layoutSize * 0.014)));
-      const radius = layoutSize / 2 - rimW / 2 - 1;
-      const labelRadius = radius * 0.6;
-      const maxTextWidth = 2 * labelRadius * Math.sin(arc / 2) - 10;
-      const fontPx = 16;
+    function translateForCenteredIndex(index, viewH) {
+      return viewH / 2 - itemHeightPx / 2 - index * itemHeightPx;
+    }
 
-      ctx.clearRect(0, 0, layoutSize, layoutSize);
+    function applyStripTransform(y) {
+      drumStrip.style.transform = "translateY(" + y + "px)";
+    }
 
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(rotation);
-
-      for (let i = 0; i < N; i++) {
-        const startAngle = i * arc - Math.PI / 2;
-        const endAngle = startAngle + arc;
-        const middleAngle = startAngle + arc / 2;
-
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = SECTOR_FILL[i % 2];
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.strokeStyle = DIVIDER;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.save();
-        ctx.rotate(middleAngle);
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.direction = "ltr";
-        ctx.fillStyle = LABEL_COLOR;
-        ctx.font =
-          "700 " + fontPx + "px Inter, system-ui, -apple-system, sans-serif";
-
-        let text = PRIZES[i];
-        if (ctx.measureText(text).width > maxTextWidth) {
-          while (
-            text.length > 1 &&
-            ctx.measureText(text.slice(0, -1) + "…").width > maxTextWidth
-          ) {
-            text = text.slice(0, -1);
-          }
-          text = text.slice(0, -1) + "…";
-        }
-
-        ctx.fillText(text, radius * 0.6, 0);
-        ctx.restore();
+    function fillStripFromData(entries) {
+      drumStrip.innerHTML = "";
+      for (let i = 0; i < entries.length; i++) {
+        drumStrip.appendChild(renderStripRow(entries[i]));
       }
-
-      ctx.beginPath();
-      ctx.arc(0, 0, radius, 0, TAU);
-      ctx.strokeStyle = RIM_STROKE;
-      ctx.lineWidth = rimW;
-      ctx.stroke();
-
-      ctx.restore();
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.beginPath();
-      ctx.arc(0, 0, radius * 0.12, 0, TAU);
-      ctx.fillStyle = HUB_FILL;
-      ctx.fill();
-      ctx.strokeStyle = HUB_STROKE;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
     }
-
-    const SPIN_MS = 4500;
 
     function spin() {
+      if (spinning) return;
       cancelSpinAnimation();
+
+      itemHeightPx = readItemHeight();
+      const viewH = drumViewport.getBoundingClientRect().height;
+
+      const won = pickWeightedPrize();
+      const stripData = buildStrip(won);
+      fillStripFromData(stripData);
+
+      const winIndex = stripData.length - 1;
+      const yStart = translateForCenteredIndex(0, viewH);
+      const yEnd = translateForCenteredIndex(winIndex, viewH);
+
+      applyStripTransform(yStart);
+
       spinSound.pause();
       spinSound.currentTime = 0;
       spinSound.volume = 1;
@@ -558,27 +648,22 @@
 
       spinBtn.classList.add("is-waiting");
       spinBtn.disabled = true;
+      spinning = true;
 
-      const winnerIndex = Math.floor(Math.random() * N);
-      const fullSpins = 8 + Math.floor(Math.random() * 3);
-      const localCenter = winnerIndex * arc + arc / 2 - Math.PI / 2;
-      const pointerAngle = (3 * Math.PI) / 2;
-      let delta = pointerAngle - localCenter - rotation;
-      while (delta <= 0) delta += TAU;
-      const targetRotation = rotation + fullSpins * TAU + delta;
-
-      const startRot = rotation;
+      const SPIN_MS = 4500;
       const startTime = performance.now();
 
       function frame(now) {
         const elapsed = now - startTime;
         const t = Math.min(1, elapsed / SPIN_MS);
-        rotation = startRot + (targetRotation - startRot) * easeSpin(t);
-        drawWheel();
+        const e = easeSpin(t);
+        const y = yStart + (yEnd - yStart) * e;
+        applyStripTransform(y);
         if (t < 1) {
           spinRafId = requestAnimationFrame(frame);
         } else {
           spinRafId = null;
+          applyStripTransform(yEnd);
         }
       }
       spinRafId = requestAnimationFrame(frame);
@@ -589,11 +674,11 @@
           cancelAnimationFrame(spinRafId);
           spinRafId = null;
         }
-        rotation = targetRotation;
-        drawWheel();
+        applyStripTransform(yEnd);
         spinSound.pause();
         spinSound.currentTime = 0;
-        currentPrizeText = PRIZES[winnerIndex];
+        currentPrizeText = won.title;
+        spinning = false;
         spinBtn.disabled = false;
         spinBtn.classList.remove("is-waiting");
         openModal(currentPrizeText);
@@ -602,13 +687,29 @@
 
     function openModal(prize) {
       modalPrize.textContent = prize;
-      claimBtn.textContent = "Получить приз";
+      claimBtn.textContent = "Забрать приз";
       claimBtn.disabled = false;
       overlay.classList.add("is-open");
     }
 
     function closeModal() {
       overlay.classList.remove("is-open");
+    }
+
+    function applyPlayedState() {
+      appEl.classList.add("app--played");
+      spinBtn.hidden = true;
+      playedMsg.hidden = false;
+    }
+
+    function initPlayedGate() {
+      try {
+        if (localStorage.getItem(LS_PLAYED) === "true") {
+          applyPlayedState();
+        }
+      } catch (e) {
+        /* ignore */
+      }
     }
 
     spinBtn.addEventListener("click", spin);
@@ -666,32 +767,34 @@
         return;
       }
 
-      claimBtn.textContent = "ОТПРАВЛЕНО...";
+      try {
+        localStorage.setItem(LS_PLAYED, "true");
+      } catch (e) {
+        /* ignore */
+      }
+
+      claimBtn.textContent = "Отправлено";
       claimBtn.disabled = true;
+      closeModal();
+      applyPlayedState();
+
       setTimeout(function () {
         if (tg && typeof tg.close === "function") {
           tg.close();
         }
-      }, 1500);
+      }, 1200);
     });
 
-    if (typeof ResizeObserver !== "undefined") {
-      new ResizeObserver(syncCanvasSize).observe(wheelWrap);
-    } else {
-      window.addEventListener("resize", syncCanvasSize);
-    }
-    window.addEventListener("orientationchange", function () {
-      setTimeout(syncCanvasSize, 200);
-    });
+    initPlayedGate();
 
-    function startCanvas() {
-      requestAnimationFrame(syncCanvasSize);
-    }
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(startCanvas);
-    } else {
-      startCanvas();
-    }
+    window.addEventListener("resize", function () {
+      if (!spinning && drumStrip.children.length) {
+        itemHeightPx = readItemHeight();
+        const viewH = drumViewport.getBoundingClientRect().height;
+        const winIndex = drumStrip.children.length - 1;
+        applyStripTransform(translateForCenteredIndex(winIndex, viewH));
+      }
+    });
   </script>
 </body>
 </html>
