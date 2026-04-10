@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Золотое Яблоко — Колесо</title>
+  <title>Whoosh — Колесо бонусов</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --ga-bg: #FFFFFF;
-      --ga-accent: #CCFF00;
-      --ga-line: #F0F0F0;
-      --ga-text: #000000;
-      --ga-muted: #666666;
-      --btn-radius: 0;
+      --whoosh-bg: #F2F2F2;
+      --whoosh-surface: #FFFFFF;
+      --whoosh-accent: #FFD500;
+      --whoosh-line: #E8E8E8;
+      --whoosh-text: #000000;
+      --whoosh-muted: #666666;
+      --whoosh-radius-btn: 12px;
+      --whoosh-radius-modal: 16px;
     }
 
     * {
@@ -30,8 +32,8 @@
 
     html, body {
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #FFFFFF;
-      color: var(--ga-text);
+      background: var(--whoosh-bg);
+      color: var(--whoosh-text);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
@@ -87,7 +89,7 @@
       font-size: 0.72rem;
       font-weight: 500;
       letter-spacing: 0.03em;
-      color: var(--ga-muted);
+      color: var(--whoosh-muted);
       line-height: 1.45;
       max-width: 300px;
       margin-left: auto;
@@ -179,10 +181,10 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       border: none;
-      border-radius: 0;
+      border-radius: var(--whoosh-radius-btn);
       cursor: pointer;
       color: #000000;
-      background: #CCFF00;
+      background: var(--whoosh-accent);
       transition: opacity 0.15s ease;
     }
 
@@ -202,7 +204,7 @@
     .staff-hint {
       font-size: clamp(11px, 3.2vw, 13px);
       font-weight: 500;
-      color: #666666;
+      color: var(--whoosh-muted);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -242,11 +244,11 @@
       max-width: 336px;
       max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       overflow-y: auto;
-      background: #FFFFFF;
+      background: var(--whoosh-surface);
       color: #000000;
-      border-radius: 0;
+      border-radius: var(--whoosh-radius-modal);
       padding: 28px 22px 22px;
-      border: 1px solid var(--ga-line);
+      border: 1px solid var(--whoosh-line);
       opacity: 0;
       transition: opacity 0.22s ease;
     }
@@ -258,7 +260,7 @@
     .modal-accent {
       width: calc(100% + 44px);
       height: 3px;
-      background: var(--ga-accent);
+      background: var(--whoosh-accent);
       margin: -28px -22px 18px;
     }
 
@@ -296,7 +298,7 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       border: 1px solid #000000;
-      border-radius: 0;
+      border-radius: var(--whoosh-radius-btn);
       cursor: pointer;
       color: #ffffff;
       background: #000000;
@@ -318,27 +320,27 @@
       font-size: 0.74rem;
       font-weight: 600;
       letter-spacing: 0.05em;
-      border: 1px solid #eeeeee;
-      border-radius: 0;
+      border: 1px solid var(--whoosh-line);
+      border-radius: var(--whoosh-radius-btn);
       cursor: pointer;
-      background: #ffffff;
-      color: var(--ga-muted);
+      background: var(--whoosh-surface);
+      color: var(--whoosh-muted);
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <p class="brand-wordmark">GOLDEN APPLE</p>
-      <h1>ПОЛУЧИТЕ ПОДАРОК</h1>
-      <p class="subtitle">Крутите колесо в Золотом Яблоке</p>
+      <p class="brand-wordmark">WHOOSH</p>
+      <h1>БОНУСЫ ОТ WHOOSH</h1>
+      <p class="subtitle">Крути колесо и забирай подарки от Whoosh</p>
     </header>
 
     <div class="main-stack">
       <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
         <div class="pointer" aria-hidden="true">
           <svg viewBox="-1 -1 30 28" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="14,24 4,2 24,2" fill="#CCFF00"/>
+            <polygon points="14,24 4,2 24,2" fill="#FFD500"/>
           </svg>
         </div>
         <canvas id="wheel"></canvas>
@@ -373,12 +375,12 @@
       "Сэмпл",
     ];
 
-    const SECTOR_FILL = ["#FFFFFF", "#F9F9F9"];
-    const DIVIDER = "#EFEFEF";
-    const RIM_STROKE = "#CCFF00";
+    const SECTOR_FILL = ["#FFFFFF", "#F5F5F5"];
+    const DIVIDER = "#EBEBEB";
+    const RIM_STROKE = "#FFD500";
     const LABEL_COLOR = "#000000";
     const HUB_FILL = "#FFFFFF";
-    const HUB_STROKE = "#F0F0F0";
+    const HUB_STROKE = "#E8E8E8";
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {

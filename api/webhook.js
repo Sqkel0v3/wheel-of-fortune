@@ -34,8 +34,6 @@ export default async function handler(req, res) {
   const msg = body.message;
   const chatId = msg.chat.id;
   const text = msg.text;
-  const firstName = msg.from && msg.from.first_name;
-
   if (text !== "/start") {
     return res.status(200).send("ok");
   }
@@ -48,9 +46,7 @@ export default async function handler(req, res) {
   }
 
   const welcomeText =
-    "Привет, " +
-    (firstName || "друг") +
-    "! \uD83D\uDC4B\n\nДобро пожаловать в Золотое Яблоко. У нас ты можешь испытать удачу и выиграть призы!";
+    "Привет! \uD83D\uDC4B Готов получить бонусы от Whoosh? Жми на кнопку ниже!";
 
   const payload = {
     chat_id: chatId,
@@ -62,7 +58,7 @@ export default async function handler(req, res) {
       inline_keyboard: [
         [
           {
-            text: "\uD83C\uDFA1 Испытать удачу",
+            text: "\uD83C\uDF81 Бонусы Whoosh",
             web_app: { url: miniAppUrl },
           },
         ],
