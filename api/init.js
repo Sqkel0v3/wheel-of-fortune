@@ -1,28 +1,24 @@
-import { sql } from '@vercel/postgres';
+import { sql } from "@vercel/postgres";
 
 export default async function handler(req, res) {
-  // Проверяем, есть ли вообще переменные окружения
-  if (!process.env.POSTGRES_URL) {
-    return res.status(500).json({ 
-      error: "База данных не подключена! Зайди в Vercel -> Storage и нажми Connect." 
-    });
-  }
-
   try {
+    // Удаляем старую таблицу, чтобы создать новую со всеми полями
+    await sql`DROP TABLE IF EXISTS users CASCADE;`;
+
     await sql`
-      CREATE TABLE IF NOT EXISTS users (
-        id BIGINT PRIMARY KEY,
+      CREATE TABLE users (
+        telegram_id BIGINT PRIMARY KEY,
         phone TEXT,
         mileage INTEGER DEFAULT 0,
-        first_spin_done BOOLEAN DEFAULT FALSE
+        free_spin_available BOOLEAN DEFAULT TRUE
       );
     `;
-    return res.status(200).json({ message: "Таблица проверена/создана успешно!" });
-  } catch (error) {
-    console.error("Ошибка БД:", error);
-    return res.status(500).json({ 
-      error: "Ошибка при создании таблицы",
-      details: error.message 
+
+    return res.status(200).json({
+      message:
+        "Таблица готова! Колонки: telegram_id, phone, mileage, free_spin_available",
     });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 }

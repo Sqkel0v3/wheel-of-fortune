@@ -1,10 +1,7 @@
--- Vercel Postgres: выполните в консоли Storage / SQL или через migrate.
+-- Соответствует api/init.js (ручной запуск без init-эндпоинта).
 CREATE TABLE IF NOT EXISTS users (
   telegram_id BIGINT PRIMARY KEY,
-  phone TEXT NOT NULL,
-  mileage INTEGER NOT NULL CHECK (mileage >= 0),
-  free_spin_available BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  phone TEXT,
+  mileage INTEGER DEFAULT 0,
+  free_spin_available BOOLEAN DEFAULT TRUE
 );
-
-CREATE INDEX IF NOT EXISTS idx_users_phone ON users (phone);
