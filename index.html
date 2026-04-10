@@ -3,66 +3,195 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Whoosh — Барабан бонусов</title>
+  <title>Whoosh — Лояльность</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --whoosh-bg: #F5F5F7;
-      --whoosh-surface: #FFFFFF;
-      --whoosh-accent: #FFD500;
-      --whoosh-line: #E8E8E8;
-      --whoosh-card-border: #E0E0E0;
+      --whoosh-bg: #f5f5f7;
+      --whoosh-surface: #ffffff;
+      --whoosh-accent: #ffd500;
       --whoosh-text: #000000;
       --whoosh-muted: #666666;
       --whoosh-radius-btn: 12px;
       --whoosh-radius-modal: 16px;
       --drum-item-h: 76px;
       --drum-card-gap: 8px;
-      /* Центральная карточка по центру окна, сверху/снизу — части соседей */
       --drum-view-h: calc(3 * var(--drum-item-h) + 2 * var(--drum-card-gap));
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html {
-      min-height: 100dvh;
-    }
+    html { min-height: 100dvh; }
 
     html, body {
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--whoosh-bg);
-      color: var(--whoosh-text);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
     body {
-      padding: max(10px, env(safe-area-inset-top, 0px)) 16px max(10px, env(safe-area-inset-bottom, 0px));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      box-sizing: border-box;
       min-height: 100dvh;
       width: 100%;
-      overflow-y: hidden;
+      color: var(--whoosh-text);
+      background: var(--whoosh-bg);
     }
 
+    body.auth-mode {
+      background: #ffffff;
+    }
+
+    .screen { display: none; }
+    .screen.is-active { display: flex; }
+
+    /* ——— Авторизация ——— */
+    .auth-screen {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 24px 20px;
+      width: 100%;
+      background: #ffffff;
+    }
+
+    .auth-logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      margin-bottom: 28px;
+    }
+
+    .auth-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: #000000;
+    }
+
+    .auth-sub {
+      font-size: 0.72rem;
+      color: var(--whoosh-muted);
+      margin-bottom: 32px;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.45;
+    }
+
+    .auth-field-label {
+      align-self: stretch;
+      max-width: 340px;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: #000000;
+    }
+
+    .auth-input {
+      width: 100%;
+      max-width: 340px;
+      padding: 16px 18px;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      border: 2px solid #000000;
+      border-radius: var(--whoosh-radius-btn);
+      background: #ffffff;
+      color: #000000;
+      margin-bottom: 20px;
+    }
+
+    .auth-input::placeholder {
+      color: #999999;
+      font-weight: 500;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.65);
+    }
+
+    .btn-auth-enter {
+      width: 100%;
+      max-width: 340px;
+      padding: 18px 24px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: var(--whoosh-radius-btn);
+      background: var(--whoosh-accent);
+      color: #000000;
+      cursor: pointer;
+    }
+
+    .btn-auth-enter:active {
+      opacity: 0.9;
+    }
+
+    .btn-auth-enter:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ——— Загрузка ——— */
+    .boot-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      padding: 24px;
+    }
+
+    .boot-loading.is-visible {
+      display: flex;
+    }
+
+    .boot-loading__spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid #eeeeee;
+      border-top-color: #000000;
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+      margin-bottom: 24px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .boot-loading__text {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #000000;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.45;
+    }
+
+    /* ——— Главный экран ——— */
     .app {
       width: 100%;
       max-width: 520px;
-      min-height: 0;
-      flex: 1 1 auto;
+      min-height: 100dvh;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      align-items: stretch;
+      padding: max(10px, env(safe-area-inset-top, 0px)) 16px max(10px, env(safe-area-inset-bottom, 0px));
     }
 
     header {
@@ -81,7 +210,7 @@
     }
 
     h1 {
-      font-size: clamp(0.85rem, 3.8vw, 1.1rem);
+      font-size: clamp(0.85rem, 3.8vw, 1.05rem);
       font-weight: 800;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -96,74 +225,9 @@
       letter-spacing: 0.03em;
       color: var(--whoosh-muted);
       line-height: 1.45;
-      max-width: 300px;
+      max-width: 320px;
       margin-left: auto;
       margin-right: auto;
-    }
-
-    .km-progress {
-      width: 100%;
-      max-width: min(100%, 380px);
-      flex-shrink: 0;
-    }
-
-    .km-progress.is-hidden {
-      display: none;
-    }
-
-    .km-progress__label {
-      font-size: clamp(0.65rem, 2.8vw, 0.78rem);
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      text-align: center;
-      color: #000000;
-      margin-bottom: 8px;
-      line-height: 1.35;
-    }
-
-    .km-progress__track {
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.06);
-      overflow: hidden;
-    }
-
-    .km-progress__fill {
-      height: 100%;
-      width: 0%;
-      max-width: 100%;
-      border-radius: inherit;
-      background: #FFD500;
-      transition: width 0.35s ease;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
-    }
-
-    .admin-km-panel--under-spin {
-      width: 100%;
-      max-width: 520px;
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-      margin-top: 2px;
-    }
-
-    .btn-admin-km--compact {
-      padding: 8px 18px;
-      font-family: inherit;
-      font-size: 0.58rem;
-      font-weight: 800;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      border: 1px solid rgba(0, 0, 0, 0.35);
-      border-radius: 999px;
-      cursor: pointer;
-      color: #000000;
-      background: rgba(255, 213, 0, 0.55);
-    }
-
-    .btn-admin-km--compact:active {
-      opacity: 0.88;
     }
 
     .main-stack {
@@ -176,6 +240,38 @@
       min-height: 0;
       width: 100%;
       padding: 8px 0 4px;
+    }
+
+    .km-block {
+      width: 100%;
+      max-width: min(100%, 380px);
+      flex-shrink: 0;
+    }
+
+    .km-block__label {
+      font-size: clamp(0.68rem, 2.9vw, 0.82rem);
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      color: #000000;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .km-block__track {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+
+    .km-block__fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--whoosh-accent);
+      transition: width 0.35s ease;
     }
 
     .drum-assembly {
@@ -196,8 +292,6 @@
       height: var(--drum-view-h);
       overflow: hidden;
       background: transparent;
-      border: none;
-      box-shadow: none;
     }
 
     .drum-fade {
@@ -206,34 +300,17 @@
       right: 0;
       z-index: 2;
       pointer-events: none;
-      height: 42%;
+      height: 44%;
     }
 
     .drum-fade--top {
       top: 0;
-      background: linear-gradient(
-        to bottom,
-        #f5f5f7 0%,
-        rgba(245, 245, 247, 0.92) 22%,
-        rgba(245, 245, 247, 0.35) 55%,
-        rgba(245, 245, 247, 0) 100%
-      );
+      background: linear-gradient(to bottom, rgba(245, 245, 247, 1) 0%, rgba(245, 245, 247, 0) 100%);
     }
 
     .drum-fade--bottom {
       bottom: 0;
-      background: linear-gradient(
-        to top,
-        #f5f5f7 0%,
-        rgba(245, 245, 247, 0.92) 22%,
-        rgba(245, 245, 247, 0.35) 55%,
-        rgba(245, 245, 247, 0) 100%
-      );
-    }
-
-    .drum-strip-wrap {
-      position: relative;
-      z-index: 0;
+      background: linear-gradient(to top, rgba(245, 245, 247, 1) 0%, rgba(245, 245, 247, 0) 100%);
     }
 
     .drum-strip {
@@ -251,17 +328,16 @@
       align-items: center;
       gap: 12px;
       padding: 10px 14px;
-      border: 1px solid var(--whoosh-card-border);
       border-radius: 12px;
-      background: var(--whoosh-surface);
-      box-sizing: border-box;
-      box-shadow: none;
+      background: #ffffff;
+      border: none;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
     }
 
     .drum-card__icon {
       width: 48px;
       height: 48px;
-      background: #FFD500;
+      background: var(--whoosh-accent);
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -271,32 +347,23 @@
       overflow: hidden;
     }
 
-    .drum-card__icon .drum-card__logo {
+    .drum-card__logo {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      object-position: center;
-      display: block;
       pointer-events: none;
     }
 
-    .drum-card__text {
-      flex: 1;
-      min-width: 0;
-      text-align: left;
-    }
-
     .drum-card__big {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 800;
       color: #000000;
       line-height: 1.15;
-      letter-spacing: -0.02em;
     }
 
     .drum-card__small {
       margin-top: 2px;
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 600;
       color: #444444;
       text-transform: uppercase;
@@ -313,124 +380,81 @@
       margin-right: 8px;
     }
 
-    @media (max-height: 700px) {
-      :root {
-        --drum-item-h: 70px;
-      }
-      .brand-wordmark {
-        margin-bottom: 6px;
-      }
-      .subtitle {
-        margin-top: 4px;
-        font-size: 0.68rem;
-      }
-      .main-stack {
-        gap: 10px;
-        padding: 4px 0 2px;
-      }
-      .btn-spin {
-        padding: 20px 22px;
-        font-size: 0.82rem;
-      }
+    .hint {
+      font-size: clamp(10px, 2.9vw, 12px);
+      font-weight: 600;
+      color: var(--whoosh-muted);
+      text-align: center;
+      letter-spacing: 0.06em;
+      line-height: 1.4;
+      max-width: 340px;
+      padding: 0 8px;
     }
 
-    @media (max-height: 620px) {
-      :root {
-        --drum-item-h: 64px;
-      }
-      h1 {
-        font-size: clamp(0.78rem, 3.5vw, 1rem);
-      }
+    .admin-km-panel {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .btn-admin-km {
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: 1px solid #000000;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #000000;
+      background: rgba(255, 213, 0, 0.65);
     }
 
     .btn-spin {
       width: 100%;
       max-width: 520px;
-      padding: 26px 28px;
+      padding: 24px 20px;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 800;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       border: none;
       border-radius: var(--whoosh-radius-btn);
       cursor: pointer;
       color: #000000;
       background: var(--whoosh-accent);
-      transition: opacity 0.15s ease;
     }
 
-    .btn-spin:active:not(:disabled) {
-      opacity: 0.88;
+    .btn-spin:disabled:not(.is-waiting) {
+      background: #d1d1d6;
+      color: #3a3a3c;
+      cursor: not-allowed;
+      font-size: clamp(0.58rem, 2.8vw, 0.75rem);
     }
 
     .btn-spin.is-waiting {
-      opacity: 0.75;
+      opacity: 0.8;
     }
 
     .btn-spin:disabled.is-waiting {
       background: var(--whoosh-accent);
       color: #000000;
-      opacity: 0.75;
-      font-size: 0.9rem;
-      letter-spacing: 0.14em;
-      padding: 26px 28px;
-    }
-
-    .btn-spin:disabled:not(.is-waiting) {
-      opacity: 1;
-      cursor: not-allowed;
-      font-size: clamp(0.62rem, 2.8vw, 0.78rem);
-      letter-spacing: 0.1em;
-      line-height: 1.25;
-      padding: 22px 16px;
-      background: #c7c7cc;
-      color: #3a3a3c;
     }
 
     .btn-spin--long {
-      font-size: clamp(0.52rem, 3.1vw, 0.72rem);
-      letter-spacing: 0.08em;
-      padding: 22px 12px;
-    }
-
-    .promo-instruction {
-      font-size: clamp(10px, 2.9vw, 12px);
-      font-weight: 700;
-      color: #000000;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      line-height: 1.4;
-      max-width: 340px;
-      margin: 0;
-      padding: 0 10px;
-      flex-shrink: 0;
-    }
-
-    .staff-hint {
-      font-size: clamp(11px, 3.2vw, 13px);
-      font-weight: 500;
-      color: var(--whoosh-muted);
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      line-height: 1.45;
-      max-width: 320px;
-      margin: 0;
-      padding: 0 10px;
-      flex-shrink: 0;
-    }
-
-    .modal .staff-hint {
-      margin: 0 auto 14px;
-      padding: 0 12px;
+      font-size: clamp(0.5rem, 3vw, 0.7rem);
+      letter-spacing: 0.07em;
+      padding: 20px 12px;
     }
 
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.18);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -449,131 +473,58 @@
     .modal {
       width: 100%;
       max-width: 336px;
-      max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      overflow-y: auto;
-      background: var(--whoosh-surface);
+      background: #ffffff;
       color: #000000;
       border-radius: var(--whoosh-radius-modal);
-      padding: 28px 22px 22px;
-      border: 1px solid var(--whoosh-line);
-      opacity: 0;
-      transition: opacity 0.22s ease;
-    }
-
-    .overlay.is-open .modal {
-      opacity: 1;
-    }
-
-    .modal-accent {
-      width: calc(100% + 44px);
-      height: 3px;
-      background: var(--whoosh-accent);
-      margin: -28px -22px 18px;
+      padding: 24px 20px 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     }
 
     .modal h2 {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.28em;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
       text-align: center;
-      margin-bottom: 14px;
-      color: #000000;
+      margin-bottom: 12px;
     }
 
     .modal-prize {
       text-align: center;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
-      color: #000000;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       line-height: 1.4;
-      min-height: 1.5em;
     }
 
     .modal-promo-label {
       text-align: center;
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 700;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--whoosh-muted);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .modal-promo-code {
       text-align: center;
-      font-size: clamp(1.35rem, 6.5vw, 1.75rem);
+      font-size: clamp(1.2rem, 6vw, 1.6rem);
       font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.06em;
-      color: #000000;
-      margin: 0 0 18px;
-      padding: 14px 12px;
-      line-height: 1.25;
+      margin: 0 0 16px;
+      padding: 12px;
       background: var(--whoosh-accent);
       border-radius: 12px;
-      border: 2px solid #000000;
       word-break: break-all;
     }
 
     .modal-physical-notice {
       text-align: center;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      line-height: 1.45;
-      color: #000000;
-      margin: 0 0 16px;
+      line-height: 1.4;
+      margin-bottom: 14px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .btn-contact-tg {
-      display: block;
-      width: 100%;
-      padding: 16px 16px;
-      font-family: inherit;
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-align: center;
-      text-decoration: none;
-      border: 2px solid #000000;
-      border-radius: var(--whoosh-radius-btn);
-      cursor: pointer;
-      color: #000000;
-      background: var(--whoosh-accent);
-      box-sizing: border-box;
-      margin-bottom: 10px;
-    }
-
-    .btn-contact-tg:active {
-      opacity: 0.88;
-    }
-
-    .btn-copy-promo {
-      padding: 16px 16px;
-      font-family: inherit;
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      border: 2px solid #000000;
-      border-radius: var(--whoosh-radius-btn);
-      cursor: pointer;
-      color: #000000;
-      background: var(--whoosh-accent);
-      transition: opacity 0.15s;
-    }
-
-    .btn-copy-promo:active:not(:disabled) {
-      opacity: 0.88;
-    }
-
-    .btn-copy-promo:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
     }
 
     .modal-actions {
@@ -582,99 +533,130 @@
       gap: 10px;
     }
 
-    .btn-claim {
-      padding: 18px 18px;
+    .btn-contact-tg {
+      display: block;
+      width: 100%;
+      padding: 14px;
       font-family: inherit;
-      font-size: 0.7rem;
-      font-weight: 700;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      text-decoration: none;
+      border-radius: var(--whoosh-radius-btn);
+      background: var(--whoosh-accent);
+      color: #000000;
+    }
+
+    .btn-copy-promo {
+      padding: 14px;
+      font-family: inherit;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: var(--whoosh-radius-btn);
+      background: var(--whoosh-accent);
+      color: #000000;
+      cursor: pointer;
+    }
+
+    .btn-claim {
+      padding: 16px;
+      font-family: inherit;
+      font-size: 0.68rem;
+      font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      border: 1px solid #000000;
+      border: none;
       border-radius: var(--whoosh-radius-btn);
-      cursor: pointer;
-      color: #ffffff;
       background: #000000;
-      transition: opacity 0.15s;
-    }
-
-    .btn-claim:active:not(:disabled) {
-      opacity: 0.85;
-    }
-
-    .btn-claim:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      color: #ffffff;
+      cursor: pointer;
     }
 
     .btn-secondary {
-      padding: 14px;
+      padding: 12px;
       font-family: inherit;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: 0.05em;
-      border: 1px solid var(--whoosh-line);
+      border: 1px solid #e0e0e0;
       border-radius: var(--whoosh-radius-btn);
-      cursor: pointer;
-      background: var(--whoosh-surface);
+      background: #ffffff;
       color: var(--whoosh-muted);
+      cursor: pointer;
     }
 
+    @media (max-height: 700px) {
+      :root { --drum-item-h: 70px; }
+    }
   </style>
 </head>
 <body>
-  <div class="app" id="app">
+  <div class="boot-loading" id="bootLoading" aria-live="polite">
+    <div class="boot-loading__spinner" aria-hidden="true"></div>
+    <p class="boot-loading__text">Подключение к серверам Whoosh...</p>
+  </div>
+
+  <div class="screen auth-screen" id="authScreen" hidden>
+    <img class="auth-logo" src="/whoosh.png" alt="Whoosh" width="72" height="72" />
+    <p class="auth-title">WHOOSH</p>
+    <p class="auth-sub">Войдите по номеру телефона, чтобы открыть барабан бонусов</p>
+    <label class="auth-field-label" for="phoneInput">Телефон</label>
+    <input
+      class="auth-input"
+      id="phoneInput"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      placeholder="+7 (999) 000-00-00"
+    />
+    <button type="button" class="btn-auth-enter" id="authEnterBtn">ВОЙТИ</button>
+  </div>
+
+  <div class="app" id="mainApp" hidden>
     <header>
       <p class="brand-wordmark">WHOOSH</p>
       <h1>БОНУСЫ WHOOSH</h1>
-      <p class="subtitle" id="subtitleLine">Крути барабан и забирай приз</p>
+      <p class="subtitle" id="subtitleLine"></p>
     </header>
 
     <div class="main-stack">
-      <div class="km-progress" id="kmProgress">
-        <p class="km-progress__label" id="kmProgressLabel">ВАШ ПРОБЕГ: 0 / 250 КМ</p>
-        <div class="km-progress__track" aria-hidden="true">
-          <div class="km-progress__fill" id="kmProgressFill"></div>
+      <div class="km-block" id="kmBlock">
+        <p class="km-block__label" id="kmBlockLabel">Ваш пробег: 0 км</p>
+        <div class="km-block__track" aria-hidden="true">
+          <div class="km-block__fill" id="kmBlockFill"></div>
         </div>
       </div>
 
-      <div class="drum-assembly" id="drumAssembly" aria-hidden="true">
+      <div class="drum-assembly" id="drumAssembly">
         <div class="drum-pointer" aria-hidden="true"></div>
         <div class="drum-viewport" id="drumViewport">
           <div class="drum-fade drum-fade--top" aria-hidden="true"></div>
           <div class="drum-fade drum-fade--bottom" aria-hidden="true"></div>
-          <div class="drum-strip-wrap">
-            <div class="drum-strip" id="drumStrip"></div>
-          </div>
+          <div class="drum-strip" id="drumStrip"></div>
         </div>
       </div>
 
-      <p class="promo-instruction" id="promoInstruction">
-        ПРОМОКОД ДЕЙСТВУЕТ 24 ЧАСА ПОСЛЕ АКТИВАЦИИ
-      </p>
-
-      <p class="staff-hint" id="staffHintMain">
-        ПЕРВЫЙ ПРИЗ — БЕСПЛАТНО. ДАЛЕЕ ПРОКРУТКА ЗА 250 КМ ПРОБЕГА В ПРИЛОЖЕНИИ WHOOSH.
+      <p class="hint" id="hintLine">
+        Первый прокрут бесплатно. Далее — 250 км с баланса.
       </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
     </div>
   </div>
 
-  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="overlay" id="prizeOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
-      <div class="modal-accent" aria-hidden="true"></div>
-      <p class="staff-hint">
-        ПРОКРУТКА: 250 КМ. ПРОМОКОД — 24 ЧАСА ПОСЛЕ АКТИВАЦИИ.
-      </p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
-      <p class="modal-physical-notice" id="modalPhysicalNotice" hidden>
-        ПОЗДРАВЛЯЕМ! Для получения приза свяжитесь с администрацией.
-      </p>
+      <p class="modal-physical-notice" id="modalPhysicalNotice" hidden></p>
       <p class="modal-promo-label" id="modalPromoLabel">Промокод</p>
       <p class="modal-promo-code" id="modalPromoCode" aria-live="polite"></p>
       <div class="modal-actions">
-        <a class="btn-contact-tg" id="contactTgBtn" href="https://t.me/graceqqq" target="_blank" rel="noopener noreferrer" hidden>СВЯЗАТЬСЯ</a>
+        <a class="btn-contact-tg" id="contactTgBtn" href="https://t.me/graceqqq" rel="noopener noreferrer" hidden>СВЯЗАТЬСЯ</a>
         <button type="button" class="btn-copy-promo" id="copyPromoBtn"></button>
         <button type="button" class="btn-claim" id="claimBtn"></button>
         <button type="button" class="btn-secondary" id="closeModalBtn">Закрыть</button>
@@ -683,153 +665,39 @@
   </div>
 
   <script>
-    const LS_MILEAGE = "whoosh_mileage";
-    const LS_MILEAGE_LEGACY = "whoosh_km_balance";
-    const LS_FIRST_SPIN_DONE = "whoosh_first_spin_done";
-    const LS_PENDING_FREE_CLAIM = "whoosh_pending_free_claim";
-    const KM_PER_SPIN = 250;
+    const KM_TARGET = 250;
     const STRIP_POOL_REPEATS = 100;
     const PHYSICAL_PRIZE_CHAT_URL = "https://t.me/graceqqq";
-    const ADMIN_USER_ID = 821470232;
-
-    function firstSpinDone() {
-      try {
-        const v = localStorage.getItem(LS_FIRST_SPIN_DONE);
-        return v === "1" || v === "true";
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function setFirstSpinDone() {
-      try {
-        localStorage.setItem(LS_FIRST_SPIN_DONE, "true");
-      } catch (e) {
-        /* ignore */
-      }
-    }
-
-    function getPendingFreeClaim() {
-      if (firstSpinDone()) return null;
-      try {
-        const raw = localStorage.getItem(LS_PENDING_FREE_CLAIM);
-        if (!raw) return null;
-        const d = JSON.parse(raw);
-        if (!d || typeof d.prize !== "string") return null;
-        return d;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function setPendingFreeClaim(payload) {
-      try {
-        localStorage.setItem(LS_PENDING_FREE_CLAIM, JSON.stringify(payload));
-      } catch (e) {
-        /* ignore */
-      }
-    }
-
-    function clearPendingFreeClaim() {
-      try {
-        localStorage.removeItem(LS_PENDING_FREE_CLAIM);
-      } catch (e) {
-        /* ignore */
-      }
-    }
-
-    /**
-     * Этап 2: ключ whoosh_first_spin_done или уже ведётся пробег.
-     * Legacy: был whoosh_mileage / whoosh_km_balance — сразу этап с километрами.
-     */
-    function initStorage() {
-      try {
-        if (firstSpinDone()) {
-          try {
-            localStorage.removeItem(LS_PENDING_FREE_CLAIM);
-          } catch (e) {
-            /* ignore */
-          }
-          if (localStorage.getItem(LS_MILEAGE) === null) {
-            localStorage.setItem(LS_MILEAGE, "0");
-          }
-          return;
-        }
-        if (localStorage.getItem(LS_MILEAGE) !== null) {
-          setFirstSpinDone();
-          return;
-        }
-        const leg = localStorage.getItem(LS_MILEAGE_LEGACY);
-        if (leg != null) {
-          localStorage.setItem(LS_MILEAGE, leg);
-          localStorage.removeItem(LS_MILEAGE_LEGACY);
-          setFirstSpinDone();
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    }
-    initStorage();
+    const DEMO_ADMIN_IDS = [821470232, 1106885262];
 
     const WHOOSH_LOGO_SRC = "/whoosh.png";
-    const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
-    const FREE_SPIN_BTN_LABEL =
-      "\u041f\u041e\u041b\u0423\u0427\u0418\u0422\u042c \u0411\u0415\u0421\u041f\u041b\u0410\u0422\u041d\u042b\u0419 \u041f\u0420\u0418\u0417";
-    const LABEL_COPY_PROMO =
-      "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u0422\u042c \u041f\u0420\u041e\u041c\u041e\u041a\u041e\u0414";
+    const LABEL_COPY_PROMO = "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u0422\u042c \u041f\u0420\u041e\u041c\u041e\u041a\u041e\u0414";
     const LABEL_COPIED = "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u041d\u041e";
-    const LABEL_GET_PRIZE =
-      "\u0417\u0410\u0411\u0420\u0410\u0422\u042c \u041f\u0420\u0418\u0417";
-    const LABEL_CONTACT =
-      "\u0421\u0412\u042f\u0417\u0410\u0422\u042c\u0421\u042f";
+    const LABEL_CLAIM = "\u0417\u0410\u0411\u0420\u0410\u0422\u042c \u041f\u0420\u0418\u0417";
+    const LABEL_CONTACT = "\u0421\u0412\u042f\u0417\u0410\u0422\u042c\u0421\u042f";
+    const LABEL_SPIN = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
+    const LABEL_FREE_SPIN =
+      "\u0411\u0415\u0421\u041f\u041b\u0410\u0422\u041d\u0410\u042f \u041f\u0420\u041e\u041a\u0420\u0423\u0422\u041a\u0410";
 
-    /**
-     * Призы и вероятности (сумма весов = 100).
-     * Выбор: случайное число r в [0, 100), приз с наименьшим cum > r по накопленным весам.
-     */
     const PRIZE_POOL = [
       { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01 },
       { title: "AirPods 4", big: "4", small: "AirPods", weight: 0.05 },
-      {
-        title: "Whoosh Pass на год",
-        big: "365",
-        small: "дней Pass",
-        weight: 0.1,
-        promoSlug: "365",
-      },
-      {
-        title: "Whoosh Pass на месяц",
-        big: "30",
-        small: "дней Pass",
-        weight: 1,
-        promoSlug: "30",
-      },
+      { title: "Whoosh Pass на год", big: "365", small: "дней Pass", weight: 0.1, promoSlug: "365" },
+      { title: "Whoosh Pass на месяц", big: "30", small: "дней Pass", weight: 1, promoSlug: "30" },
       { title: "500 бонусов", big: "500", small: "бонусов", weight: 3, promoSlug: "500" },
-      {
-        title: "3 бесплатных старта",
-        big: "3",
-        small: "бесплатных старта",
-        weight: 15,
-        promoSlug: "START3",
-      },
+      { title: "3 бесплатных старта", big: "3", small: "бесплатных старта", weight: 15, promoSlug: "START3" },
       { title: "100 бонусов", big: "100", small: "бонусов", weight: 35, promoSlug: "100" },
-      {
-        title: "Скидка 10% на поездку",
-        big: "10%",
-        small: "на поездку",
-        weight: 45.84,
-        promoSlug: "RIDE10",
-      },
+      { title: "Скидка 10% на поездку", big: "10%", small: "на поездку", weight: 45.84, promoSlug: "RIDE10" },
     ];
+
+    const PROMO_RND = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
     function pickWeightedPrize() {
       const r = Math.random() * 100;
       let cum = 0;
       for (let i = 0; i < PRIZE_POOL.length; i++) {
         cum += PRIZE_POOL[i].weight;
-        if (r < cum) {
-          return PRIZE_POOL[i];
-        }
+        if (r < cum) return PRIZE_POOL[i];
       }
       return PRIZE_POOL[PRIZE_POOL.length - 1];
     }
@@ -843,14 +711,11 @@
       };
     }
 
-    const PROMO_RND = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
     function isPhysicalPrize(entry) {
       const t = entry && entry.title;
       return t === "iPhone 16" || t === "AirPods 4";
     }
 
-    /** Формат: WHOOSH-XXX-XXXX (3 символа из префикса приза + случайный хвост). */
     function generatePromo(prefix) {
       let mid = String(prefix || "BONUS").replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "BONUS";
       mid = mid.slice(0, 3);
@@ -867,52 +732,6 @@
     function promoForEntry(entry) {
       if (isPhysicalPrize(entry)) return "";
       return generatePromo(entry.promoSlug || "BONUS");
-    }
-
-    function getKm() {
-      try {
-        const raw = localStorage.getItem(LS_MILEAGE);
-        const v = raw == null ? 0 : parseFloat(raw);
-        return Number.isFinite(v) && v >= 0 ? v : 0;
-      } catch (e) {
-        return 0;
-      }
-    }
-
-    function setKm(n) {
-      try {
-        const v = Math.max(0, n);
-        localStorage.setItem(LS_MILEAGE, String(v));
-      } catch (e) {
-        /* ignore */
-      }
-    }
-
-    function addKm(delta) {
-      setKm(getKm() + delta);
-    }
-
-    function renderStripRow(entry) {
-      const row = document.createElement("div");
-      row.className = "drum-card";
-      row.innerHTML =
-        '<div class="drum-card__icon" aria-hidden="true">' +
-        '<img class="drum-card__logo" src="' +
-        WHOOSH_LOGO_SRC +
-        '" alt="" width="36" height="36" decoding="async" />' +
-        "</div>" +
-        '<div class="drum-card__text">' +
-        '<div class="drum-card__big"></div>' +
-        '<div class="drum-card__small"></div>' +
-        "</div>";
-      const img = row.querySelector(".drum-card__logo");
-      img.addEventListener("error", function () {
-        this.remove();
-      });
-      row.querySelector(".drum-card__big").textContent = entry.big;
-      row.querySelector(".drum-card__small").textContent = entry.small;
-      row.dataset.prizeTitle = entry.title;
-      return row;
     }
 
     function buildStrip(winnerEntry) {
@@ -932,15 +751,216 @@
       tg.expand();
     }
 
-    function isAdmin() {
-      const id = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
-      return id == ADMIN_USER_ID;
+    function getTelegramUserId() {
+      const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+      if (u && u.id != null) return u.id;
+      try {
+        const q = new URLSearchParams(window.location.search).get("telegramId");
+        if (q) {
+          const n = Number(q);
+          if (Number.isFinite(n)) return n;
+        }
+      } catch (e) {}
+      return null;
     }
 
-    const spinSound = new Audio("wheel-of-fortune.mp3");
-    spinSound.preload = "auto";
+    function isDemoAdmin() {
+      const id = getTelegramUserId();
+      return id != null && DEMO_ADMIN_IDS.some(function (x) { return x == id; });
+    }
+
+    let sessionUser = null;
+    let spinning = false;
+    let currentPrizeText = "";
+    let currentPromoCode = "";
+    let currentIsPhysical = false;
     let spinRafId = null;
     let spinTimeoutId = null;
+
+    const bootLoading = document.getElementById("bootLoading");
+    const authScreen = document.getElementById("authScreen");
+    const mainApp = document.getElementById("mainApp");
+    const phoneInput = document.getElementById("phoneInput");
+    const authEnterBtn = document.getElementById("authEnterBtn");
+    const subtitleLine = document.getElementById("subtitleLine");
+    const kmBlockLabel = document.getElementById("kmBlockLabel");
+    const kmBlockFill = document.getElementById("kmBlockFill");
+    const spinBtn = document.getElementById("spinBtn");
+    const drumStrip = document.getElementById("drumStrip");
+    const drumViewport = document.getElementById("drumViewport");
+    const prizeOverlay = document.getElementById("prizeOverlay");
+    const modalPrize = document.getElementById("modalPrize");
+    const modalPhysicalNotice = document.getElementById("modalPhysicalNotice");
+    const modalPromoLabel = document.getElementById("modalPromoLabel");
+    const modalPromoCode = document.getElementById("modalPromoCode");
+    const contactTgBtn = document.getElementById("contactTgBtn");
+    const copyPromoBtn = document.getElementById("copyPromoBtn");
+    const claimBtn = document.getElementById("claimBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    copyPromoBtn.textContent = LABEL_COPY_PROMO;
+    claimBtn.textContent = LABEL_CLAIM;
+    contactTgBtn.textContent = LABEL_CONTACT;
+    contactTgBtn.href = PHYSICAL_PRIZE_CHAT_URL;
+
+    function showBootLoading(on) {
+      bootLoading.classList.toggle("is-visible", !!on);
+    }
+
+    function setBodyAuthMode(on) {
+      document.body.classList.toggle("auth-mode", !!on);
+    }
+
+    function showAuthOnly() {
+      authScreen.hidden = false;
+      authScreen.classList.add("is-active");
+      mainApp.hidden = true;
+      setBodyAuthMode(true);
+    }
+
+    function showMainOnly() {
+      authScreen.hidden = true;
+      authScreen.classList.remove("is-active");
+      mainApp.hidden = false;
+      setBodyAuthMode(false);
+      injectDemoAdminPanel();
+    }
+
+    function injectDemoAdminPanel() {
+      if (!isDemoAdmin() || document.getElementById("demoKmPanel")) return;
+      const panel = document.createElement("div");
+      panel.className = "admin-km-panel";
+      panel.id = "demoKmPanel";
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn-admin-km";
+      btn.textContent = "+50 \u041a\u041c";
+      btn.addEventListener("click", async function () {
+        const tid = getTelegramUserId();
+        try {
+          const res = await fetch("/api/add-demo-km", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ telegramId: tid }),
+          });
+          const data = await res.json().catch(function () { return {}; });
+          if (res.ok && data.mileage != null) {
+            sessionUser.mileage = data.mileage;
+            refreshUi();
+          } else {
+            showErr((data && data.error) || "\u041e\u0448\u0438\u0431\u043a\u0430");
+          }
+        } catch (e) {
+          showErr("\u0421\u0435\u0442\u044c");
+        }
+      });
+      panel.appendChild(btn);
+      spinBtn.insertAdjacentElement("afterend", panel);
+    }
+
+    function showErr(msg) {
+      if (tg && typeof tg.showAlert === "function") tg.showAlert(msg);
+      else alert(msg);
+    }
+
+    async function apiMe() {
+      const tid = getTelegramUserId();
+      const res = await fetch("/api/me?telegramId=" + encodeURIComponent(String(tid)));
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error("me");
+      return res.json();
+    }
+
+    function refreshUi() {
+      if (!sessionUser) return;
+      const km = Number(sessionUser.mileage) || 0;
+      kmBlockLabel.textContent =
+        "\u0412\u0430\u0448 \u043f\u0440\u043e\u0431\u0435\u0433: " + Math.floor(km) + " \u043a\u043c";
+      const pct = Math.min(100, (km / KM_TARGET) * 100);
+      kmBlockFill.style.width = pct + "%";
+
+      if (isDemoAdmin()) {
+        subtitleLine.textContent =
+          "\u0414\u0435\u043c\u043e: +50 \u043a\u043c, \u043f\u0440\u043e\u043a\u0440\u0443\u0442\u043a\u0430 \u0431\u0435\u0437 \u0441\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u0431\u0430\u043b\u0430\u043d\u0441\u0430.";
+      } else if (sessionUser.free_spin_available) {
+        subtitleLine.textContent =
+          "\u041f\u0435\u0440\u0432\u044b\u0439 \u043f\u0440\u043e\u043a\u0440\u0443\u0442 \u2014 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e.";
+      } else {
+        subtitleLine.textContent =
+          "\u0414\u0430\u043b\u044c\u0448\u0435 \u043a\u0430\u0436\u0434\u044b\u0439 \u0441\u043f\u0438\u043d \u2014 " + KM_TARGET + " \u043a\u043c.";
+      }
+
+      if (spinning) return;
+      spinBtn.classList.remove("btn-spin--long", "is-waiting");
+
+      if (isDemoAdmin()) {
+        spinBtn.disabled = false;
+        spinBtn.textContent = LABEL_SPIN;
+        return;
+      }
+
+      if (sessionUser.free_spin_available) {
+        spinBtn.disabled = false;
+        spinBtn.textContent = LABEL_FREE_SPIN;
+        spinBtn.classList.add("btn-spin--long");
+        return;
+      }
+
+      if (km >= KM_TARGET) {
+        spinBtn.disabled = false;
+        spinBtn.textContent = LABEL_SPIN;
+        return;
+      }
+
+      spinBtn.disabled = true;
+      const need = Math.max(0, Math.ceil(KM_TARGET - km));
+      spinBtn.textContent =
+        "\u041d\u0443\u0436\u043d\u043e \u0435\u0449\u0451 " + need + " \u043a\u043c";
+    }
+
+    function readItemHeight() {
+      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-item-h").trim();
+      const p = parseFloat(v);
+      return Number.isFinite(p) ? p : 76;
+    }
+
+    function readStripGapPx() {
+      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-card-gap").trim();
+      const p = parseFloat(v);
+      return Number.isFinite(p) ? p : 8;
+    }
+
+    function translateForCenteredIndex(index, viewH) {
+      const itemH = readItemHeight();
+      const gap = readStripGapPx();
+      const step = itemH + gap;
+      const centerY = index * step + itemH / 2;
+      return viewH / 2 - centerY;
+    }
+
+    function renderStripRow(entry) {
+      const row = document.createElement("div");
+      row.className = "drum-card";
+      row.innerHTML =
+        '<div class="drum-card__icon" aria-hidden="true">' +
+        '<img class="drum-card__logo" src="' +
+        WHOOSH_LOGO_SRC +
+        '" alt="" decoding="async" />' +
+        "</div>" +
+        '<div><div class="drum-card__big"></div><div class="drum-card__small"></div></div>';
+      const img = row.querySelector(".drum-card__logo");
+      img.addEventListener("error", function () { this.remove(); });
+      row.querySelector(".drum-card__big").textContent = entry.big;
+      row.querySelector(".drum-card__small").textContent = entry.small;
+      return row;
+    }
+
+    function fillStripFromData(entries) {
+      drumStrip.innerHTML = "";
+      for (let i = 0; i < entries.length; i++) {
+        drumStrip.appendChild(renderStripRow(entries[i]));
+      }
+    }
 
     function cancelSpinAnimation() {
       if (spinTimeoutId !== null) {
@@ -961,181 +981,66 @@
       for (let i = 0; i < 28; i++) {
         const u = (lo + hi) / 2;
         const bx =
-          3 * (1 - u) * (1 - u) * u * x1 +
-          3 * (1 - u) * u * u * x2 +
-          u * u * u;
+          3 * (1 - u) * (1 - u) * u * x1 + 3 * (1 - u) * u * u * x2 + u * u * u;
         if (bx < t) lo = u;
         else hi = u;
       }
       const u = (lo + hi) / 2;
-      return (
-        3 * (1 - u) * (1 - u) * u * y1 +
-        3 * (1 - u) * u * u * y2 +
-        u * u * u
-      );
+      return 3 * (1 - u) * (1 - u) * u * y1 + 3 * (1 - u) * u * u * y2 + u * u * u;
     }
 
     const easeSpin = function (t) {
       return easeCubicBezier(t, 0.2, 0, 0.3, 1);
     };
 
-    function showErr(msg) {
-      if (tg && typeof tg.showAlert === "function") {
-        tg.showAlert(msg);
-      } else {
-        alert(msg);
-      }
-    }
+    const spinSound = new Audio("wheel-of-fortune.mp3");
+    spinSound.preload = "auto";
 
-    const drumStrip = document.getElementById("drumStrip");
-    const drumViewport = document.getElementById("drumViewport");
-    const spinBtn = document.getElementById("spinBtn");
-    const overlay = document.getElementById("overlay");
-    const modalPrize = document.getElementById("modalPrize");
-    const modalPromoLabel = document.getElementById("modalPromoLabel");
-    const modalPromoCode = document.getElementById("modalPromoCode");
-    const modalPhysicalNotice = document.getElementById("modalPhysicalNotice");
-    const contactTgBtn = document.getElementById("contactTgBtn");
-    const copyPromoBtn = document.getElementById("copyPromoBtn");
-    const claimBtn = document.getElementById("claimBtn");
-    const closeModalBtn = document.getElementById("closeModalBtn");
-    const subtitleLine = document.getElementById("subtitleLine");
-    const kmProgress = document.getElementById("kmProgress");
-    const kmProgressLabel = document.getElementById("kmProgressLabel");
-    const kmProgressFill = document.getElementById("kmProgressFill");
-    const staffHintMain = document.getElementById("staffHintMain");
+    async function spin() {
+      if (spinning || !sessionUser) return;
+      const tid = getTelegramUserId();
 
-    copyPromoBtn.textContent = LABEL_COPY_PROMO;
-    claimBtn.textContent = LABEL_GET_PRIZE;
-    contactTgBtn.href = PHYSICAL_PRIZE_CHAT_URL;
-    contactTgBtn.textContent = LABEL_CONTACT;
-
-    let itemHeightPx = 76;
-    let currentPrizeText = "";
-    let currentPromoCode = "";
-    let currentIsPhysical = false;
-    let spinning = false;
-
-    function readItemHeight() {
-      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-item-h").trim();
-      const parsed = parseFloat(v);
-      return Number.isFinite(parsed) ? parsed : 76;
-    }
-
-    function readStripGapPx() {
-      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-card-gap").trim();
-      const parsed = parseFloat(v);
-      return Number.isFinite(parsed) ? parsed : 8;
-    }
-
-    function getStripMetrics() {
-      const itemH = readItemHeight();
-      const gap = readStripGapPx();
-      return { itemH, gap, step: itemH + gap };
-    }
-
-    /** Центр карточки index по вертикали совпадает с центром окна (лента «замерла» с соседями). */
-    function translateForCenteredIndex(index, viewH) {
-      const { itemH, step } = getStripMetrics();
-      const centerY = index * step + itemH / 2;
-      return viewH / 2 - centerY;
-    }
-
-    function applyStripTransform(y) {
-      drumStrip.style.transform = "translateY(" + y + "px)";
-    }
-
-    function fillStripFromData(entries) {
-      drumStrip.innerHTML = "";
-      for (let i = 0; i < entries.length; i++) {
-        drumStrip.appendChild(renderStripRow(entries[i]));
-      }
-    }
-
-    function updateKmProgressUI() {
-      if (!kmProgressLabel || !kmProgressFill) return;
-      const km = getKm();
-      const pct = Math.min(100, (km / KM_PER_SPIN) * 100);
-      kmProgressFill.style.width = pct + "%";
-      kmProgressLabel.textContent =
-        "\u0412\u0410\u0428 \u041f\u0420\u041e\u0411\u0415\u0413: " +
-        Math.floor(km) +
-        " / " +
-        KM_PER_SPIN +
-        " \u041a\u041c";
-    }
-
-    function refreshKmAndSpin() {
-      if (kmProgress) {
-        kmProgress.classList.toggle("is-hidden", !firstSpinDone());
-      }
-      updateKmProgressUI();
-      if (!spinBtn || spinning) return;
-      spinBtn.hidden = false;
-      spinBtn.classList.remove("btn-spin--long");
-      if (isAdmin()) {
-        spinBtn.disabled = false;
-        spinBtn.textContent = SPIN_BTN_LABEL;
-        return;
-      }
-      if (!firstSpinDone()) {
-        spinBtn.disabled = false;
-        if (getPendingFreeClaim()) {
-          spinBtn.textContent = LABEL_GET_PRIZE;
-        } else {
-          spinBtn.textContent = FREE_SPIN_BTN_LABEL;
-        }
-        spinBtn.classList.add("btn-spin--long");
-        return;
-      }
-      const km = getKm();
-      if (km < KM_PER_SPIN) {
-        spinBtn.disabled = true;
-        const need = Math.max(0, Math.ceil(KM_PER_SPIN - km));
-        spinBtn.textContent =
-          "\u041d\u0423\u0416\u041d\u041e \u0415\u0429\u0401 " + need + " \u041a\u041c";
-      } else {
-        spinBtn.disabled = false;
-        spinBtn.textContent = SPIN_BTN_LABEL;
-      }
-    }
-
-    function spin() {
-      if (spinning) return;
-      if (!isAdmin()) {
-        const pend = getPendingFreeClaim();
-        if (!firstSpinDone() && pend) {
-          currentPrizeText = pend.prize;
-          currentPromoCode = pend.promoCode || "";
-          currentIsPhysical = !!pend.isPhysical;
-          openModal(currentPrizeText, currentPromoCode, currentIsPhysical);
+      if (!isDemoAdmin()) {
+        if (!sessionUser.free_spin_available && (Number(sessionUser.mileage) || 0) < KM_TARGET) {
           return;
         }
-        if (firstSpinDone() && getKm() < KM_PER_SPIN) return;
       }
+
+      let reserve;
+      try {
+        const res = await fetch("/api/spin-reserve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telegramId: tid }),
+        });
+        reserve = await res.json().catch(function () { return {}; });
+        if (!res.ok) {
+          showErr((reserve && reserve.error) || "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043a\u043c");
+          return;
+        }
+      } catch (e) {
+        showErr("\u0421\u0435\u0442\u044c");
+        return;
+      }
+
+      if (!isDemoAdmin()) {
+        sessionUser.mileage = reserve.mileage;
+        sessionUser.free_spin_available = reserve.free_spin_available;
+      }
+      refreshUi();
+
       cancelSpinAnimation();
-
-      if (!isAdmin() && firstSpinDone()) {
-        setKm(getKm() - KM_PER_SPIN);
-        updateKmProgressUI();
-      }
-
-      itemHeightPx = readItemHeight();
-      const viewH = drumViewport.getBoundingClientRect().height;
-
       const won = pickWeightedPrize();
       const stripData = buildStrip(won);
       fillStripFromData(stripData);
-
+      const viewH = drumViewport.getBoundingClientRect().height;
       const winIndex = stripData.length - 1;
       const yStart = translateForCenteredIndex(0, viewH);
       const yEnd = translateForCenteredIndex(winIndex, viewH);
-
-      applyStripTransform(yStart);
+      drumStrip.style.transform = "translateY(" + yStart + "px)";
 
       spinSound.pause();
       spinSound.currentTime = 0;
-      spinSound.volume = 1;
       spinSound.play().catch(function () {});
 
       spinBtn.classList.add("is-waiting");
@@ -1149,51 +1054,34 @@
         const elapsed = now - startTime;
         const t = Math.min(1, elapsed / SPIN_MS);
         const e = easeSpin(t);
-        const y = yStart + (yEnd - yStart) * e;
-        applyStripTransform(y);
-        if (t < 1) {
-          spinRafId = requestAnimationFrame(frame);
-        } else {
-          spinRafId = null;
-          applyStripTransform(yEnd);
-        }
+        drumStrip.style.transform = "translateY(" + (yStart + (yEnd - yStart) * e) + "px)";
+        if (t < 1) spinRafId = requestAnimationFrame(frame);
+        else spinRafId = null;
       }
       spinRafId = requestAnimationFrame(frame);
 
       spinTimeoutId = setTimeout(function () {
         spinTimeoutId = null;
-        if (spinRafId !== null) {
-          cancelAnimationFrame(spinRafId);
-          spinRafId = null;
-        }
-        applyStripTransform(yEnd);
+        cancelSpinAnimation();
+        drumStrip.style.transform = "translateY(" + yEnd + "px)";
         spinSound.pause();
-        spinSound.currentTime = 0;
         currentPrizeText = won.title;
         currentIsPhysical = isPhysicalPrize(won);
         currentPromoCode = currentIsPhysical ? "" : promoForEntry(won);
-        if (!isAdmin() && !firstSpinDone()) {
-          setPendingFreeClaim({
-            prize: currentPrizeText,
-            promoCode: currentPromoCode,
-            isPhysical: currentIsPhysical,
-          });
-        }
         spinning = false;
         spinBtn.classList.remove("is-waiting");
-        refreshKmAndSpin();
-        openModal(currentPrizeText, currentPromoCode, currentIsPhysical);
+        refreshUi();
+        openPrizeModal();
       }, SPIN_MS);
     }
 
-    function openModal(prize, promoCode, isPhysical) {
-      currentIsPhysical = !!isPhysical;
-      modalPrize.textContent = prize;
-      if (isPhysical) {
+    function openPrizeModal() {
+      modalPrize.textContent = currentPrizeText;
+      if (currentIsPhysical) {
         modalPhysicalNotice.hidden = false;
+        modalPhysicalNotice.textContent =
+          "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0432\u044f\u0436\u0438\u0442\u0435\u0441\u044c \u0441 \u043c\u0435\u043d\u0435\u0434\u0436\u0435\u0440\u043e\u043c.";
         contactTgBtn.hidden = false;
-        contactTgBtn.href = PHYSICAL_PRIZE_CHAT_URL;
-        contactTgBtn.textContent = LABEL_CONTACT;
         modalPromoLabel.hidden = true;
         modalPromoCode.hidden = true;
         copyPromoBtn.hidden = true;
@@ -1204,78 +1092,29 @@
         modalPromoLabel.hidden = false;
         modalPromoCode.hidden = false;
         copyPromoBtn.hidden = false;
-        modalPromoCode.textContent = promoCode;
-        copyPromoBtn.disabled = false;
+        modalPromoCode.textContent = currentPromoCode;
         copyPromoBtn.textContent = LABEL_COPY_PROMO;
       }
-      claimBtn.textContent = LABEL_GET_PRIZE;
+      claimBtn.textContent = LABEL_CLAIM;
       claimBtn.disabled = false;
-      overlay.classList.add("is-open");
+      prizeOverlay.classList.add("is-open");
     }
 
-    function closeModal() {
-      overlay.classList.remove("is-open");
-      refreshKmAndSpin();
-    }
-
-    function syncStaffHint() {
-      if (!staffHintMain) return;
-      if (!firstSpinDone()) {
-        staffHintMain.textContent =
-          "\u041f\u0415\u0420\u0412\u042b\u0419 \u041f\u0420\u0418\u0417 \u2014 \u0411\u0415\u0421\u041f\u041b\u0410\u0422\u041d\u041e. \u0414\u0410\u041b\u0415\u0415 \u041f\u0420\u041e\u041a\u0420\u0423\u0422\u041a\u0410 \u0417\u0410 250 \u041a\u041c \u041f\u0420\u041e\u0411\u0415\u0413\u0410 \u0412 WHOOSH.";
-      } else {
-        staffHintMain.textContent =
-          "\u041a\u041e\u041f\u0418\u0422\u0415 250 \u041a\u041c \u041f\u0420\u041e\u0411\u0415\u0413\u0410, \u0427\u0422\u041e\u0411\u042b \u0421\u041d\u041e\u0412\u0410 \u041a\u0420\u0423\u0422\u0418\u0422\u042c \u0411\u0410\u0420\u0410\u0411\u0410\u041d.";
-      }
-    }
-
-    function initSubtitle() {
-      if (!subtitleLine) return;
-      if (isAdmin()) {
-        subtitleLine.textContent =
-          "\u0410\u0434\u043c\u0438\u043d: \u043a\u043d\u043e\u043f\u043a\u0430 \u0432\u0441\u0435\u0433\u0434\u0430 \u0430\u043a\u0442\u0438\u0432\u043d\u0430, +50 \u043a\u043c \u0432\u0441\u0435\u0433\u0434\u0430 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430.";
-      } else if (!firstSpinDone()) {
-        subtitleLine.textContent =
-          "\u041f\u0435\u0440\u0432\u044b\u0439 \u043f\u0440\u0438\u0437 \u2014 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e. \u0417\u0430\u0431\u0435\u0440\u0438\u0442\u0435 \u0435\u0433\u043e \u0438 \u043d\u0430\u0447\u043d\u0438\u0442\u0435 \u043a\u043e\u043f\u0438\u0442\u044c \u043f\u0440\u043e\u0431\u0435\u0433.";
-      } else {
-        subtitleLine.textContent =
-          "\u041a\u0440\u0443\u0442\u0438\u0442\u0435 \u0431\u0430\u0440\u0430\u0431\u0430\u043d \u0437\u0430 250 \u043a\u043c \u043d\u0430\u043a\u043e\u043f\u043b\u0435\u043d\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0431\u0435\u0433\u0430.";
-      }
-    }
-
-    if (isAdmin() && spinBtn && spinBtn.parentNode) {
-      const wrap = document.createElement("div");
-      wrap.className = "admin-km-panel--under-spin";
-      const addBtn = document.createElement("button");
-      addBtn.type = "button";
-      addBtn.className = "btn-admin-km--compact";
-      addBtn.textContent = "+50 \u041a\u041c";
-      addBtn.addEventListener("click", function () {
-        if (!isAdmin()) return;
-        addKm(50);
-        updateKmProgressUI();
-        refreshKmAndSpin();
-      });
-      wrap.appendChild(addBtn);
-      spinBtn.insertAdjacentElement("afterend", wrap);
+    function closePrizeModal() {
+      prizeOverlay.classList.remove("is-open");
+      refreshUi();
     }
 
     contactTgBtn.addEventListener("click", function (e) {
       e.preventDefault();
       const url = PHYSICAL_PRIZE_CHAT_URL;
-      if (tg && typeof tg.openTelegramLink === "function") {
-        tg.openTelegramLink(url);
-      } else {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
+      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(url);
+      else window.open(url, "_blank", "noopener,noreferrer");
     });
 
-    spinBtn.addEventListener("click", spin);
-    closeModalBtn.addEventListener("click", closeModal);
-
-    async function copyPromoToClipboard() {
+    copyPromoBtn.addEventListener("click", async function () {
       if (copyPromoBtn.hidden) return;
-      const text = currentPromoCode || (modalPromoCode && modalPromoCode.textContent) || "";
+      const text = currentPromoCode || modalPromoCode.textContent || "";
       if (!text) return;
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1283,9 +1122,6 @@
         } else {
           const ta = document.createElement("textarea");
           ta.value = text;
-          ta.setAttribute("readonly", "");
-          ta.style.position = "fixed";
-          ta.style.left = "-9999px";
           document.body.appendChild(ta);
           ta.select();
           document.execCommand("copy");
@@ -1293,125 +1129,132 @@
         }
         copyPromoBtn.textContent = LABEL_COPIED;
         setTimeout(function () {
-          if (overlay.classList.contains("is-open")) {
+          if (prizeOverlay.classList.contains("is-open")) {
             copyPromoBtn.textContent = LABEL_COPY_PROMO;
           }
         }, 2000);
       } catch (e) {
-        showErr("Не удалось скопировать. Выделите код вручную.");
+        showErr("\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u043d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c");
       }
-    }
-
-    copyPromoBtn.addEventListener("click", function () {
-      copyPromoToClipboard();
     });
 
     claimBtn.addEventListener("click", async function () {
       if (claimBtn.disabled) return;
-
-      const winnerPrizeName = currentPrizeText;
-      const promoCode = currentPromoCode;
-
       claimBtn.disabled = true;
-
-      let res;
       try {
-        res = await fetch("/api/send-prize", {
+        const res = await fetch("/api/send-prize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: tg?.initDataUnsafe?.user?.first_name || "Инкогнито",
-            prize: winnerPrizeName,
-            promoCode: currentIsPhysical ? "" : promoCode,
+            name: (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || "\u0413\u043e\u0441\u0442\u044c",
+            prize: currentPrizeText,
+            promoCode: currentIsPhysical ? "" : currentPromoCode,
+            userId: getTelegramUserId(),
           }),
         });
+        const data = await res.json().catch(function () { return {}; });
+        if (!res.ok || !data.success) {
+          showErr((data && data.error) || "\u041e\u0448\u0438\u0431\u043a\u0430");
+          claimBtn.disabled = false;
+          return;
+        }
+        claimBtn.textContent = "\u041e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e";
+        closePrizeModal();
+        if (tg && typeof tg.showAlert === "function") {
+          tg.showAlert("\u041f\u0440\u0438\u0437 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d!");
+        }
       } catch (e) {
-        console.log("send-prize fetch error", e);
-        alert(
-          "Ошибка сети: " + (e && e.message ? e.message : "проверьте подключение")
-        );
         claimBtn.disabled = false;
-        return;
+        showErr("\u0421\u0435\u0442\u044c");
       }
-
-      let data;
-      try {
-        data = await res.json();
-      } catch (parseErr) {
-        console.log("send-prize response (JSON parse failed)", {
-          status: res.status,
-          error: parseErr,
-        });
-        alert("Не удалось разобрать ответ сервера.");
-        claimBtn.disabled = false;
-        return;
-      }
-
-      console.log("send-prize response", {
-        status: res.status,
-        ok: res.ok,
-        body: data,
-      });
-
-      if (!res.ok || !data.success) {
-        alert(
-          (data && data.error) || "Запрос не прошёл: " + res.status + " " + res.statusText
-        );
-        claimBtn.disabled = false;
-        return;
-      }
-
-      const wasFreePhase = !isAdmin() && !firstSpinDone();
-      if (wasFreePhase) {
-        try {
-          clearPendingFreeClaim();
-          localStorage.setItem(LS_FIRST_SPIN_DONE, "true");
-          localStorage.setItem(LS_MILEAGE, "0");
-        } catch (e) {
-          /* ignore */
-        }
-      }
-
-      claimBtn.textContent = "Отправлено";
-      claimBtn.disabled = true;
-      closeModal();
-      initSubtitle();
-      syncStaffHint();
-
-      if (tg && typeof tg.showAlert === "function") {
-        tg.showAlert("Приз отправлен!");
-      }
-
-      setTimeout(function () {
-        if (tg && typeof tg.close === "function" && !isAdmin()) {
-          tg.close();
-        }
-      }, 1200);
     });
 
-    function tryResumePendingModal() {
-      if (isAdmin() || firstSpinDone()) return;
-      const pend = getPendingFreeClaim();
-      if (!pend) return;
-      currentPrizeText = pend.prize;
-      currentPromoCode = pend.promoCode || "";
-      currentIsPhysical = !!pend.isPhysical;
-      openModal(currentPrizeText, currentPromoCode, currentIsPhysical);
-    }
+    closeModalBtn.addEventListener("click", closePrizeModal);
+    spinBtn.addEventListener("click", spin);
 
-    initSubtitle();
-    syncStaffHint();
-    refreshKmAndSpin();
-    tryResumePendingModal();
+    phoneInput.addEventListener("input", function () {
+      let v = phoneInput.value.replace(/\D/g, "");
+      if (v.startsWith("8")) v = "7" + v.slice(1);
+      if (v.startsWith("7") && v.length > 1) {
+        phoneInput.value = "+" + v;
+      } else if (v.length > 0) {
+        phoneInput.value = "+" + v;
+      }
+    });
+
+    authEnterBtn.addEventListener("click", async function () {
+      const raw = phoneInput.value.replace(/\D/g, "");
+      if (raw.length < 10) {
+        showErr("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440");
+ return;
+      }
+      authEnterBtn.disabled = true;
+      showBootLoading(true);
+      const tid = getTelegramUserId();
+      const start = Date.now();
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telegramId: tid, phone: phoneInput.value.trim() }),
+        });
+        const data = await res.json().catch(function () { return {}; });
+        if (!res.ok) {
+          showBootLoading(false);
+          showErr((data && data.error) || "\u041e\u0448\u0438\u0431\u043a\u0430 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438");
+          authEnterBtn.disabled = false;
+          return;
+        }
+        sessionUser = {
+          mileage: data.mileage,
+          free_spin_available: data.free_spin_available,
+          phone: data.phone,
+        };
+      } catch (e) {
+        showBootLoading(false);
+        showErr("\u0421\u0435\u0442\u044c");
+        authEnterBtn.disabled = false;
+        return;
+      }
+      const elapsed = Date.now() - start;
+      if (elapsed < 3000) {
+        await new Promise(function (r) { setTimeout(r, 3000 - elapsed); });
+      }
+      showBootLoading(false);
+      authEnterBtn.disabled = false;
+      showMainOnly();
+      refreshUi();
+    });
 
     window.addEventListener("resize", function () {
       if (!spinning && drumStrip.children.length) {
-        itemHeightPx = readItemHeight();
         const viewH = drumViewport.getBoundingClientRect().height;
         const winIndex = drumStrip.children.length - 1;
-        applyStripTransform(translateForCenteredIndex(winIndex, viewH));
+        drumStrip.style.transform = "translateY(" + translateForCenteredIndex(winIndex, viewH) + "px)";
       }
     });
+
+    (async function boot() {
+      const tid = getTelegramUserId();
+      if (tid == null) {
+        showErr("\u041e\u0442\u043a\u0440\u043e\u0439\u0442\u0435 \u0432 Telegram \u0438\u043b\u0438 ?telegramId=");
+        showAuthOnly();
+        return;
+      }
+      try {
+        const me = await apiMe();
+        if (!me) {
+          showAuthOnly();
+          return;
+        }
+        sessionUser = me;
+        showMainOnly();
+        refreshUi();
+      } catch (e) {
+        showErr("\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u0435");
+        showAuthOnly();
+      }
+    })();
   </script>
 </body>
 </html>
