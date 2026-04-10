@@ -24,70 +24,124 @@
       padding: 0;
     }
 
+    html {
+      min-height: 100dvh;
+    }
+
     html, body {
-      min-height: 100%;
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
       background: #FFFFFF;
       color: var(--ga-text);
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
     body {
-      padding: max(16px, env(safe-area-inset-top, 0px)) 18px max(24px, env(safe-area-inset-bottom, 0px));
+      padding: max(10px, env(safe-area-inset-top, 0px)) 16px max(10px, env(safe-area-inset-bottom, 0px));
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      min-height: 100dvh;
+      width: 100%;
+      overflow-y: hidden;
     }
 
     .app {
       width: 100%;
       max-width: 520px;
+      min-height: 0;
+      flex: 1 1 auto;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 28px;
+      align-items: stretch;
     }
 
     header {
       text-align: center;
       width: 100%;
-      padding: 4px 8px 0;
+      padding: 0 6px;
+      flex-shrink: 0;
     }
 
     .brand-wordmark {
-      font-size: 0.58rem;
+      font-size: 0.55rem;
       font-weight: 600;
-      letter-spacing: 0.5em;
+      letter-spacing: 0.45em;
       color: #000000;
-      margin-bottom: 18px;
+      margin-bottom: 8px;
     }
 
     h1 {
-      font-size: clamp(0.95rem, 4vw, 1.15rem);
+      font-size: clamp(0.85rem, 3.8vw, 1.1rem);
       font-weight: 800;
-      letter-spacing: 0.24em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      line-height: 1.45;
+      line-height: 1.35;
       color: #000000;
     }
 
     .subtitle {
-      margin-top: 12px;
-      font-size: 0.78rem;
+      margin-top: 6px;
+      font-size: 0.72rem;
       font-weight: 500;
       letter-spacing: 0.03em;
       color: var(--ga-muted);
-      line-height: 1.6;
+      line-height: 1.45;
       max-width: 300px;
       margin-left: auto;
       margin-right: auto;
     }
 
+    .main-stack {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 0;
+      width: 100%;
+      padding: 8px 0 4px;
+    }
+
     .wheel-wrap {
       position: relative;
-      width: min(calc(100vw - 36px), 100%);
+      flex-shrink: 0;
+      width: min(calc(100vw - 32px), 100%, 85vmin, calc(100dvh - 220px));
       max-width: 100%;
       aspect-ratio: 1;
+    }
+
+    @media (max-height: 700px) {
+      .wheel-wrap {
+        width: min(calc(100vw - 28px), 100%, min(72vw, calc(100dvh - 200px)));
+      }
+      .brand-wordmark {
+        margin-bottom: 6px;
+      }
+      .subtitle {
+        margin-top: 4px;
+        font-size: 0.68rem;
+      }
+      .main-stack {
+        gap: 10px;
+        padding: 4px 0 2px;
+      }
+      .btn-spin {
+        padding: 20px 22px;
+        font-size: 0.82rem;
+      }
+    }
+
+    @media (max-height: 620px) {
+      .wheel-wrap {
+        width: min(calc(100vw - 24px), 100%, min(68vw, calc(100dvh - 185px)));
+      }
+      h1 {
+        font-size: clamp(0.78rem, 3.5vw, 1rem);
+      }
     }
 
     .pointer {
@@ -145,14 +199,23 @@
       cursor: not-allowed;
     }
 
-    .hint {
-      font-size: 0.7rem;
+    .staff-hint {
+      font-size: clamp(11px, 3.2vw, 13px);
       font-weight: 500;
-      color: var(--ga-muted);
+      color: #666666;
       text-align: center;
-      max-width: 340px;
-      line-height: 1.6;
-      padding: 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      line-height: 1.45;
+      max-width: 300px;
+      margin: 0;
+      padding: 0 10px;
+      flex-shrink: 0;
+    }
+
+    .modal .staff-hint {
+      margin: 0 auto 14px;
+      padding: 0 12px;
     }
 
     .overlay {
@@ -177,10 +240,12 @@
     .modal {
       width: 100%;
       max-width: 336px;
+      max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      overflow-y: auto;
       background: #FFFFFF;
       color: #000000;
       border-radius: 0;
-      padding: 32px 24px 24px;
+      padding: 28px 22px 22px;
       border: 1px solid var(--ga-line);
       opacity: 0;
       transition: opacity 0.22s ease;
@@ -191,10 +256,10 @@
     }
 
     .modal-accent {
-      width: calc(100% + 48px);
+      width: calc(100% + 44px);
       height: 3px;
       background: var(--ga-accent);
-      margin: -32px -24px 24px;
+      margin: -28px -22px 18px;
     }
 
     .modal h2 {
@@ -269,22 +334,26 @@
       <p class="subtitle">Крутите колесо в Золотом Яблоке</p>
     </header>
 
-    <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
-      <div class="pointer" aria-hidden="true">
-        <svg viewBox="-1 -1 30 28" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="14,24 4,2 24,2" fill="#CCFF00"/>
-        </svg>
+    <div class="main-stack">
+      <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
+        <div class="pointer" aria-hidden="true">
+          <svg viewBox="-1 -1 30 28" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="14,24 4,2 24,2" fill="#CCFF00"/>
+          </svg>
+        </div>
+        <canvas id="wheel"></canvas>
       </div>
-      <canvas id="wheel"></canvas>
-    </div>
 
-    <button type="button" class="btn-spin" id="spinBtn">Испытать удачу</button>
-    <p class="hint">Один спин — один подарок. Покажите экран сотруднику.</p>
+      <p class="staff-hint">Один спин — один подарок. Покажите экран сотруднику.</p>
+
+      <button type="button" class="btn-spin" id="spinBtn">Испытать удачу</button>
+    </div>
   </div>
 
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
+      <p class="staff-hint">Один спин — один подарок. Покажите экран сотруднику.</p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <div class="modal-actions">
