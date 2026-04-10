@@ -50,12 +50,7 @@ export default async function handler(req, res) {
     safeName +
     "\n\uD83C\uDFC6 \u041f\u0440\u0438\u0437: " +
     safePrize;
-  if (userId != null && String(userId).trim() !== "") {
-    text +=
-      "\n\uD83D\uDD0D Telegram ID: <code>" +
-      escapeHtml(String(userId).trim()) +
-      "</code>";
-  }
+
   if (!isPhysical && safePromo) {
     text += "\n\uD83C\uDF9F \u041f\u0440\u043e\u043c\u043e\u043a\u043e\u0434: <code>" + safePromo + "</code>";
   }
