@@ -10,16 +10,18 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --whoosh-bg: #F2F2F2;
+      --whoosh-bg: #F5F5F7;
       --whoosh-surface: #FFFFFF;
       --whoosh-accent: #FFD500;
       --whoosh-line: #E8E8E8;
+      --whoosh-card-border: #E0E0E0;
       --whoosh-text: #000000;
       --whoosh-muted: #666666;
       --whoosh-radius-btn: 12px;
       --whoosh-radius-modal: 16px;
       --drum-item-h: 76px;
-      --drum-view-h: calc(var(--drum-item-h) * 3);
+      --drum-card-gap: 8px;
+      --drum-view-h: calc(var(--drum-item-h) * 3 + var(--drum-card-gap) * 2);
     }
 
     * {
@@ -127,10 +129,10 @@
       min-width: 0;
       height: var(--drum-view-h);
       overflow: hidden;
-      background: var(--whoosh-surface);
-      border-radius: 12px;
-      border: 2px solid #000000;
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.06);
+      background: transparent;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
     }
 
     .drum-fade {
@@ -144,12 +146,22 @@
 
     .drum-fade--top {
       top: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0) 100%);
+      background: linear-gradient(
+        to bottom,
+        var(--whoosh-bg) 0%,
+        rgba(0, 0, 0, 0.05) 18%,
+        rgba(245, 245, 247, 0) 48%
+      );
     }
 
     .drum-fade--bottom {
       bottom: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0) 100%);
+      background: linear-gradient(
+        to top,
+        var(--whoosh-bg) 0%,
+        rgba(0, 0, 0, 0.05) 18%,
+        rgba(245, 245, 247, 0) 48%
+      );
     }
 
     .drum-strip-wrap {
@@ -159,17 +171,23 @@
 
     .drum-strip {
       will-change: transform;
+      display: flex;
+      flex-direction: column;
+      gap: var(--drum-card-gap);
     }
 
     .drum-card {
       height: var(--drum-item-h);
+      flex-shrink: 0;
       display: flex;
       flex-direction: row;
       align-items: center;
       gap: 12px;
       padding: 10px 14px;
-      border-bottom: 1px solid var(--whoosh-line);
+      border: 1px solid var(--whoosh-card-border);
+      border-radius: 12px;
       background: var(--whoosh-surface);
+      box-sizing: border-box;
     }
 
     .drum-card__icon {
@@ -213,10 +231,10 @@
       width: 0;
       height: 0;
       border-style: solid;
-      border-width: 14px 0 14px 18px;
+      border-width: 11px 0 11px 18px;
       border-color: transparent transparent transparent #000000;
-      margin-left: 2px;
-      filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.15));
+      margin-right: 8px;
+      filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.18));
     }
 
     @media (max-height: 700px) {
@@ -279,18 +297,15 @@
       cursor: not-allowed;
     }
 
-    .played-msg {
-      width: 100%;
-      max-width: 520px;
-      padding: 22px 20px;
-      text-align: center;
-      font-size: 0.85rem;
-      font-weight: 600;
-      line-height: 1.5;
-      color: var(--whoosh-muted);
-      background: var(--whoosh-surface);
-      border: 1px solid var(--whoosh-line);
-      border-radius: var(--whoosh-radius-btn);
+    .app--played .btn-spin {
+      opacity: 1;
+      background: #E8E8E8;
+      color: #555555;
+      cursor: not-allowed;
+    }
+
+    .app--played .btn-spin:disabled {
+      opacity: 1;
     }
 
     .staff-hint {
@@ -435,6 +450,7 @@
 
     <div class="main-stack">
       <div class="drum-assembly" id="drumAssembly" aria-hidden="true">
+        <div class="drum-pointer" aria-hidden="true"></div>
         <div class="drum-viewport" id="drumViewport">
           <div class="drum-fade drum-fade--top" aria-hidden="true"></div>
           <div class="drum-fade drum-fade--bottom" aria-hidden="true"></div>
@@ -442,13 +458,11 @@
             <div class="drum-strip" id="drumStrip"></div>
           </div>
         </div>
-        <div class="drum-pointer" aria-hidden="true"></div>
       </div>
 
       <p class="staff-hint">Один аккаунт — одна попытка. Покажите экран сотруднику.</p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
-      <p class="played-msg" id="playedMsg" hidden>Вы уже использовали свой шанс. Возвращайтесь завтра!</p>
     </div>
   </div>
 
@@ -473,13 +487,20 @@
      * Выбор: случайное число r в [0, 100), приз с наименьшим cum > r по накопленным весам.
      */
     const PRIZE_POOL = [
-      { title: "iPhone 16", big: "16", small: "iPhone", icon: "\u{1F4F1}", weight: 0.1 },
-      { title: "Неделя поездок", big: "7", small: "дней поездок", icon: "\u{1F6F4}", weight: 1 },
-      { title: "Whoosh Pass на месяц", big: "Pass", small: "30 дней", icon: "\u{1F3AB}", weight: 5 },
-      { title: "500 бонусов", big: "500", small: "бонусов", icon: "\u{1F4B0}", weight: 10 },
-      { title: "Бесплатный старт (3 шт)", big: "3", small: "бесплатных старта", icon: "\u26A1", weight: 25 },
-      { title: "Скидка 20%", big: "20%", small: "скидка", icon: "\u{1F3F7}", weight: 25 },
-      { title: "100 бонусов", big: "100", small: "бонусов", icon: "\u2728", weight: 33.9 },
+      { title: "iPhone 16", big: "16", small: "iPhone", icon: "\u{1F4F1}", weight: 0.01 },
+      { title: "AirPods 4", big: "4", small: "AirPods", icon: "\u{1F3A7}", weight: 0.05 },
+      { title: "Whoosh Pass на год", big: "365", small: "дней Pass", icon: "\u{1F3AB}", weight: 0.1 },
+      { title: "Whoosh Pass на месяц", big: "30", small: "дней Pass", icon: "\u{1F3AB}", weight: 1 },
+      { title: "500 бонусов", big: "500", small: "бонусов", icon: "\u{1F4B0}", weight: 3 },
+      { title: "3 бесплатных старта", big: "3", small: "бесплатных старта", icon: "\u26A1", weight: 15 },
+      { title: "100 бонусов", big: "100", small: "бонусов", icon: "\u2728", weight: 35 },
+      {
+        title: "Скидка 10% на поездку",
+        big: "10%",
+        small: "на поездку",
+        icon: "\u{1F3F7}",
+        weight: 45.84,
+      },
     ];
 
     function pickWeightedPrize() {
@@ -592,7 +613,6 @@
     const drumStrip = document.getElementById("drumStrip");
     const drumViewport = document.getElementById("drumViewport");
     const spinBtn = document.getElementById("spinBtn");
-    const playedMsg = document.getElementById("playedMsg");
     const appEl = document.getElementById("app");
     const overlay = document.getElementById("overlay");
     const modalPrize = document.getElementById("modalPrize");
@@ -610,7 +630,12 @@
     }
 
     function translateForCenteredIndex(index, viewH) {
-      return viewH / 2 - itemHeightPx / 2 - index * itemHeightPx;
+      const el = drumStrip.children[index];
+      if (!el) {
+        return viewH / 2 - itemHeightPx / 2 - index * itemHeightPx;
+      }
+      const cy = el.offsetTop + el.offsetHeight / 2;
+      return viewH / 2 - cy;
     }
 
     function applyStripTransform(y) {
@@ -625,7 +650,7 @@
     }
 
     function spin() {
-      if (spinning) return;
+      if (spinning || appEl.classList.contains("app--played")) return;
       cancelSpinAnimation();
 
       itemHeightPx = readItemHeight();
@@ -698,8 +723,10 @@
 
     function applyPlayedState() {
       appEl.classList.add("app--played");
-      spinBtn.hidden = true;
-      playedMsg.hidden = false;
+      spinBtn.hidden = false;
+      spinBtn.disabled = true;
+      spinBtn.textContent = "Попытка использована";
+      spinBtn.classList.remove("is-waiting");
     }
 
     function initPlayedGate() {
@@ -719,19 +746,7 @@
       if (claimBtn.disabled) return;
 
       const prize = currentPrizeText;
-      const user =
-        window.Telegram &&
-        window.Telegram.WebApp &&
-        window.Telegram.WebApp.initDataUnsafe
-          ? window.Telegram.WebApp.initDataUnsafe.user
-          : undefined;
-
-      let name = "Анонимный игрок";
-      if (user) {
-        const full = [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
-        if (full) name = full;
-        else if (user.username) name = user.username;
-      }
+      const name = tg?.initDataUnsafe?.user?.first_name || "Пользователь";
 
       claimBtn.disabled = true;
 
@@ -777,6 +792,10 @@
       claimBtn.disabled = true;
       closeModal();
       applyPlayedState();
+
+      if (tg && typeof tg.showAlert === "function") {
+        tg.showAlert("Приз отправлен!");
+      }
 
       setTimeout(function () {
         if (tg && typeof tg.close === "function") {
