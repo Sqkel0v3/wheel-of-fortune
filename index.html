@@ -149,8 +149,10 @@
       background: linear-gradient(
         to bottom,
         var(--whoosh-bg) 0%,
-        rgba(0, 0, 0, 0.05) 18%,
-        rgba(245, 245, 247, 0) 48%
+        rgba(0, 0, 0, 0.07) 22%,
+        rgba(245, 245, 247, 0.35) 45%,
+        rgba(245, 245, 247, 0) 72%,
+        transparent 100%
       );
     }
 
@@ -159,8 +161,10 @@
       background: linear-gradient(
         to top,
         var(--whoosh-bg) 0%,
-        rgba(0, 0, 0, 0.05) 18%,
-        rgba(245, 245, 247, 0) 48%
+        rgba(0, 0, 0, 0.07) 22%,
+        rgba(245, 245, 247, 0.35) 45%,
+        rgba(245, 245, 247, 0) 72%,
+        transparent 100%
       );
     }
 
@@ -306,15 +310,22 @@
       cursor: not-allowed;
     }
 
-    .app--played .btn-spin {
-      opacity: 1;
-      background: #E8E8E8;
-      color: #555555;
-      cursor: not-allowed;
-    }
-
-    .app--played .btn-spin:disabled {
-      opacity: 1;
+    .cooldown-timer {
+      width: 100%;
+      max-width: 520px;
+      padding: 26px 20px;
+      font-family: inherit;
+      font-size: clamp(0.72rem, 3vw, 0.88rem);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.35;
+      color: #333333;
+      background: #E8E8ED;
+      border-radius: var(--whoosh-radius-btn);
+      border: 1px solid var(--whoosh-line);
+      box-sizing: border-box;
     }
 
     .staff-hint {
@@ -443,10 +454,6 @@
       color: var(--whoosh-muted);
     }
 
-    .app--played .drum-assembly {
-      opacity: 0.55;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
@@ -469,16 +476,21 @@
         </div>
       </div>
 
-      <p class="staff-hint">Один аккаунт — одна попытка. Покажите экран сотруднику.</p>
+      <p class="staff-hint" id="staffHintMain">
+        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+      </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
+      <div class="cooldown-timer" id="cooldownBar" hidden></div>
     </div>
   </div>
 
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
-      <p class="staff-hint">Один аккаунт — одна попытка. Покажите экран сотруднику.</p>
+      <p class="staff-hint">
+        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+      </p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <div class="modal-actions">
@@ -489,9 +501,12 @@
   </div>
 
   <script>
-    const LS_PLAYED = "whoosh_played";
-    const ADMIN_TELEGRAM_ID = 821470232;
+    const LS_LAST_SPIN = "whoosh_last_spin";
+    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
     const WHOOSH_LOGO_SRC = "whoosh.png";
+    const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
+
+    let cooldownTickerId = null;
 
     /**
      * Призы и вероятности (сумма весов = 100).
@@ -550,6 +565,10 @@
         '<div class="drum-card__big"></div>' +
         '<div class="drum-card__small"></div>' +
         "</div>";
+      const img = row.querySelector(".drum-card__logo");
+      img.addEventListener("error", function () {
+        this.remove();
+      });
       row.querySelector(".drum-card__big").textContent = entry.big;
       row.querySelector(".drum-card__small").textContent = entry.small;
       row.dataset.prizeTitle = entry.title;
@@ -557,7 +576,7 @@
     }
 
     function buildStrip(winnerEntry) {
-      const preCount = 32 + Math.floor(Math.random() * 10);
+      const preCount = 49 + Math.floor(Math.random() * 24);
       const strip = [];
       for (let i = 0; i < preCount; i++) {
         strip.push(cloneEntry(randomPoolEntry()));
@@ -573,8 +592,7 @@
     }
 
     function isAdmin() {
-      const id = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
-      return id === ADMIN_TELEGRAM_ID;
+      return tg?.initDataUnsafe?.user?.id === 821470232;
     }
 
     const spinSound = new Audio("wheel-of-fortune.mp3");
@@ -630,12 +648,12 @@
     const drumStrip = document.getElementById("drumStrip");
     const drumViewport = document.getElementById("drumViewport");
     const spinBtn = document.getElementById("spinBtn");
-    const appEl = document.getElementById("app");
     const overlay = document.getElementById("overlay");
     const modalPrize = document.getElementById("modalPrize");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const subtitleLine = document.getElementById("subtitleLine");
+    const cooldownBar = document.getElementById("cooldownBar");
 
     let itemHeightPx = 76;
     let currentPrizeText = "";
@@ -667,9 +685,78 @@
       }
     }
 
+    function getCooldownRemainingMs() {
+      if (isAdmin()) return 0;
+      try {
+        const raw = localStorage.getItem(LS_LAST_SPIN);
+        if (!raw) return 0;
+        const last = parseInt(raw, 10);
+        if (!Number.isFinite(last)) return 0;
+        const elapsed = Date.now() - last;
+        return Math.max(0, WEEK_MS - elapsed);
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function formatCooldown(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const d = Math.floor(sec / 86400);
+      const h = Math.floor((sec % 86400) / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      return (
+        "\u0421\u041b\u0415\u0414\u0423\u042e\u0429\u0418\u0419 \u0428\u0410\u041d\u0421 \u0427\u0415\u0420\u0415\u0417: " +
+        d +
+        "\u0434 " +
+        h +
+        "\u0447 " +
+        m +
+        "\u043c"
+      );
+    }
+
+    function stopCooldownTicker() {
+      if (cooldownTickerId !== null) {
+        clearInterval(cooldownTickerId);
+        cooldownTickerId = null;
+      }
+    }
+
+    function refreshSpinOrTimer() {
+      stopCooldownTicker();
+      if (!spinBtn || !cooldownBar) return;
+      if (isAdmin()) {
+        spinBtn.hidden = false;
+        cooldownBar.hidden = true;
+        spinBtn.disabled = false;
+        spinBtn.textContent = SPIN_BTN_LABEL;
+        return;
+      }
+      const left = getCooldownRemainingMs();
+      if (left <= 0) {
+        spinBtn.hidden = false;
+        cooldownBar.hidden = true;
+        spinBtn.disabled = false;
+        spinBtn.textContent = SPIN_BTN_LABEL;
+        return;
+      }
+      spinBtn.hidden = true;
+      cooldownBar.hidden = false;
+      function tick() {
+        const rem = getCooldownRemainingMs();
+        if (rem <= 0) {
+          refreshSpinOrTimer();
+          return;
+        }
+        cooldownBar.textContent = formatCooldown(rem);
+      }
+      tick();
+      cooldownTickerId = setInterval(tick, 1000);
+    }
+
     function spin() {
       if (spinning) return;
-      if (appEl.classList.contains("app--played") && !isAdmin()) return;
+      if (!isAdmin() && getCooldownRemainingMs() > 0) return;
       cancelSpinAnimation();
 
       itemHeightPx = readItemHeight();
@@ -723,8 +810,15 @@
         spinSound.currentTime = 0;
         currentPrizeText = won.title;
         spinning = false;
-        spinBtn.disabled = false;
         spinBtn.classList.remove("is-waiting");
+        if (!isAdmin()) {
+          try {
+            localStorage.setItem(LS_LAST_SPIN, String(Date.now()));
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        refreshSpinOrTimer();
         openModal(currentPrizeText);
       }, SPIN_MS);
     }
@@ -738,24 +832,7 @@
 
     function closeModal() {
       overlay.classList.remove("is-open");
-    }
-
-    function applyPlayedState() {
-      appEl.classList.add("app--played");
-      spinBtn.hidden = false;
-      spinBtn.disabled = true;
-      spinBtn.textContent = "Попытка использована";
-      spinBtn.classList.remove("is-waiting");
-    }
-
-    function initPlayedGate() {
-      try {
-        if (localStorage.getItem(LS_PLAYED) === "true" && !isAdmin()) {
-          applyPlayedState();
-        }
-      } catch (e) {
-        /* ignore */
-      }
+      refreshSpinOrTimer();
     }
 
     function initSubtitle() {
@@ -788,6 +865,7 @@
           }),
         });
       } catch (e) {
+        console.log("send-prize fetch error", e);
         alert(
           "Ошибка сети: " + (e && e.message ? e.message : "проверьте подключение")
         );
@@ -798,11 +876,21 @@
       let data;
       try {
         data = await res.json();
-      } catch {
+      } catch (parseErr) {
+        console.log("send-prize response (JSON parse failed)", {
+          status: res.status,
+          error: parseErr,
+        });
         alert("Не удалось разобрать ответ сервера.");
         claimBtn.disabled = false;
         return;
       }
+
+      console.log("send-prize response", {
+        status: res.status,
+        ok: res.ok,
+        body: data,
+      });
 
       if (!res.ok || !data.success) {
         alert(
@@ -812,23 +900,13 @@
         return;
       }
 
-      if (!isAdmin()) {
-        try {
-          localStorage.setItem(LS_PLAYED, "true");
-        } catch (e) {
-          /* ignore */
-        }
-      }
-
       claimBtn.textContent = "Отправлено";
       claimBtn.disabled = true;
       closeModal();
 
-      if (!isAdmin()) {
-        applyPlayedState();
-      } else {
+      if (isAdmin()) {
         spinBtn.disabled = false;
-        spinBtn.textContent = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
+        spinBtn.textContent = SPIN_BTN_LABEL;
         spinBtn.classList.remove("is-waiting");
       }
 
@@ -844,7 +922,7 @@
     });
 
     initSubtitle();
-    initPlayedGate();
+    refreshSpinOrTimer();
 
     window.addEventListener("resize", function () {
       if (!spinning && drumStrip.children.length) {
