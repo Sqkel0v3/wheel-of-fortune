@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Колесо удачи — Золотое Яблоко</title>
+  <title>Золотое Яблоко — Колесо</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -12,12 +12,10 @@
     :root {
       --ga-bg: #ffffff;
       --ga-accent: #ccff00;
-      --ga-sector-a: #ffffff;
-      --ga-sector-b: #f5f5f5;
       --ga-line: #eeeeee;
       --ga-text: #000000;
       --ga-muted: #666666;
-      --btn-radius: 2px;
+      --btn-radius: 0;
     }
 
     * {
@@ -29,13 +27,13 @@
     html, body {
       min-height: 100%;
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--ga-bg);
+      background: #ffffff;
       color: var(--ga-text);
       -webkit-font-smoothing: antialiased;
     }
 
     body {
-      padding: max(20px, env(safe-area-inset-top, 0px)) 20px max(28px, env(safe-area-inset-bottom, 0px));
+      padding: max(16px, env(safe-area-inset-top, 0px)) 18px max(24px, env(safe-area-inset-bottom, 0px));
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -47,49 +45,39 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 32px;
+      gap: 28px;
     }
 
     header {
       text-align: center;
       width: 100%;
-      padding: 8px 12px 0;
-    }
-
-    .brand-line {
-      font-size: 0.58rem;
-      font-weight: 700;
-      letter-spacing: 0.42em;
-      text-transform: uppercase;
-      color: var(--ga-text);
-      margin-bottom: 14px;
-      opacity: 0.85;
+      padding: 4px 8px 0;
     }
 
     h1 {
-      font-size: clamp(1.05rem, 3.8vw, 1.35rem);
-      font-weight: 700;
-      letter-spacing: 0.28em;
+      font-size: clamp(0.95rem, 4vw, 1.15rem);
+      font-weight: 800;
+      letter-spacing: 0.24em;
       text-transform: uppercase;
-      line-height: 1.5;
-      color: var(--ga-text);
+      line-height: 1.45;
+      color: #000000;
     }
 
     .subtitle {
-      margin-top: 16px;
-      font-size: 0.8rem;
+      margin-top: 12px;
+      font-size: 0.78rem;
       font-weight: 500;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       color: var(--ga-muted);
-      line-height: 1.65;
-      max-width: 320px;
+      line-height: 1.6;
+      max-width: 300px;
       margin-left: auto;
       margin-right: auto;
     }
 
     .wheel-wrap {
       position: relative;
-      width: min(calc(100vw - 40px), 100%);
+      width: min(calc(100vw - 36px), 100%);
       max-width: 100%;
       aspect-ratio: 1;
     }
@@ -104,7 +92,7 @@
       height: 0;
       border-left: 10px solid transparent;
       border-right: 10px solid transparent;
-      border-top: 16px solid var(--ga-accent);
+      border-top: 16px solid #ccff00;
       pointer-events: none;
     }
 
@@ -118,69 +106,55 @@
     .btn-spin {
       width: 100%;
       max-width: 520px;
-      padding: 22px 24px;
+      padding: 26px 20px;
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 0.95rem;
       font-weight: 800;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       border: none;
       border-radius: var(--btn-radius);
       cursor: pointer;
       color: #000000;
-      background: var(--ga-accent);
-      transition: transform 0.15s ease, opacity 0.2s;
-    }
-
-    @keyframes btn-pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-
-    .btn-spin:hover:not(:disabled) {
-      animation: btn-pulse 1.2s ease-in-out infinite;
-    }
-
-    .btn-spin.is-waiting {
-      animation: btn-pulse 1s ease-in-out infinite;
-      opacity: 0.88;
+      background: #ccff00;
+      transition: opacity 0.15s ease;
     }
 
     .btn-spin:active:not(:disabled) {
-      animation: none;
-      transform: scale(0.995);
+      opacity: 0.88;
+    }
+
+    .btn-spin.is-waiting {
+      opacity: 0.75;
     }
 
     .btn-spin:disabled {
-      opacity: 0.45;
+      opacity: 0.4;
       cursor: not-allowed;
-      animation: none;
     }
 
     .hint {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 500;
-      letter-spacing: 0.02em;
       color: var(--ga-muted);
       text-align: center;
-      max-width: 360px;
-      line-height: 1.65;
-      padding: 0 8px;
+      max-width: 340px;
+      line-height: 1.6;
+      padding: 0 6px;
     }
 
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.12);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: max(20px, env(safe-area-inset-top)) 24px max(20px, env(safe-area-inset-bottom));
+      padding: max(16px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
       z-index: 100;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.25s ease;
     }
 
     .overlay.is-open {
@@ -190,16 +164,15 @@
 
     .modal {
       width: 100%;
-      max-width: 340px;
+      max-width: 336px;
       background: #ffffff;
-      color: var(--ga-text);
-      border-radius: var(--btn-radius);
-      padding: 36px 28px 28px;
-      border: 1px solid var(--ga-accent);
-      box-shadow: none;
-      transform: translateY(12px);
-      opacity: 0.96;
-      transition: transform 0.35s ease, opacity 0.35s ease;
+      color: #000000;
+      border-radius: 0;
+      padding: 32px 24px 24px;
+      border: 1px solid #eeeeee;
+      transform: translateY(8px);
+      opacity: 0.98;
+      transition: transform 0.25s ease, opacity 0.25s ease;
     }
 
     .overlay.is-open .modal {
@@ -207,74 +180,73 @@
       opacity: 1;
     }
 
-    .modal-mark {
-      width: 32px;
-      height: 2px;
-      margin: 0 auto 20px;
-      background: var(--ga-accent);
+    .modal-accent {
+      width: calc(100% + 48px);
+      height: 3px;
+      background: #ccff00;
+      margin: -32px -24px 24px;
     }
 
     .modal h2 {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.35em;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
       text-align: center;
-      margin-bottom: 16px;
-      color: var(--ga-text);
+      margin-bottom: 14px;
+      color: #000000;
     }
 
     .modal-prize {
       text-align: center;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      color: var(--ga-text);
-      margin-bottom: 28px;
+      color: #000000;
+      margin-bottom: 24px;
       line-height: 1.4;
-      min-height: 2.4em;
+      min-height: 2.3em;
     }
 
     .modal-actions {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .btn-claim {
-      padding: 18px 20px;
+      padding: 20px 18px;
       font-family: inherit;
       font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       border: none;
-      border-radius: var(--btn-radius);
+      border-radius: 0;
       cursor: pointer;
       color: #000000;
-      background: var(--ga-accent);
-      transition: opacity 0.2s, transform 0.12s;
+      background: #ccff00;
+      transition: opacity 0.15s;
     }
 
     .btn-claim:active:not(:disabled) {
-      transform: scale(0.99);
+      opacity: 0.85;
     }
 
     .btn-claim:disabled {
-      opacity: 0.55;
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
     .btn-secondary {
       padding: 14px;
       font-family: inherit;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 600;
-      letter-spacing: 0.06em;
-      border: 1px solid var(--ga-line);
-      border-radius: var(--btn-radius);
+      letter-spacing: 0.05em;
+      border: 1px solid #eeeeee;
+      border-radius: 0;
       cursor: pointer;
-      background: transparent;
+      background: #ffffff;
       color: var(--ga-muted);
     }
   </style>
@@ -282,9 +254,8 @@
 <body>
   <div class="app">
     <header>
-      <p class="brand-line">Golden Apple</p>
-      <h1>Колесо удачи</h1>
-      <p class="subtitle">Крутите колесо и заберите подарок в Золотом Яблоке</p>
+      <h1>ПОЛУЧИТЕ ПОДАРОК</h1>
+      <p class="subtitle">Крутите колесо в Золотом Яблоке</p>
     </header>
 
     <div class="wheel-wrap" id="wheelWrap" aria-hidden="true">
@@ -293,12 +264,12 @@
     </div>
 
     <button type="button" class="btn-spin" id="spinBtn">Испытать удачу</button>
-    <p class="hint">Один спин — один подарок. Покажите экран сотруднику магазина.</p>
+    <p class="hint">Один спин — один подарок. Покажите экран сотруднику.</p>
   </div>
 
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
-      <div class="modal-mark" aria-hidden="true"></div>
+      <div class="modal-accent" aria-hidden="true"></div>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <div class="modal-actions">
@@ -321,9 +292,8 @@
       "Сэмпл",
     ];
 
-    const SECTOR_FILL = ["#ffffff", "#f5f5f5"];
-    const WHEEL_STROKE = "#eeeeee";
-    const INNER_LINE = "#eeeeee";
+    const SECTOR_FILL = ["#ffffff", "#f9f9f9"];
+    const LINE_COLOR = "#eeeeee";
     const LABEL_COLOR = "#000000";
 
     const tg = window.Telegram && window.Telegram.WebApp;
@@ -351,7 +321,7 @@
 
     const N = PRIZES.length;
     const TAU = Math.PI * 2;
-    const sectorAngle = TAU / N;
+    const arc = TAU / N;
 
     let layoutSize = 300;
     let rotation = 0;
@@ -371,81 +341,80 @@
     }
 
     function drawWheel() {
-      const w = layoutSize;
-      const cx = w / 2;
-      const cy = w / 2;
-      const outlineW = Math.max(1, Math.min(1.5, layoutSize * 0.004));
-      const r = w / 2 - outlineW - 1;
+      const centerX = layoutSize / 2;
+      const centerY = layoutSize / 2;
+      const outlineW = 1;
+      const radius = layoutSize / 2 - outlineW - 1;
+      const labelRadius = radius * 0.6;
+      const maxTextWidth = 2 * labelRadius * Math.sin(arc / 2) - 10;
 
-      const radialT = 0.65;
-      const textRadius = r * radialT;
-      const maxTextWidth =
-        2 * textRadius * Math.sin(sectorAngle * 0.42) - 8;
+      const fontPx = Math.min(16, Math.max(14, Math.round(layoutSize * 0.042)));
 
-      ctx.clearRect(0, 0, w, w);
+      ctx.clearRect(0, 0, layoutSize, layoutSize);
+
       ctx.save();
-      ctx.translate(cx, cy);
+      ctx.translate(centerX, centerY);
       ctx.rotate(rotation);
 
       for (let i = 0; i < N; i++) {
-        const start = i * sectorAngle - Math.PI / 2;
-        const end = start + sectorAngle;
+        const startAngle = i * arc - Math.PI / 2;
+        const endAngle = startAngle + arc;
+        const middleAngle = startAngle + arc / 2;
 
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.arc(0, 0, r, start, end);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.closePath();
         ctx.fillStyle = SECTOR_FILL[i % 2];
         ctx.fill();
 
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.arc(0, 0, r, start, end);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.strokeStyle = INNER_LINE;
+        ctx.strokeStyle = LINE_COLOR;
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        const mid = start + sectorAngle / 2;
-
         ctx.save();
-        ctx.rotate(mid);
+        ctx.rotate(middleAngle);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.direction = "ltr";
         ctx.fillStyle = LABEL_COLOR;
-        ctx.font = "bold 16px Inter, sans-serif";
+        ctx.font =
+          "bold " + fontPx + "px Inter, system-ui, -apple-system, sans-serif";
 
-        let textLine = PRIZES[i];
-        if (ctx.measureText(textLine).width > maxTextWidth) {
+        let text = PRIZES[i];
+        if (ctx.measureText(text).width > maxTextWidth) {
           while (
-            textLine.length > 1 &&
-            ctx.measureText(textLine.slice(0, -1) + "…").width > maxTextWidth
+            text.length > 1 &&
+            ctx.measureText(text.slice(0, -1) + "…").width > maxTextWidth
           ) {
-            textLine = textLine.slice(0, -1);
+            text = text.slice(0, -1);
           }
-          textLine = textLine.slice(0, -1) + "…";
+          text = text.slice(0, -1) + "…";
         }
 
-        ctx.fillText(textLine, textRadius, 0);
+        ctx.fillText(text, labelRadius, 0);
         ctx.restore();
       }
 
       ctx.beginPath();
-      ctx.arc(0, 0, r, 0, TAU);
-      ctx.strokeStyle = WHEEL_STROKE;
+      ctx.arc(0, 0, radius, 0, TAU);
+      ctx.strokeStyle = LINE_COLOR;
       ctx.lineWidth = outlineW;
       ctx.stroke();
 
       ctx.restore();
 
       ctx.save();
-      ctx.translate(cx, cy);
+      ctx.translate(centerX, centerY);
       ctx.beginPath();
-      ctx.arc(0, 0, r * 0.12, 0, TAU);
+      ctx.arc(0, 0, radius * 0.12, 0, TAU);
       ctx.fillStyle = "#ffffff";
       ctx.fill();
-      ctx.strokeStyle = WHEEL_STROKE;
+      ctx.strokeStyle = LINE_COLOR;
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
@@ -465,8 +434,7 @@
       const fullSpins = 10 + Math.floor(Math.random() * 5);
       const duration = 7500 + Math.random() * 2000;
 
-      const localCenter =
-        winnerIndex * sectorAngle + sectorAngle / 2 - Math.PI / 2;
+      const localCenter = winnerIndex * arc + arc / 2 - Math.PI / 2;
       const pointerAngle = (3 * Math.PI) / 2;
       let delta = pointerAngle - localCenter - rotation;
       while (delta <= 0) delta += TAU;
@@ -520,15 +488,15 @@
           ? window.Telegram.WebApp.initDataUnsafe.user
           : undefined;
 
-      let userName = "Анонимный игрок";
+      let name = "Анонимный игрок";
       if (user) {
         const full = [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
-        if (full) userName = full;
-        else if (user.username) userName = user.username;
+        if (full) name = full;
+        else if (user.username) name = user.username;
       }
 
       const text =
-        "\uD83C\uDF81 Новый победитель! \nИмя: " + userName + " \nПриз: " + prize;
+        "\uD83C\uDF81 Победитель: " + name + " \nПриз: " + prize;
 
       const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
 
@@ -571,7 +539,7 @@
         if (tg && typeof tg.close === "function") {
           tg.close();
         }
-      }, 2000);
+      }, 1500);
     });
 
     if (typeof ResizeObserver !== "undefined") {
