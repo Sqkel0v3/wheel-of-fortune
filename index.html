@@ -3,14 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Колесо удачи</title>
+  <title>Колесо удачи — Золотое Яблоко</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --app-radius: 20px;
-      --app-radius-sm: 14px;
-      --shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
-      --wheel-border: color-mix(in srgb, var(--tg-theme-text-color, #000) 12%, transparent);
+      --ga-bg: #000000;
+      --ga-accent: #ccff00;
+      --ga-gray: #1a1a1a;
+      --ga-border: #2a2a2a;
+      --ga-text: #ffffff;
+      --ga-muted: #888888;
+      --btn-radius: 4px;
     }
 
     * {
@@ -21,82 +27,94 @@
 
     html, body {
       min-height: 100%;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--tg-theme-bg-color, #212121);
-      color: var(--tg-theme-text-color, #fff);
+      font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--ga-bg);
+      color: var(--ga-text);
       -webkit-font-smoothing: antialiased;
     }
 
     body {
-      padding: 20px 16px 32px;
+      padding: 16px 12px 28px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
     }
 
     .app {
       width: 100%;
-      max-width: 400px;
+      max-width: 560px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
     }
 
     header {
       text-align: center;
       width: 100%;
+      padding: 0 8px;
+    }
+
+    .brand-line {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ga-accent);
+      margin-bottom: 8px;
     }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--tg-theme-text-color, #fff);
+      font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--ga-text);
     }
 
     .subtitle {
-      margin-top: 6px;
-      font-size: 0.9rem;
-      opacity: 0.72;
-      color: var(--tg-theme-hint-color, #aaa);
+      margin-top: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ga-muted);
+      line-height: 1.45;
     }
 
     .wheel-wrap {
       position: relative;
-      width: min(92vw, 320px);
+      width: min(calc(100vw - 24px), 100%);
+      max-width: 520px;
       aspect-ratio: 1;
-      filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.25));
+      filter: drop-shadow(0 0 32px rgba(204, 255, 0, 0.12));
     }
 
     .pointer {
       position: absolute;
       left: 50%;
-      top: -6px;
+      top: -8px;
       transform: translateX(-50%);
       z-index: 3;
       width: 0;
       height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-top: 32px solid var(--tg-theme-button-color, #3390ec);
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-      animation: pointer-bob 1.1s ease-in-out infinite;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 36px solid var(--ga-accent);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+      animation: pointer-bob 1.15s ease-in-out infinite;
       transform-origin: 50% 0;
     }
 
     @keyframes pointer-bob {
-      0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-      50% { transform: translateX(-50%) translateY(4px) scale(1.04); }
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(5px); }
     }
 
     .wheel-ring {
       position: absolute;
-      inset: 14px;
+      inset: 10px;
       border-radius: 50%;
-      border: 4px solid var(--wheel-border);
-      box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--tg-theme-bg-color, #000) 40%, transparent);
+      border: 2px solid var(--ga-accent);
+      opacity: 0.35;
       pointer-events: none;
       z-index: 2;
     }
@@ -110,54 +128,51 @@
 
     .btn-spin {
       width: 100%;
-      max-width: 320px;
-      padding: 16px 24px;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
+      max-width: 520px;
+      padding: 17px 22px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       border: none;
-      border-radius: var(--app-radius);
+      border-radius: var(--btn-radius);
       cursor: pointer;
-      color: var(--tg-theme-button-text-color, #fff);
-      background: linear-gradient(
-        135deg,
-        var(--tg-theme-button-color, #3390ec),
-        color-mix(in srgb, var(--tg-theme-button-color, #3390ec) 70%, #000)
-      );
-      box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--tg-theme-button-color, #3390ec) 50%, transparent);
-      transition: transform 0.15s ease, filter 0.15s ease, opacity 0.2s;
+      color: #000000;
+      background: var(--ga-accent);
+      box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+      transition: transform 0.12s ease, filter 0.12s ease, opacity 0.2s;
     }
 
     .btn-spin:hover:not(:disabled) {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
+      filter: brightness(1.06);
     }
 
     .btn-spin:active:not(:disabled) {
-      transform: translateY(1px) scale(0.98);
+      transform: scale(0.985);
     }
 
     .btn-spin:disabled {
-      opacity: 0.55;
+      opacity: 0.45;
       cursor: not-allowed;
       transform: none;
     }
 
     .hint {
-      font-size: 0.8rem;
-      color: var(--tg-theme-hint-color, #888);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--ga-muted);
       text-align: center;
-      max-width: 320px;
-      line-height: 1.4;
+      max-width: 420px;
+      line-height: 1.5;
+      padding: 0 12px;
     }
 
-    /* Modal */
     .overlay {
       position: fixed;
       inset: 0;
-      background: color-mix(in srgb, #000 45%, transparent);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -175,46 +190,47 @@
 
     .modal {
       width: 100%;
-      max-width: 340px;
-      background: var(--tg-theme-secondary-bg-color, #2b2b2b);
-      color: var(--tg-theme-text-color, #fff);
-      border-radius: var(--app-radius);
-      padding: 28px 24px 24px;
-      box-shadow: var(--shadow);
-      transform: scale(0.92) translateY(12px);
-      transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
-      border: 1px solid color-mix(in srgb, var(--tg-theme-text-color, #fff) 8%, transparent);
+      max-width: 360px;
+      background: var(--ga-bg);
+      color: var(--ga-text);
+      border-radius: var(--btn-radius);
+      padding: 28px 22px 22px;
+      border: 1px solid var(--ga-accent);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 40px rgba(204, 255, 0, 0.08);
+      transform: scale(0.94) translateY(16px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.25, 0.64, 1);
     }
 
     .overlay.is-open .modal {
       transform: scale(1) translateY(0);
     }
 
-    .modal-badge {
-      width: 56px;
-      height: 56px;
-      margin: 0 auto 16px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, var(--tg-theme-button-color, #3390ec), color-mix(in srgb, var(--tg-theme-button-color, #3390ec) 50%, #000));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.75rem;
+    .modal-mark {
+      width: 48px;
+      height: 4px;
+      margin: 0 auto 18px;
+      background: var(--ga-accent);
+      border-radius: 1px;
     }
 
     .modal h2 {
-      font-size: 1.25rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 14px;
+      color: var(--ga-accent);
     }
 
     .modal-prize {
       text-align: center;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--tg-theme-link-color, var(--tg-theme-button-color, #6ab7ff));
-      margin-bottom: 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ga-text);
+      margin-bottom: 24px;
       line-height: 1.35;
+      min-height: 2.6em;
     }
 
     .modal-actions {
@@ -224,85 +240,88 @@
     }
 
     .btn-claim {
-      padding: 14px 18px;
-      font-size: 0.95rem;
-      font-weight: 600;
+      padding: 16px 18px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       border: none;
-      border-radius: var(--app-radius-sm);
+      border-radius: var(--btn-radius);
       cursor: pointer;
-      color: var(--tg-theme-button-text-color, #fff);
-      background: var(--tg-theme-button-color, #3390ec);
-      transition: filter 0.15s, transform 0.15s;
+      color: #000000;
+      background: var(--ga-accent);
+      transition: opacity 0.2s, transform 0.12s;
     }
 
-    .btn-claim:active {
+    .btn-claim:active:not(:disabled) {
       transform: scale(0.98);
+    }
+
+    .btn-claim:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
     }
 
     .btn-secondary {
       padding: 12px;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: var(--app-radius-sm);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--ga-border);
+      border-radius: var(--btn-radius);
       cursor: pointer;
       background: transparent;
-      color: var(--tg-theme-hint-color, #aaa);
+      color: var(--ga-muted);
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
+      <p class="brand-line">Golden Apple</p>
       <h1>Колесо удачи</h1>
-      <p class="subtitle">Крути и забирай приз в нашем магазине</p>
+      <p class="subtitle">Крутите колесо и заберите подарок в Золотом Яблоке</p>
     </header>
 
     <div class="wheel-wrap" aria-hidden="true">
       <div class="pointer"></div>
       <div class="wheel-ring"></div>
-      <canvas id="wheel" width="640" height="640"></canvas>
+      <canvas id="wheel" width="720" height="720"></canvas>
     </div>
 
     <button type="button" class="btn-spin" id="spinBtn">Испытать удачу</button>
-    <p class="hint">Один спин — один подарок. Покажите экран кассиру при получении приза.</p>
+    <p class="hint">Один спин — один подарок. Покажите экран сотруднику магазина.</p>
   </div>
 
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
-      <div class="modal-badge" aria-hidden="true">&#127942;</div>
-      <h2 id="modalTitle">Поздравляем!</h2>
+      <div class="modal-mark" aria-hidden="true"></div>
+      <h2 id="modalTitle">Вы выиграли</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <div class="modal-actions">
-        <button type="button" class="btn-claim" id="claimBtn">Забрать приз</button>
+        <button type="button" class="btn-claim" id="claimBtn">Получить приз</button>
         <button type="button" class="btn-secondary" id="closeModalBtn">Закрыть</button>
       </div>
     </div>
   </div>
 
   <script>
-    /**
-     * ВНИМАНИЕ: токен в клиенте виден всем — для продакшена выносите sendMessage на сервер.
-     */
     const BOT_TOKEN = "8392003499:AAG5RkZOn2TPkD75b3rVcsZvXMgny1rW-hA";
     const ADMIN_CHAT_ID = "821470232";
 
     const PRIZES = [
-      'Скидка 5%',
-      'Бесплатный кофе',
-      'Скидка 10%',
-      'Подарок к заказу',
-      'Скидка 15%',
-      'Секретный бонус',
+      "Скидка 5%",
+      "100 бонусов",
+      "Пробник крема",
+      "Скидка 10%",
+      "Маска для лица",
+      "Сэмпл парфюма",
     ];
 
-    const SECTOR_COLORS = [
-      '#5B8DEF',
-      '#7C6CF0',
-      '#4ECDC4',
-      '#FF6B6B',
-      '#FFD166',
-      '#06D6A0',
-    ];
+    const SECTOR_FILL = ["#000000", "#1a1a1a"];
+    const ACCENT = "#ccff00";
+    const STROKE = "#2d2d2d";
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -310,13 +329,21 @@
       tg.expand();
     }
 
-    const canvas = document.getElementById('wheel');
-    const ctx = canvas.getContext('2d');
-    const spinBtn = document.getElementById('spinBtn');
-    const overlay = document.getElementById('overlay');
-    const modalPrize = document.getElementById('modalPrize');
-    const claimBtn = document.getElementById('claimBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
+    function showErr(msg) {
+      if (tg && typeof tg.showAlert === "function") {
+        tg.showAlert(msg);
+      } else {
+        alert(msg);
+      }
+    }
+
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const spinBtn = document.getElementById("spinBtn");
+    const overlay = document.getElementById("overlay");
+    const modalPrize = document.getElementById("modalPrize");
+    const claimBtn = document.getElementById("claimBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
 
     const N = PRIZES.length;
     const TAU = Math.PI * 2;
@@ -324,15 +351,49 @@
 
     let rotation = 0;
     let spinning = false;
-    let currentPrizeIndex = 0;
-    let currentPrizeText = '';
+    let currentPrizeText = "";
+
+    function drawRadialLabel(mid, label, innerR, outerR) {
+      ctx.save();
+      ctx.rotate(mid);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = ACCENT;
+
+      let fontSize = Math.min(26, Math.floor((outerR - innerR) / 5.5));
+      ctx.font = "600 " + fontSize + "px Inter, system-ui, sans-serif";
+
+      let text = label;
+      while (ctx.measureText(text).width > outerR - innerR - 16 && fontSize > 11) {
+        fontSize -= 1;
+        ctx.font = "600 " + fontSize + "px Inter, system-ui, sans-serif";
+      }
+      if (ctx.measureText(text).width > outerR - innerR - 16) {
+        text = text.slice(0, Math.max(4, text.length - 2)) + "…";
+      }
+
+      const chars = Array.from(text);
+      let dist = innerR;
+      for (let c = 0; c < chars.length; c++) {
+        const ch = chars[c];
+        const w = ctx.measureText(ch).width;
+        if (dist + w > outerR - 8) break;
+        ctx.save();
+        ctx.translate(dist + w / 2, 0);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillText(ch, 0, 0);
+        ctx.restore();
+        dist += w + (fontSize > 18 ? 1 : 0.5);
+      }
+      ctx.restore();
+    }
 
     function drawWheel() {
       const w = canvas.width;
       const h = canvas.height;
       const cx = w / 2;
       const cy = h / 2;
-      const r = w / 2 - 8;
+      const r = w / 2 - 6;
 
       ctx.clearRect(0, 0, w, h);
       ctx.save();
@@ -347,26 +408,16 @@
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, r, start, end);
         ctx.closePath();
-        ctx.fillStyle = SECTOR_COLORS[i % SECTOR_COLORS.length];
+        ctx.fillStyle = SECTOR_FILL[i % 2];
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = STROKE;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        ctx.save();
         const mid = start + sectorAngle / 2;
-        ctx.rotate(mid);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
-        ctx.font = 'bold 26px system-ui, sans-serif';
-        const label = PRIZES[i];
-        const maxChars = 14;
-        const lines = label.length > maxChars ? [label.slice(0, maxChars - 1) + '…'] : [label];
-        lines.forEach((line, j) => {
-          ctx.fillText(line, r - 28, j * 30 - (lines.length - 1) * 15);
-        });
-        ctx.restore();
+        const innerR = r * 0.2;
+        drawRadialLabel(mid, PRIZES[i], innerR, r - 10);
       }
 
       ctx.restore();
@@ -374,19 +425,17 @@
       ctx.save();
       ctx.translate(cx, cy);
       ctx.beginPath();
-      ctx.arc(0, 0, 22, 0, TAU);
-      ctx.fillStyle = tg && tg.themeParams && tg.themeParams.secondary_bg_color
-        ? '#' + tg.themeParams.secondary_bg_color
-        : 'rgba(40,40,40,0.95)';
+      ctx.arc(0, 0, r * 0.14, 0, TAU);
+      ctx.fillStyle = "#000000";
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
     }
 
-    function easeOutCubic(t) {
-      return 1 - Math.pow(1 - t, 3);
+    function easeOutQuint(t) {
+      return 1 - Math.pow(1 - t, 5);
     }
 
     function spin() {
@@ -395,8 +444,8 @@
       spinBtn.disabled = true;
 
       const winnerIndex = Math.floor(Math.random() * N);
-      const fullSpins = 5 + Math.floor(Math.random() * 2);
-      const duration = 4000 + Math.random() * 1000;
+      const fullSpins = 10 + Math.floor(Math.random() * 5);
+      const duration = 7500 + Math.random() * 2000;
 
       const localCenter =
         winnerIndex * sectorAngle + sectorAngle / 2 - Math.PI / 2;
@@ -410,7 +459,7 @@
 
       function frame(now) {
         const t = Math.min(1, (now - startTime) / duration);
-        const e = easeOutCubic(t);
+        const e = easeOutQuint(t);
         rotation = startRot + (targetRotation - startRot) * e;
         drawWheel();
         if (t < 1) {
@@ -418,7 +467,6 @@
         } else {
           rotation = targetRotation;
           drawWheel();
-          currentPrizeIndex = winnerIndex;
           currentPrizeText = PRIZES[winnerIndex];
           spinning = false;
           spinBtn.disabled = false;
@@ -430,60 +478,85 @@
 
     function openModal(prize) {
       modalPrize.textContent = prize;
-      overlay.classList.add('is-open');
+      claimBtn.textContent = "Получить приз";
+      claimBtn.disabled = false;
+      overlay.classList.add("is-open");
     }
 
     function closeModal() {
-      overlay.classList.remove('is-open');
+      overlay.classList.remove("is-open");
     }
 
-    spinBtn.addEventListener('click', spin);
-    closeModalBtn.addEventListener('click', closeModal);
+    spinBtn.addEventListener("click", spin);
+    closeModalBtn.addEventListener("click", closeModal);
 
-    claimBtn.addEventListener('click', async function () {
+    claimBtn.addEventListener("click", async function () {
+      if (claimBtn.disabled) return;
+
       const prize = currentPrizeText;
-      const user = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe
-        ? window.Telegram.WebApp.initDataUnsafe.user
-        : undefined;
+      const user =
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.initDataUnsafe
+          ? window.Telegram.WebApp.initDataUnsafe.user
+          : undefined;
 
-      let userName = 'Анонимный игрок';
+      let userName = "Анонимный игрок";
       if (user) {
-        const full = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+        const full = [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
         if (full) userName = full;
         else if (user.username) userName = user.username;
       }
 
-      if (tg && typeof tg.showAlert === 'function') {
-        tg.showAlert('Ваш приз: ' + prize);
-      } else {
-        alert('Ваш приз: ' + prize);
-      }
-
       const text =
-        '\uD83C\uDF81 Новый победитель! \nИмя: ' + userName + ' \nПриз: ' + prize;
+        "\uD83C\uDF81 Новый победитель! \nИмя: " + userName + " \nПриз: " + prize;
 
-      const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage';
+      const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
 
+      claimBtn.disabled = true;
+
+      let data;
       try {
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id: ADMIN_CHAT_ID,
             text: text,
           }),
         });
+        try {
+          data = await res.json();
+        } catch {
+          showErr("Не удалось разобрать ответ сервера.");
+          claimBtn.disabled = false;
+          return;
+        }
       } catch (e) {
-        console.error(e);
+        showErr(
+          "Ошибка сети: " + (e && e.message ? e.message : "проверьте подключение")
+        );
+        claimBtn.disabled = false;
+        return;
       }
 
-      closeModal();
+      if (!data.ok) {
+        showErr(data.description || "Не удалось отправить уведомление.");
+        claimBtn.disabled = false;
+        return;
+      }
+
+      claimBtn.textContent = "ОТПРАВЛЕНО...";
+      claimBtn.disabled = true;
+      setTimeout(function () {
+        if (tg && typeof tg.close === "function") {
+          tg.close();
+        }
+      }, 2000);
     });
 
     drawWheel();
-    window.addEventListener('resize', function () {
-      drawWheel();
-    });
+    window.addEventListener("resize", drawWheel);
   </script>
 </body>
 </html>
