@@ -125,7 +125,7 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       border: none;
-      border-radius: var(--btn-radius);
+      border-radius: 0;
       cursor: pointer;
       color: #000000;
       background: #ccff00;
@@ -319,6 +319,37 @@
       tg.expand();
     }
 
+    const spinSound = new Audio('wheel-of-fortune.mp3');
+    spinSound.preload = "auto";
+    let spinSoundFadeTimer = null;
+
+    function resetSpinSoundFade() {
+      if (spinSoundFadeTimer !== null) {
+        clearInterval(spinSoundFadeTimer);
+        spinSoundFadeTimer = null;
+      }
+      spinSound.volume = 1;
+    }
+
+    function fadeOutSpinSound() {
+      resetSpinSoundFade();
+      const steps = 12;
+      const stepMs = 35;
+      let i = 0;
+      const v0 = spinSound.volume;
+      spinSoundFadeTimer = setInterval(function () {
+        i++;
+        spinSound.volume = Math.max(0, v0 * (1 - i / steps));
+        if (i >= steps) {
+          clearInterval(spinSoundFadeTimer);
+          spinSoundFadeTimer = null;
+          spinSound.pause();
+          spinSound.currentTime = 0;
+          spinSound.volume = 1;
+        }
+      }, stepMs);
+    }
+
     function showErr(msg) {
       if (tg && typeof tg.showAlert === "function") {
         tg.showAlert(msg);
@@ -446,9 +477,14 @@
       spinBtn.disabled = true;
       spinBtn.classList.add("is-waiting");
 
+      resetSpinSoundFade();
+      spinSound.currentTime = 0;
+      spinSound.volume = 1;
+      spinSound.play().catch(function () {});
+
       const winnerIndex = Math.floor(Math.random() * N);
-      const fullSpins = 10 + Math.floor(Math.random() * 5);
-      const duration = 7500 + Math.random() * 2000;
+      const fullSpins = 8 + Math.floor(Math.random() * 4);
+      const duration = 4000;
 
       const localCenter = winnerIndex * arc + arc / 2 - Math.PI / 2;
       const pointerAngle = (3 * Math.PI) / 2;
@@ -469,6 +505,7 @@
         } else {
           rotation = targetRotation;
           drawWheel();
+          fadeOutSpinSound();
           currentPrizeText = PRIZES[winnerIndex];
           spinning = false;
           spinBtn.disabled = false;
