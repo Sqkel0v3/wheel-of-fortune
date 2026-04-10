@@ -11,15 +11,18 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Server configuration error" });
   }
 
-  const { name, prize } = req.body || {};
+  const { name, prize, promoCode } = req.body || {};
   if (name == null || prize == null) {
     return res.status(400).json({ error: "Missing name or prize" });
   }
 
   console.log("Отправка сообщения через нового бота...");
 
-  const text =
+  let text =
     "\uD83C\uDF81 Новый победитель!\nИмя: " + name + "\nПриз: " + prize;
+  if (promoCode != null && String(promoCode).trim() !== "") {
+    text += "\nПромокод: " + String(promoCode).trim();
+  }
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
   try {

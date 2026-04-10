@@ -141,17 +141,17 @@
       right: 0;
       z-index: 2;
       pointer-events: none;
-      height: 42%;
+      height: 48%;
     }
 
     .drum-fade--top {
       top: 0;
       background: linear-gradient(
         to bottom,
-        var(--whoosh-bg) 0%,
-        rgba(0, 0, 0, 0.18) 28%,
-        rgba(0, 0, 0, 0.06) 52%,
-        rgba(245, 245, 247, 0) 78%,
+        #000000 0%,
+        rgba(0, 0, 0, 0.55) 18%,
+        rgba(0, 0, 0, 0.22) 42%,
+        rgba(245, 245, 247, 0) 72%,
         transparent 100%
       );
     }
@@ -160,10 +160,10 @@
       bottom: 0;
       background: linear-gradient(
         to top,
-        var(--whoosh-bg) 0%,
-        rgba(0, 0, 0, 0.18) 28%,
-        rgba(0, 0, 0, 0.06) 52%,
-        rgba(245, 245, 247, 0) 78%,
+        #000000 0%,
+        rgba(0, 0, 0, 0.55) 18%,
+        rgba(0, 0, 0, 0.22) 42%,
+        rgba(245, 245, 247, 0) 72%,
         transparent 100%
       );
     }
@@ -328,6 +328,20 @@
       box-sizing: border-box;
     }
 
+    .promo-instruction {
+      font-size: clamp(10px, 2.9vw, 12px);
+      font-weight: 700;
+      color: #000000;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+      max-width: 340px;
+      margin: 0;
+      padding: 0 10px;
+      flex-shrink: 0;
+    }
+
     .staff-hint {
       font-size: clamp(11px, 3.2vw, 13px);
       font-weight: 500;
@@ -403,12 +417,62 @@
 
     .modal-prize {
       text-align: center;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #000000;
-      margin-bottom: 24px;
+      margin-bottom: 10px;
       line-height: 1.4;
-      min-height: 2.3em;
+      min-height: 1.5em;
+    }
+
+    .modal-promo-label {
+      text-align: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--whoosh-muted);
+      margin-bottom: 8px;
+    }
+
+    .modal-promo-code {
+      text-align: center;
+      font-size: clamp(1.35rem, 6.5vw, 1.75rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.06em;
+      color: #000000;
+      margin: 0 0 18px;
+      padding: 14px 12px;
+      line-height: 1.25;
+      background: var(--whoosh-accent);
+      border-radius: 12px;
+      border: 2px solid #000000;
+      word-break: break-all;
+    }
+
+    .btn-copy-promo {
+      padding: 16px 16px;
+      font-family: inherit;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 2px solid #000000;
+      border-radius: var(--whoosh-radius-btn);
+      cursor: pointer;
+      color: #000000;
+      background: var(--whoosh-accent);
+      transition: opacity 0.15s;
+    }
+
+    .btn-copy-promo:active:not(:disabled) {
+      opacity: 0.88;
+    }
+
+    .btn-copy-promo:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     .modal-actions {
@@ -476,8 +540,12 @@
         </div>
       </div>
 
+      <p class="promo-instruction" id="promoInstruction">
+        ПРОМОКОД ДЕЙСТВУЕТ 24 ЧАСА ПОСЛЕ АКТИВАЦИИ
+      </p>
+
       <p class="staff-hint" id="staffHintMain">
-        ОДИН ШАНС В СУТКИ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
       </p>
 
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
@@ -489,12 +557,15 @@
     <div class="modal">
       <div class="modal-accent" aria-hidden="true"></div>
       <p class="staff-hint">
-        ОДИН ШАНС В СУТКИ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
+        ОДИН ШАНС В НЕДЕЛЮ. ХОЧЕШЬ ЕЩЁ? ПРИВЕДИ ДРУГА!
       </p>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
+      <p class="modal-promo-label" id="modalPromoLabel">Промокод</p>
+      <p class="modal-promo-code" id="modalPromoCode" aria-live="polite"></p>
       <div class="modal-actions">
-        <button type="button" class="btn-claim" id="claimBtn">Забрать приз</button>
+        <button type="button" class="btn-copy-promo" id="copyPromoBtn"></button>
+        <button type="button" class="btn-claim" id="claimBtn"></button>
         <button type="button" class="btn-secondary" id="closeModalBtn">Закрыть</button>
       </div>
     </div>
@@ -502,9 +573,15 @@
 
   <script>
     const LS_LAST_SPIN = "whoosh_last_spin";
-    const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+    const STRIP_REPEATS = 100;
     const WHOOSH_LOGO_SRC = "/whoosh.png";
     const SPIN_BTN_LABEL = "\u041a\u0420\u0423\u0422\u0418\u0422\u042c";
+    const LABEL_COPY_PROMO =
+      "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u0422\u042c \u041f\u0420\u041e\u041c\u041e\u041a\u041e\u0414";
+    const LABEL_COPIED = "\u0421\u041a\u041e\u041f\u0418\u0420\u041e\u0412\u0410\u041d\u041e";
+    const LABEL_GET_PRIZE =
+      "\u041f\u041e\u041b\u0423\u0427\u0418\u0422\u042c \u041f\u0420\u0418\u0417";
 
     let cooldownTickerId = null;
 
@@ -513,18 +590,37 @@
      * Выбор: случайное число r в [0, 100), приз с наименьшим cum > r по накопленным весам.
      */
     const PRIZE_POOL = [
-      { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01 },
-      { title: "AirPods 4", big: "4", small: "AirPods", weight: 0.05 },
-      { title: "Whoosh Pass на год", big: "365", small: "дней Pass", weight: 0.1 },
-      { title: "Whoosh Pass на месяц", big: "30", small: "дней Pass", weight: 1 },
-      { title: "500 бонусов", big: "500", small: "бонусов", weight: 3 },
-      { title: "3 бесплатных старта", big: "3", small: "бесплатных старта", weight: 15 },
-      { title: "100 бонусов", big: "100", small: "бонусов", weight: 35 },
+      { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01, promoBase: "IPHONE16" },
+      { title: "AirPods 4", big: "4", small: "AirPods", weight: 0.05, promoBase: "AIRPODS4" },
+      {
+        title: "Whoosh Pass на год",
+        big: "365",
+        small: "дней Pass",
+        weight: 0.1,
+        promoBase: "PASS_YEAR",
+      },
+      {
+        title: "Whoosh Pass на месяц",
+        big: "30",
+        small: "дней Pass",
+        weight: 1,
+        promoBase: "PASS_MONTH",
+      },
+      { title: "500 бонусов", big: "500", small: "бонусов", weight: 3, promoBase: "WHOOSH500" },
+      {
+        title: "3 бесплатных старта",
+        big: "3",
+        small: "бесплатных старта",
+        weight: 15,
+        promoBase: "START_FREE",
+      },
+      { title: "100 бонусов", big: "100", small: "бонусов", weight: 35, promoBase: "WHOOSH100" },
       {
         title: "Скидка 10% на поездку",
         big: "10%",
         small: "на поездку",
         weight: 45.84,
+        promoBase: "RIDE_OFF10",
       },
     ];
 
@@ -545,7 +641,23 @@
         title: entry.title,
         big: entry.big,
         small: entry.small,
+        promoBase: entry.promoBase,
       };
+    }
+
+    const PROMO_SUFFIX_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    function randomPromoSuffix(len) {
+      let s = "";
+      for (let i = 0; i < len; i++) {
+        s += PROMO_SUFFIX_CHARS.charAt(Math.floor(Math.random() * PROMO_SUFFIX_CHARS.length));
+      }
+      return s;
+    }
+
+    function makePromoCode(entry) {
+      const base = entry.promoBase || "WHOOSH";
+      return base + "-" + randomPromoSuffix(4);
     }
 
     function renderStripRow(entry) {
@@ -573,7 +685,7 @@
 
     function buildStrip(winnerEntry) {
       const strip = [];
-      for (let rep = 0; rep < 20; rep++) {
+      for (let rep = 0; rep < STRIP_REPEATS; rep++) {
         for (let i = 0; i < PRIZE_POOL.length; i++) {
           strip.push(cloneEntry(PRIZE_POOL[i]));
         }
@@ -647,13 +759,19 @@
     const spinBtn = document.getElementById("spinBtn");
     const overlay = document.getElementById("overlay");
     const modalPrize = document.getElementById("modalPrize");
+    const modalPromoCode = document.getElementById("modalPromoCode");
+    const copyPromoBtn = document.getElementById("copyPromoBtn");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const subtitleLine = document.getElementById("subtitleLine");
     const cooldownBar = document.getElementById("cooldownBar");
 
+    copyPromoBtn.textContent = LABEL_COPY_PROMO;
+    claimBtn.textContent = LABEL_GET_PRIZE;
+
     let itemHeightPx = 76;
     let currentPrizeText = "";
+    let currentPromoCode = "";
     let spinning = false;
 
     function readItemHeight() {
@@ -662,13 +780,23 @@
       return Number.isFinite(parsed) ? parsed : 76;
     }
 
+    function readStripGapPx() {
+      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-card-gap").trim();
+      const parsed = parseFloat(v);
+      return Number.isFinite(parsed) ? parsed : 8;
+    }
+
+    function getStripMetrics() {
+      const itemH = readItemHeight();
+      const gap = readStripGapPx();
+      return { itemH, gap, step: itemH + gap };
+    }
+
+    /** Центр карточки index по вертикали совпадает с центром окна (лента «замерла» с соседями). */
     function translateForCenteredIndex(index, viewH) {
-      const el = drumStrip.children[index];
-      if (!el) {
-        return viewH / 2 - itemHeightPx / 2 - index * itemHeightPx;
-      }
-      const cy = el.offsetTop + el.offsetHeight / 2;
-      return viewH / 2 - cy;
+      const { itemH, step } = getStripMetrics();
+      const centerY = index * step + itemH / 2;
+      return viewH / 2 - centerY;
     }
 
     function applyStripTransform(y) {
@@ -806,6 +934,7 @@
         spinSound.pause();
         spinSound.currentTime = 0;
         currentPrizeText = won.title;
+        currentPromoCode = makePromoCode(won);
         spinning = false;
         spinBtn.classList.remove("is-waiting");
         if (!isAdmin()) {
@@ -816,13 +945,16 @@
           }
         }
         refreshSpinOrTimer();
-        openModal(currentPrizeText);
+        openModal(currentPrizeText, currentPromoCode);
       }, SPIN_MS);
     }
 
-    function openModal(prize) {
+    function openModal(prize, promoCode) {
       modalPrize.textContent = prize;
-      claimBtn.textContent = "Забрать приз";
+      modalPromoCode.textContent = promoCode;
+      copyPromoBtn.disabled = false;
+      copyPromoBtn.textContent = LABEL_COPY_PROMO;
+      claimBtn.textContent = LABEL_GET_PRIZE;
       claimBtn.disabled = false;
       overlay.classList.add("is-open");
     }
@@ -844,10 +976,43 @@
     spinBtn.addEventListener("click", spin);
     closeModalBtn.addEventListener("click", closeModal);
 
+    async function copyPromoToClipboard() {
+      const text = currentPromoCode || (modalPromoCode && modalPromoCode.textContent) || "";
+      if (!text) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
+        copyPromoBtn.textContent = LABEL_COPIED;
+        setTimeout(function () {
+          if (overlay.classList.contains("is-open")) {
+            copyPromoBtn.textContent = LABEL_COPY_PROMO;
+          }
+        }, 2000);
+      } catch (e) {
+        showErr("Не удалось скопировать. Выделите код вручную.");
+      }
+    }
+
+    copyPromoBtn.addEventListener("click", function () {
+      copyPromoToClipboard();
+    });
+
     claimBtn.addEventListener("click", async function () {
       if (claimBtn.disabled) return;
 
       const winnerPrizeName = currentPrizeText;
+      const promoCode = currentPromoCode;
 
       claimBtn.disabled = true;
 
@@ -859,6 +1024,7 @@
           body: JSON.stringify({
             name: tg?.initDataUnsafe?.user?.first_name || "Инкогнито",
             prize: winnerPrizeName,
+            promoCode: promoCode,
           }),
         });
       } catch (e) {
