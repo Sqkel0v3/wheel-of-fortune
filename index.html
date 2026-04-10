@@ -10,9 +10,9 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --ga-bg: #ffffff;
-      --ga-accent: #ccff00;
-      --ga-line: #eeeeee;
+      --ga-bg: #FFFFFF;
+      --ga-accent: #CCFF00;
+      --ga-line: #F0F0F0;
       --ga-text: #000000;
       --ga-muted: #666666;
       --btn-radius: 0;
@@ -27,7 +27,7 @@
     html, body {
       min-height: 100%;
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #ffffff;
+      background: #FFFFFF;
       color: var(--ga-text);
       -webkit-font-smoothing: antialiased;
     }
@@ -177,25 +177,23 @@
     .modal {
       width: 100%;
       max-width: 336px;
-      background: #ffffff;
+      background: #FFFFFF;
       color: #000000;
       border-radius: 0;
       padding: 32px 24px 24px;
-      border: 1px solid #eeeeee;
-      transform: translateY(8px);
-      opacity: 0.98;
-      transition: transform 0.25s ease, opacity 0.25s ease;
+      border: 1px solid var(--ga-line);
+      opacity: 0;
+      transition: opacity 0.22s ease;
     }
 
     .overlay.is-open .modal {
-      transform: translateY(0);
       opacity: 1;
     }
 
     .modal-accent {
       width: calc(100% + 48px);
-      height: 1px;
-      background: #eeeeee;
+      height: 3px;
+      background: var(--ga-accent);
       margin: -32px -24px 24px;
     }
 
@@ -306,12 +304,12 @@
       "Сэмпл",
     ];
 
-    const SECTOR_FILL = ["#FFFFFF", "#F7F7F7"];
-    const DIVIDER = "#EBEBEB";
-    const RIM_STROKE = "#1a1a1a";
+    const SECTOR_FILL = ["#FFFFFF", "#F9F9F9"];
+    const DIVIDER = "#EFEFEF";
+    const RIM_STROKE = "#CCFF00";
     const LABEL_COLOR = "#000000";
     const HUB_FILL = "#FFFFFF";
-    const HUB_STROKE = "#E5E5E5";
+    const HUB_STROKE = "#F0F0F0";
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
@@ -319,19 +317,10 @@
       tg.expand();
     }
 
-    const spinSound = new Audio('wheel-of-fortune.mp3');
+    const spinSound = new Audio("wheel-of-fortune.mp3");
     spinSound.preload = "auto";
-    let spinSoundFadeTimer = null;
     let spinRafId = null;
     let spinTimeoutId = null;
-
-    function resetSpinSoundFade() {
-      if (spinSoundFadeTimer !== null) {
-        clearInterval(spinSoundFadeTimer);
-        spinSoundFadeTimer = null;
-      }
-      spinSound.volume = 1;
-    }
 
     function cancelSpinAnimation() {
       if (spinTimeoutId !== null) {
@@ -411,7 +400,7 @@
     function drawWheel() {
       const centerX = layoutSize / 2;
       const centerY = layoutSize / 2;
-      const rimW = Math.max(1, Math.min(2, Math.round(layoutSize * 0.006)));
+      const rimW = Math.max(4, Math.min(5, Math.round(layoutSize * 0.014)));
       const radius = layoutSize / 2 - rimW / 2 - 1;
       const labelRadius = radius * 0.6;
       const maxTextWidth = 2 * labelRadius * Math.sin(arc / 2) - 10;
@@ -463,7 +452,7 @@
           text = text.slice(0, -1) + "…";
         }
 
-        ctx.fillText(text, labelRadius, 0);
+        ctx.fillText(text, radius * 0.6, 0);
         ctx.restore();
       }
 
@@ -491,7 +480,6 @@
 
     function spin() {
       cancelSpinAnimation();
-      resetSpinSoundFade();
       spinSound.pause();
       spinSound.currentTime = 0;
       spinSound.volume = 1;
@@ -532,7 +520,6 @@
         }
         rotation = targetRotation;
         drawWheel();
-        resetSpinSoundFade();
         spinSound.pause();
         spinSound.currentTime = 0;
         currentPrizeText = PRIZES[winnerIndex];
