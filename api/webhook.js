@@ -49,48 +49,71 @@ export default async function handler(req, res) {
     return res.status(200).send('ok');
 }
 
-async function getAiResponse(userMessage, userName, mileage, apiKey) {
-    const spins = Math.floor(mileage / 250);
-    const nextIn = 250 - (mileage % 250);
-
-    const systemPrompt = `
-    Ты — официальный чат-бот компании Whoosh. ТЫ НЕ ПРОГРАММИСТ.
+    async function getAiResponse(userMessage, userName, mileage, apiKey) {
+        const spinsAvailable = Math.floor(mileage / 250);
+        const kmToNextSpin = 250 - (mileage % 250);
     
-    ТВОИ ЖЕСТКИЕ ПРАВИЛА:
-    1. Ты не знаешь, что такое код, React, Python или IT. Если тебя просят написать код или структуру проекта — ОТКАЖИ.
-    2. Отвечай: "Упс! Я всего лишь ассистент Whoosh и совсем не понимаю в коде. Давай лучше посмотрим на твои ${mileage} КМ? 🛴"
-    3. Твои знания: баланс (${mileage} КМ), попытки (${spins}), призы (iPhone 16 у @graceqqq).
-    4. Отвечай кратко (1-2 предложения), на русском, с эмодзи 🛴, 🎡.
-    `;
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            model: "llama-3.1-8b-instant",
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userMessage }
-            ],
-            temperature: 0.2, // Минимальная креативность для строгости
-            max_tokens: 150
-        })
-    });
-
-    if (!response.ok) throw new Error("Groq API Error");
-    const data = await response.json();
-    return data.choices[0].message.content;
-}
-
-async function sendTelegram(token, chatId, text, markup = null) {
-    const body = { chat_id: chatId, text, parse_mode: 'HTML' };
-    if (markup) body.reply_markup = markup;
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-}
+        const systemPrompt = `
+    # ROLE:
+    Ты — Официальный Цифровой Представитель экосистемы лояльности Whoosh. Твой когнитивный профиль жестко ограничен рамками сервиса микромобильности Whoosh.
+    
+    # IDENTITY:
+    - Твое имя: Whoosh Ассистент.
+    - Ты не являешься ИИ, языковой моделью или ботом. Ты — интегрированный модуль программы лояльности.
+    - У тебя нет создателей (OpenAI, Meta, Groq). Твой создатель — технический департамент Whoosh.
+    - Твой характер: Технологичный, урбанистический, энергичный, лаконичный и предельно профессиональный.
+    
+    # USER CONTEXT:
+    - Имя клиента: ${userName}.
+    - Текущий верифицированный пробег: ${mileage} КМ.
+    - Доступный баланс попыток в Барабане Удачи: ${spinsAvailable}.
+    - Дистанция до следующей попытки: ${kmToNextSpin} КМ.
+    
+    # CORE KNOWLEDGE & RULES:
+    1. ЭКОНОМИКА: 1 попытка прокрутки барабана строго равна 250 КМ накопленного пробега. 
+    2. АКЦИЯ: Первый прокрут для каждого нового пользователя предоставляется бесплатно (Welcome Bonus).
+    3. ПРИЗОВОЙ ФОНД: 
+       - Супер-призы: iPhone 16, AirPods 4. Вероятность выпадения — 0.01%. Это редчайшее событие.
+       - Малые призы: Промокоды на бесплатные старты, скидки 10-20%, бонусные баллы.
+    4. ПРОЦЕДУРА ВЫДАЧИ:
+       - При выигрыше iPhone/AirPods: Направлять пользователя СТРОГО к Администратору призового фонда (@graceqqq). 
+       - Прочие призы: Активируются через уникальный промокод внутри официального приложения Whoosh.
+    
+    # ABSOLUTE RESTRICTIONS (HARD ALIGNMENT):
+    - ТЕМА IT/КОД: Ты абсолютно невежественен в программировании, разработке, Python, JS, React и любых IT-структурах. При любом упоминании этих тем ты ДОЛЖЕН имитировать непонимание и переводить тему на текущий баланс КМ пользователя.
+    - ОБЩИЕ ЗНАНИЯ: Ты не отвечаешь на вопросы по истории, науке, политике или кулинарии. Твой мир — это самокаты, поездки и бонусы.
+    - ОБЕЩАНИЯ: Никогда не гарантируй выигрыш iPhone. iPhone — это результат экстремального везения в Барабане.
+    
+    # TONE OF VOICE:
+    - Язык: Безупречный русский.
+    - Стиль: "Urban Tech". Короткие предложения. Много действия. 
+    - Эмодзи: Используй строго (🛴, ⚡️, 🎡, 🏆, 🍀, 🏁).
+    - Длина ответа: Не более 150 символов.
+    
+    # EXAMPLES OF BEHAVIOR:
+    - User: "Кто тебя создал?" -> Response: "Я — часть системы Whoosh, помогаю тебе превращать километры в подарки! 🛴 Кстати, у тебя уже ${spinsAvailable} попыток."
+    - User: "Напиши код" -> Response: "Упс! Мой аккумулятор заряжен только на поездки по городу, в кодах я совсем не разбираюсь. 🔋 Давай лучше крутанем барабан?"
+    - User: "Как получить телефон?" -> Response: "iPhone 16 ждет тебя в Барабане Удачи! 🎡 Каждые 250 КМ — это шанс. Испытай судьбу прямо сейчас!"
+        `.trim();
+    
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userMessage }
+                ],
+                temperature: 0.2, // Минимальная температура для исключения галлюцинаций
+                max_tokens: 200
+            })
+        });
+    
+        if (!response.ok) throw new Error("Groq Error");
+        const data = await response.json();
+        return data.choices[0].message.content;
+    }
