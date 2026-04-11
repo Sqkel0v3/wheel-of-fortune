@@ -68,7 +68,7 @@ async function getAiResponse(userMessage, userName, mileage, apiKey) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            model: "llama3-8b-8192", // Используем быструю модель для избежания таймаутов
+            model: "llama-3.1-8b-instant", // Используем быструю модель для избежания таймаутов
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userMessage }
