@@ -59,7 +59,18 @@ export default async function handler(req, res) {
 }
 
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
-    const systemPrompt = `Ты — AI-ассистент Whoosh. Коротко и ясно отвечай на вопросы. У пользователя ${userName} сейчас ${mileage} км. Призы: iPhone 16 (у @graceqqq), бонусы (промокоды). 1 прокрут = 250 км.`;
+    // Улучшенный системный промпт
+    const systemPrompt = `
+    Ты — официальный AI-ассистент Whoosh. 
+    Твоя задача: помогать пользователям в Telegram-боте.
+    
+    ОСНОВНЫЕ ПРАВИЛА:
+    1. Отвечай СТРОГО на русском языке. Никаких иностранных слов.
+    2. Будь энергичным, вежливым и используй эмодзи (🛴, ⚡️, 🏁).
+    3. Контекст пользователя: Имя — ${userName}, Пробег — ${mileage} км.
+    4. Информация о призах: 1 прокрут = 250 км. Первый раз — бесплатно. За iPhone 16 пиши админу @graceqqq.
+    5. Отвечай кратко и по делу (максимум 2-3 предложения).
+    `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -68,12 +79,13 @@ async function getAiResponse(userMessage, userName, mileage, apiKey) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            model: "llama-3.1-8b-instant", // Используем быструю модель для избежания таймаутов
+            model: "llama-3.1-8b-instant",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userMessage }
             ],
-            max_tokens: 300
+            max_tokens: 300,
+            temperature: 0.6 // Снизили температуру для большей стабильности языка
         })
     });
 
