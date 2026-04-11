@@ -1,7 +1,9 @@
 import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
+    // 1. Сразу отвечаем Телеграму, чтобы он не слал повторы
     if (req.method !== 'POST') return res.status(200).send('OK');
+
     const token = process.env.BOT_TOKEN;
     const groqKey = process.env.GROQ_API_KEY;
     const body = req.body;
@@ -14,69 +16,102 @@ export default async function handler(req, res) {
     const firstName = body.message.from.first_name || "друг";
 
     try {
+        // 2. Логика команды /start
         if (text === '/start') {
-            await sendTelegram(token, chatId, `Привет, ${firstName}! 👋\nЯ твой ассистент Whoosh. Помогу превратить твои километры в крутые призы. Жми на кнопку ниже! 🛴`, {
-                inline_keyboard: [[{ text: "🎁 Испытать удачу", web_app: { url: `https://${req.headers.host}` } }]]
+            const miniAppUrl = `https://${req.headers.host}`;
+            await sendTelegram(token, chatId, {
+                text: `Привет, ${firstName}! 👋\n\nЯ — официальный AI-ассистент Whoosh. Нажми на кнопку ниже, чтобы испытать удачу! 🛴`,
+                reply_markup: {
+                    inline_keyboard: [[{ text: "🎁 Испытать удачу", web_app: { url: miniAppUrl } }]]
+                }
             });
             return res.status(200).send('ok');
         }
 
+        // 3. Индикация "печатает"
         await fetch(`https://api.telegram.org/bot${token}/sendChatAction`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: chatId, action: 'typing' })
         });
 
-        const userRes = await sql`SELECT mileage FROM users WHERE telegram_id = ${userId}`;
-        const mileage = userRes.rows.length > 0 ? userRes.rows[0].mileage : 0;
+        // 4. Получение пробега из БД
+        let mileage = 0;
+        try {
+            const { rows } = await sql`SELECT mileage FROM users WHERE telegram_id = ${userId} LIMIT 1`;
+            if (rows.length > 0) mileage = rows[0].mileage;
+        } catch (dbErr) {
+            console.error("Database Error:", dbErr.message);
+        }
 
+        // 5. Запрос к нейросети
         const aiReply = await getAiResponse(text, firstName, mileage, groqKey);
-        await sendTelegram(token, chatId, aiReply);
+        
+        // 6. Отправка ответа пользователю
+        await sendTelegram(token, chatId, { text: aiReply });
 
     } catch (e) {
-        console.error("WEBHOOK ERROR:", e.message);
-        await sendTelegram(token, chatId, "Упс, небольшая заминка в пути! 🛴 Давай придерживаться темы самокатов и бонусов. Как твой пробег?");
+        console.error("Critical Webhook Error:", e.message);
+        await sendTelegram(token, chatId, { 
+            text: "Аккумулятор немного разрядился! 🔋 Давай придерживаться темы самокатов Whoosh. Как твои успехи на дорогах?" 
+        });
     }
+
     return res.status(200).send('ok');
 }
 
+// ФУНКЦИЯ ОБЩЕНИЯ С НЕЙРОСЕТЬЮ
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
-    const spins = Math.floor(mileage / 250);
-    const nextIn = 250 - (mileage % 250);
+    const spinsAvailable = Math.floor(mileage / 250);
+    const kmToNextSpin = 250 - (mileage % 250);
 
     const systemPrompt = `
 Ты — Официальный Голос Whoosh. Твоя личность: технологичный городской житель.
-ТЫ НЕ ИИ. Ты — часть кода Whoosh. О коде, IT и других ботах ты не знаешь НИЧЕГО.
+ТЫ НЕ ИИ И НЕ ПРОГРАММИСТ. О коде и IT ты не знаешь НИЧЕГО.
 
 ДАННЫЕ КЛИЕНТА:
-- Имя: ${userName}. Пробег: ${mileage} км. Попыток: ${spins}. До следующей: ${nextIn} км.
+- Имя: ${userName}. Баланс: ${mileage} км. Попыток: ${spinsAvailable}. До следующей: ${kmToNextSpin} км.
 
-ПРАВИЛА ОБЩЕНИЯ:
-1. ГОВОРИ КАК ЧЕЛОВЕК: Не вываливай цифры списком. Пиши: "Ого, у тебя уже ${mileage} км! Это целая попытка в барабане. 🎡"
-2. ПРО IPHONE: Это СУПЕР-ПРИЗ, который можно выиграть ТОЛЬКО в приложении. Если юзер выиграл его на барабане — отправляй к @graceqqq. В остальных случаях говори: "iPhone 16 — главный трофей, испытай удачу, вдруг повезет именно тебе! 🍀"
-3. ОТКАЗ ОТ КОДА: Если просят код/программирование — вежливо "включай дурачка": "В кодах не силен, я больше по самокатам и быстрой езде! ⚡️"
-4. СТИЛЬ: Лаконично (1-2 предложения). Безупречный русский. Эмодзи: 🛴, ⚡️, 🎡.
+ПРАВИЛА:
+1. Если просят код — отвечай: "В кодах не силен, я больше по самокатам! ⚡️"
+2. Про iPhone: Это СУПЕР-ПРИЗ (шанс 0.01%). Если выиграл на барабане — пиши @graceqqq.
+3. Стиль: Лаконично (1-2 предложения), безупречный русский, эмодзи 🛴, ⚡️, 🎡.
 `.trim();
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-            model: "llama-3.1-8b-instant", // Используем 8B — она быстрее и реже "падает" по таймауту
-            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
-            temperature: 0.4,
-            max_tokens: 150
-        })
-    });
+    try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userMessage }
+                ],
+                temperature: 0.3,
+                max_tokens: 150
+            })
+        });
 
-    const data = await response.json();
-    return data.choices[0].message.content;
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "Я задумался о маршруте. Повтори вопрос? 🛴";
+    } catch (e) {
+        return "Немного отвлекся от дороги. Как твой пробег сегодня? 🛴";
+    }
 }
 
-async function sendTelegram(token, chatId, text, markup = null) {
+// ФУНКЦИЯ ОТПРАВКИ В TELEGRAM (Исправлено определение)
+async function sendTelegram(token, chatId, payload) {
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text, reply_markup: markup, parse_mode: 'HTML' })
+        body: JSON.stringify({
+            chat_id: chatId,
+            parse_mode: 'HTML',
+            ...payload
+        })
     });
 }
