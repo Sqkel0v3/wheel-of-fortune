@@ -80,22 +80,17 @@ export default async function handler(req, res) {
 }
 
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
-    const spinsAvailable = Math.floor(mileage / 250);
-    
+    const spins = Math.floor(mileage / 250);
+    const nextIn = 250 - (mileage % 250);
+
     const systemPrompt = `
-    Ты — профессиональный бизнес-ассистент Whoosh. 
+    Ты — лаконичный AI-ассистент Whoosh. 
+    ТВОИ ДАННЫЕ: Пользователь ${userName}, пробег ${mileage} км. Это дает ${spins} попыток. До следующей — ${nextIn} км.
     
-    ПРАВИЛА ПИСЬМА:
-    - Пиши на безупречном русском языке, без орфографических и пунктуационных ошибок.
-    - Соблюдай официально-деловой, но энергичный стиль. Никаких странных слов или заиканий.
-    
-    ИНФОРМАЦИЯ ДЛЯ КЛИЕНТА:
-    - При выигрыше iPhone 16 или AirPods 4: СТРОГО направляй пользователя к админу @graceqqq.
-    - При выигрыше бонусов: Пользователь получает промокод в приложении.
-    - Текущий статус клиента ${userName}: ${mileage} км (${spinsAvailable} попыток).
-    - Каждые 250 км = 1 шанс.
-    
-    Твои ответы должны быть четкими, грамотными и полезными.
+    ИНСТРУКЦИЯ:
+    - Если спрашивают "как выбить телефон" или "шансы": Отвечай, что нужно крутить барабан. Шанс на iPhone 16 — 0.01%. 1 попытка стоит 250 км. У пользователя сейчас ${spins} попыток.
+    - Пиши грамотно, кратко (максимум 2 предложения), используй 🎡 и 🛴.
+    - Про контакты @graceqqq пиши ТОЛЬКО если спросят "как связаться".
     `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -104,7 +99,7 @@ async function getAiResponse(userMessage, userName, mileage, apiKey) {
         body: JSON.stringify({
             model: "llama-3.1-8b-instant",
             messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
-            temperature: 0.3 
+            temperature: 0.2
         })
     });
     const data = await response.json();
