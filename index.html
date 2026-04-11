@@ -1149,7 +1149,7 @@
             name: (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || "\u0413\u043e\u0441\u0442\u044c",
             prize: currentPrizeText,
             promoCode: currentIsPhysical ? "" : currentPromoCode,
-            userId: getTelegramUserId(),
+            userId: tg?.initDataUnsafe?.user?.id ?? getTelegramUserId(),
           }),
         });
         const data = await res.json().catch(function () { return {}; });
