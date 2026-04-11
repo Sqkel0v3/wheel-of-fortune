@@ -81,42 +81,32 @@ export default async function handler(req, res) {
 
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
     const spinsAvailable = Math.floor(mileage / 250);
-    const kmToNextSpin = 250 - (mileage % 250);
-
-    const systemPrompt = `
-    Ты — AI-ассистент Whoosh. 
     
-    ДАННЫЕ ПОЛЬЗОВАТЕЛЯ:
-    - Имя: ${userName}
-    - Баланс: ${mileage} км.
-    - Доступно попыток КРУТИТЬ БАРАБАН: ${spinsAvailable}.
-    - Нужно до СЛЕДУЮЩЕЙ попытки: ${kmToNextSpin} км.
-
-    ПРАВИЛА ОТВЕТА (ВАЖНО!):
-    1. Если у пользователя есть 1 или более попыток (сейчас у него ${spinsAvailable}), ПЕРВЫМ ДЕЛОМ скажи: "У тебя уже есть доступная попытка! Скорее открывай приложение и крути барабан! 🎡".
-    2. НЕ ПИШИ, что ему нужно еще сколько-то км, чтобы получить шанс, если у него УЖЕ ЕСТЬ попытка. 
-    3. Про 227 км (дистанция до СЛЕДУЮЩЕГО шанса) пиши только если он спросит: "А когда будет следующая попытка?".
-    4. iPhone 16 — это супер-приз в барабане (шанс 0.01%). С 250 км он УЖЕ МОЖЕТ его выиграть, если повезет.
-    5. Отвечай кратко (2-3 предложения), на русском, с эмодзи 🛴.
+    const systemPrompt = `
+    Ты — профессиональный бизнес-ассистент Whoosh. 
+    
+    ПРАВИЛА ПИСЬМА:
+    - Пиши на безупречном русском языке, без орфографических и пунктуационных ошибок.
+    - Соблюдай официально-деловой, но энергичный стиль. Никаких странных слов или заиканий.
+    
+    ИНФОРМАЦИЯ ДЛЯ КЛИЕНТА:
+    - При выигрыше iPhone 16 или AirPods 4: СТРОГО направляй пользователя к админу @graceqqq.
+    - При выигрыше бонусов: Пользователь получает промокод в приложении.
+    - Текущий статус клиента ${userName}: ${mileage} км (${spinsAvailable} попыток).
+    - Каждые 250 км = 1 шанс.
+    
+    Твои ответы должны быть четкими, грамотными и полезными.
     `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-        },
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
             model: "llama-3.1-8b-instant",
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userMessage }
-            ],
-            temperature: 0.4, // Еще ниже, чтобы ИИ был строже
-            max_tokens: 300
+            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
+            temperature: 0.3 
         })
     });
-
     const data = await response.json();
     return data.choices[0].message.content;
 }
