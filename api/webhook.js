@@ -79,17 +79,25 @@ export default async function handler(req, res) {
     return res.status(200).send('ok');
 }
 
-// Умная функция общения с ИИ
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
     const spinsAvailable = Math.floor(mileage / 250);
     const kmToNextSpin = 250 - (mileage % 250);
 
     const systemPrompt = `
     Ты — AI-ассистент Whoosh. 
-    ДАННЫЕ ПОЛЬЗОВАТЕЛЯ: Имя: ${userName}, Пробег: ${mileage} км.
-    СТАТУС: У него сейчас ${spinsAvailable} попыток. До следующей нужно ${kmToNextSpin} км.
-    ПРАВИЛА: 1 прокрут = 250 км. iPhone 16 — шанс 0.01%.
-    ТВОЯ ЗАДАЧА: Отвечай на русском, кратко, с эмодзи. Будь вежливым и мотивируй ездить больше. Не обещай призы просто так.
+    
+    ДАННЫЕ ПОЛЬЗОВАТЕЛЯ:
+    - Имя: ${userName}
+    - Баланс: ${mileage} км.
+    - Доступно попыток КРУТИТЬ БАРАБАН: ${spinsAvailable}.
+    - Нужно до СЛЕДУЮЩЕЙ попытки: ${kmToNextSpin} км.
+
+    ПРАВИЛА ОТВЕТА (ВАЖНО!):
+    1. Если у пользователя есть 1 или более попыток (сейчас у него ${spinsAvailable}), ПЕРВЫМ ДЕЛОМ скажи: "У тебя уже есть доступная попытка! Скорее открывай приложение и крути барабан! 🎡".
+    2. НЕ ПИШИ, что ему нужно еще сколько-то км, чтобы получить шанс, если у него УЖЕ ЕСТЬ попытка. 
+    3. Про 227 км (дистанция до СЛЕДУЮЩЕГО шанса) пиши только если он спросит: "А когда будет следующая попытка?".
+    4. iPhone 16 — это супер-приз в барабане (шанс 0.01%). С 250 км он УЖЕ МОЖЕТ его выиграть, если повезет.
+    5. Отвечай кратко (2-3 предложения), на русском, с эмодзи 🛴.
     `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -104,7 +112,7 @@ async function getAiResponse(userMessage, userName, mileage, apiKey) {
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userMessage }
             ],
-            temperature: 0.5,
+            temperature: 0.4, // Еще ниже, чтобы ИИ был строже
             max_tokens: 300
         })
     });
