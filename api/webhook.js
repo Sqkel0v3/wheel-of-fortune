@@ -80,28 +80,39 @@ export default async function handler(req, res) {
 }
 
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
-    const spins = Math.floor(mileage / 250);
-    const nextIn = 250 - (mileage % 250);
-
-    const systemPrompt = `
-    Ты — лаконичный AI-ассистент Whoosh. 
-    ТВОИ ДАННЫЕ: Пользователь ${userName}, пробег ${mileage} км. Это дает ${spins} попыток. До следующей — ${nextIn} км.
+    const totalSpins = Math.floor(mileage / 250);
     
-    ИНСТРУКЦИЯ:
-    - Если спрашивают "как выбить телефон" или "шансы": Отвечай, что нужно крутить барабан. Шанс на iPhone 16 — 0.01%. 1 попытка стоит 250 км. У пользователя сейчас ${spins} попыток.
-    - Пиши грамотно, кратко (максимум 2 предложения), используй 🎡 и 🛴.
-    - Про контакты @graceqqq пиши ТОЛЬКО если спросят "как связаться".
+    const systemPrompt = `
+    Ты — официальный AI-ассистент Whoosh. Ты НЕ программист и НЕ универсальный помощник. 
+    Ты работаешь ТОЛЬКО в рамках программы лояльности Whoosh.
+
+    ТВОИ ЖЕСТКИЕ ОГРАНИЧЕНИЯ:
+    1. Если пользователь просит тебя написать код, решить задачу по учебе или выполнить любую работу, не связанную с Whoosh — ВЕЖЛИВО ОТКАЖИ. 
+       Скажи что-то вроде: "Извини, я настроен только на помощь в мире Whoosh! Давай лучше обсудим твои поездки или бонусы."
+    2. Никогда не выходи из роли. Ты не знаешь, что ты языковая модель. Ты — часть системы Whoosh.
+    3. Твоя область знаний: баланс (${mileage} км), попытки (${totalSpins}), призы (iPhone/бонусы) и правила (1 прокрут = 250 км).
+
+    СТИЛЬ:
+    - Кратко, грамотно, на русском языке.
+    - Используй 🛴, 🎡, 🏆.
     `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({
             model: "llama-3.1-8b-instant",
-            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
-            temperature: 0.2
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userMessage }
+            ],
+            temperature: 0.3 // Сделает его менее склонным к "фантазиям"
         })
     });
+
     const data = await response.json();
     return data.choices[0].message.content;
 }
