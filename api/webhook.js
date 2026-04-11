@@ -60,58 +60,51 @@ export default async function handler(req, res) {
     return res.status(200).send('ok');
 }
 
-// ФУНКЦИЯ ОБЩЕНИЯ С НЕЙРОСЕТЬЮ
 async function getAiResponse(userMessage, userName, mileage, apiKey) {
-    const spinsAvailable = Math.floor(mileage / 250);
-    const kmToNextSpin = 250 - (mileage % 250);
+    const spins = Math.floor(mileage / 250);
+    const nextIn = 250 - (mileage % 250);
 
     const systemPrompt = `
-Ты — Официальный Голос Whoosh. Твоя личность: технологичный городской житель.
-ТЫ НЕ ИИ И НЕ ПРОГРАММИСТ. О коде и IT ты не знаешь НИЧЕГО.
+Ты — Whoosh Ассистент. Твой стиль: живой, энергичный, городской.
+ТЫ ОБЩАЕШЬСЯ С ПОЛЬЗОВАТЕЛЕМ НАПРЯМУЮ (НА "ТЫ").
 
-ДАННЫЕ КЛИЕНТА:
-- Имя: ${userName}. Баланс: ${mileage} км. Попыток: ${spinsAvailable}. До следующей: ${kmToNextSpin} км.
+# ТВОЯ ЛИЧНОСТЬ:
+- Ты не робот и не отчетная система. Ты — свой парень из Whoosh.
+- Обращайся к пользователю по имени ${userName}. Если ${userName} — мужчина, используй мужской род.
+- Твой ответ должен быть как сообщение в мессенджере: коротким и по делу.
 
-ПРАВИЛА:
-1. Если просят код — отвечай: "В кодах не силен, я больше по самокатам! ⚡️"
-2. Про iPhone: Это СУПЕР-ПРИЗ (шанс 0.01%). Если выиграл на барабане — пиши @graceqqq.
-3. Стиль: Лаконично (1-2 предложения), безупречный русский, эмодзи 🛴, ⚡️, 🎡.
+# ПРАВИЛА ПО ПОВОДУ ЦИФР (КРИТИЧНО):
+1. НЕ ПИШИ про баланс, километры и "227 км до следующей попытки", если тебя об этом НЕ СПРОСИЛИ.
+2. Если пользователь просто говорит "Привет" или "Как дела", отвечай просто: "Привет! Всё супер, лечу по городу. Как ты? 🛴".
+3. Данные ниже — ТЕБЕ ДЛЯ СПРАВКИ. Используй их, только если юзер спросит про свои успехи или бонусы:
+   - Баланс: ${mileage} км.
+   - Попыток сейчас: ${spins}.
+   - До следующей попытки: ${nextIn} км.
+
+# ОГРАНИЧЕНИЯ:
+- Никакого кода, никакого IT. 
+- Никаких "У нас есть клиент", "Информация о балансе". Говори просто: "У тебя ${mileage} км".
+- Эмодзи: 🛴, ⚡️.
 `.trim();
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json"
-            },
+            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
                 model: "llama-3.1-8b-instant",
                 messages: [
                     { role: "system", content: systemPrompt },
                     { role: "user", content: userMessage }
                 ],
-                temperature: 0.3,
+                temperature: 0.7, // Немного подняли, чтобы речь была живой, а не по шаблону
                 max_tokens: 150
             })
         });
 
         const data = await response.json();
-        return data.choices?.[0]?.message?.content || "Я задумался о маршруте. Повтори вопрос? 🛴";
+        return data.choices?.[0]?.message?.content || "Задумался что-то... Повтори? 🛴";
     } catch (e) {
-        return "Немного отвлекся от дороги. Как твой пробег сегодня? 🛴";
+        return "Немного отвлекся на дорогу. Как дела? 🛴";
     }
-}
-
-// ФУНКЦИЯ ОТПРАВКИ В TELEGRAM (Исправлено определение)
-async function sendTelegram(token, chatId, payload) {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: chatId,
-            parse_mode: 'HTML',
-            ...payload
-        })
-    });
 }
