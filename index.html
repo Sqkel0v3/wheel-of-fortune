@@ -12,13 +12,13 @@
     :root {
       --y: #FFD500;
       --y-dim: #F0C800;
-      --black: #0A0A0A;
-      --surface: #141414;
-      --card: #1C1C1C;
-      --card2: #222222;
-      --muted: #666666;
-      --text: #FFFFFF;
-      --text-sec: #AAAAAA;
+      --black: #111111;
+      --surface: #F5F5F7;
+      --card: #FFFFFF;
+      --card2: #F0F0F0;
+      --muted: #888888;
+      --text: #111111;
+      --text-sec: #666666;
       --radius: 16px;
       --drum-item-h: 80px;
       --drum-card-gap: 10px;
@@ -37,10 +37,10 @@
       min-height: 100dvh;
       width: 100%;
       color: var(--text);
-      background: var(--black);
+      background: var(--surface);
     }
 
-    body.auth-mode { background: var(--black); }
+    body.auth-mode { background: #FFFFFF; }
 
     .screen { display: none; }
     .screen.is-active { display: flex; }
@@ -50,7 +50,7 @@
       position: fixed; inset: 0; z-index: 1000;
       display: none; flex-direction: column;
       align-items: center; justify-content: center;
-      background: var(--black); padding: 24px;
+      background: #FFFFFF; padding: 24px;
     }
     .boot-loading.is-visible { display: flex; }
     .boot-loading__spinner {
@@ -72,7 +72,7 @@
     .auth-screen {
       flex-direction: column; align-items: center; justify-content: center;
       min-height: 100dvh; padding: 40px 24px; width: 100%;
-      background: var(--black);
+      background: #FFFFFF;
     }
 
     .auth-logo-wrap {
@@ -108,10 +108,10 @@
       font-family: 'Manrope', sans-serif;
       font-size: 1.05rem; font-weight: 600;
       letter-spacing: 0.04em;
-      border: 1.5px solid #2A2A2A;
+      border: 1.5px solid #E5E5E5;
       border-radius: var(--radius);
-      background: var(--card);
-      color: var(--text);
+      background: #FFFFFF;
+      color: #111111;
       margin-bottom: 16px;
       transition: border-color 0.2s;
     }
@@ -136,7 +136,7 @@
       min-height: 100dvh; margin: 0 auto;
       display: flex; flex-direction: column;
       padding: max(16px, env(safe-area-inset-top,0)) 20px max(20px, env(safe-area-inset-bottom,0));
-      background: var(--black);
+      background: var(--surface);
     }
 
     /* Header */
@@ -165,12 +165,12 @@
     /* Subtitle pill */
     .subtitle-pill {
       display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,213,0,0.1);
-      border: 1px solid rgba(255,213,0,0.2);
+      background: rgba(255,213,0,0.2);
+      border: 1px solid rgba(255,213,0,0.4);
       border-radius: 999px;
       padding: 6px 14px;
       font-size: 0.72rem; font-weight: 600;
-      color: var(--y);
+      color: #111111;
       margin-bottom: 4px;
       align-self: center;
     }
@@ -186,9 +186,9 @@
 
     /* KM block */
     .km-block {
-      width: 100%; background: var(--card);
+      width: 100%; background: #FFFFFF;
       border-radius: var(--radius); padding: 16px 18px;
-      border: 1px solid #2A2A2A;
+      border: 1px solid #E8E8E8;
     }
     .km-block__top {
       display: flex; align-items: center; justify-content: space-between;
@@ -237,11 +237,11 @@
     }
     .drum-fade--top {
       top: 0;
-      background: linear-gradient(to bottom, var(--card) 0%, transparent 100%);
+      background: linear-gradient(to bottom, #FFFFFF 0%, transparent 100%);
     }
     .drum-fade--bottom {
       bottom: 0;
-      background: linear-gradient(to top, var(--card) 0%, transparent 100%);
+      background: linear-gradient(to top, #FFFFFF 0%, transparent 100%);
     }
 
     /* Active slot highlight */
@@ -249,7 +249,7 @@
       position: absolute; left: 0; right: 0; z-index: 1;
       top: 50%; transform: translateY(-50%);
       height: var(--drum-item-h);
-      background: rgba(255,213,0,0.04);
+      background: rgba(255,213,0,0.08);
       border-top: 1px solid rgba(255,213,0,0.15);
       border-bottom: 1px solid rgba(255,213,0,0.15);
       pointer-events: none;
@@ -284,7 +284,7 @@
     .drum-card__big {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.6rem; letter-spacing: 0.04em;
-      color: var(--text); line-height: 1;
+      color: #111111; line-height: 1;
     }
     .drum-card__small {
       margin-top: 3px;
@@ -370,8 +370,8 @@
     /* Modal — bottom sheet */
     .modal {
       width: 100%; max-width: 480px;
-      background: var(--card);
-      color: var(--text);
+      background: #FFFFFF;
+      color: #111111;
       border-radius: 24px 24px 16px 16px;
       padding: 8px 24px 28px;
       box-shadow: 0 -8px 48px rgba(0,0,0,0.4);
@@ -382,7 +382,7 @@
 
     .modal-handle {
       width: 40px; height: 4px; border-radius: 999px;
-      background: #333; margin: 12px auto 20px;
+      background: #E0E0E0; margin: 12px auto 20px;
     }
 
     .modal h2 {
@@ -409,10 +409,10 @@
       letter-spacing: 0.06em;
       margin: 0 0 20px;
       padding: 14px;
-      background: rgba(255,213,0,0.1);
-      border: 1px dashed rgba(255,213,0,0.35);
+      background: rgba(255,213,0,0.12);
+      border: 1px dashed rgba(255,213,0,0.5);
       border-radius: var(--radius);
-      color: var(--y);
+      color: #111111;
       word-break: break-all;
     }
     .modal-physical-notice {
@@ -434,9 +434,9 @@
     .btn-copy-promo {
       padding: 16px; font-family: 'Bebas Neue', sans-serif;
       font-size: 1rem; letter-spacing: 0.12em;
-      border: 1.5px solid rgba(255,213,0,0.3);
+      border: 1.5px solid rgba(0,0,0,0.15);
       border-radius: var(--radius);
-      background: transparent; color: var(--y); cursor: pointer;
+      background: transparent; color: #111111; cursor: pointer;
       transition: background 0.15s;
     }
     .btn-copy-promo:active { background: rgba(255,213,0,0.08); }
@@ -455,7 +455,7 @@
     .btn-secondary {
       padding: 14px; font-family: 'Manrope', sans-serif;
       font-size: 0.78rem; font-weight: 600;
-      border: 1px solid #2A2A2A;
+      border: 1px solid #E8E8E8;
       border-radius: var(--radius);
       background: transparent; color: var(--text-sec); cursor: pointer;
       transition: border-color 0.15s;
@@ -617,6 +617,11 @@
         for (let i = 0; i < PRIZE_POOL.length; i++) strip.push(cloneEntry(PRIZE_POOL[i]));
       }
       strip.push(cloneEntry(winnerEntry));
+      // Add 2 cards after winner so it's visible in center with neighbours below
+      for (let i = 0; i < 2; i++) {
+        const idx = Math.floor(Math.random() * PRIZE_POOL.length);
+        strip.push(cloneEntry(PRIZE_POOL[idx]));
+      }
       return strip;
     }
 
@@ -839,7 +844,7 @@
       const stripData = buildStrip(won);
       fillStripFromData(stripData);
       const viewH = drumViewport.getBoundingClientRect().height;
-      const winIndex = stripData.length - 1;
+      const winIndex = stripData.length - 3; // winner is 3rd from end (2 cards after it)
       const yStart = translateForCenteredIndex(0, viewH);
       const yEnd = translateForCenteredIndex(winIndex, viewH);
       drumStrip.style.transform = "translateY(" + yStart + "px)";
@@ -987,7 +992,7 @@
     window.addEventListener("resize", function() {
       if (!spinning && drumStrip.children.length) {
         const viewH = drumViewport.getBoundingClientRect().height;
-        const winIndex = drumStrip.children.length - 1;
+        const winIndex = drumStrip.children.length - 3;
         drumStrip.style.transform = "translateY(" + translateForCenteredIndex(winIndex, viewH) + "px)";
       }
     });
@@ -1009,5 +1014,4 @@
     })();
   </script>
 </body>
-</html>
 </html>
