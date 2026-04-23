@@ -50,14 +50,39 @@ export default async function handler(req, res) {
         // ——— Кнопка: Крутить колесо ———
         if (text === '🎡 Крутить колесо') {
             const miniAppUrl = `https://${req.headers.host}`;
-            await send(
-                `🎡 Жми на кнопку ниже и испытай удачу!\n\nПервый прокрут — <b>бесплатно</b>. Далее каждый спин стоит 250 км.`,
-                {
-                    reply_markup: {
-                        inline_keyboard: [[{ text: "🎡 Крутить колесо", web_app: { url: miniAppUrl } }]]
-                    }
+
+            let mileage = 0;
+            let freeSpinAvailable = false;
+            let userFound = false;
+            try {
+                const { rows } = await sql`SELECT mileage, free_spin_available FROM users WHERE telegram_id = ${userId} LIMIT 1`;
+                if (rows.length > 0) {
+                    mileage = rows[0].mileage;
+                    freeSpinAvailable = rows[0].free_spin_available;
+                    userFound = true;
                 }
-            );
+            } catch (dbErr) {
+                console.error("DB error:", dbErr.message);
+            }
+
+            let msgText;
+            if (!userFound) {
+                msgText = `🎡 Открой колесо и получи свой <b>бесплатный прокрут</b>!\n\nДля участия нужно войти по номеру телефона.`;
+            } else if (freeSpinAvailable) {
+                msgText = `🎡 Твой бесплатный прокрут ждёт!\n\nЖми и испытай удачу — это ничего не стоит 🎁`;
+            } else if (mileage >= 250) {
+                const spins = Math.floor(mileage / 250);
+                msgText = `🎡 У тебя ${spins} прокрут${spins > 1 ? 'а' : ''} — жми и крути!`;
+            } else {
+                const need = 250 - mileage;
+                msgText = `⏳ До следующего прокрута осталось <b>${need} км</b>.\n\nПоезди на самокате и возвращайся! 🛴`;
+            }
+
+            await send(msgText, {
+                reply_markup: {
+                    inline_keyboard: [[{ text: "🎡 Открыть колесо", web_app: { url: miniAppUrl } }]]
+                }
+            });
             return res.status(200).send('ok');
         }
 
