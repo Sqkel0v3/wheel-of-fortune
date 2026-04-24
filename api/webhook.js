@@ -27,18 +27,7 @@ export default async function handler(req, res) {
     try {
         // --- /start --- единственная точка входа
         if (text === '/start') {
-            const miniAppUrl = `https://${req.headers.host}`;
-            await send(
-                `Привет, ${firstName}! 👋\n\nЯ ассистент Whoosh — помогу тебе превращать километры в крутые призы 🛴\n\nНажми кнопку ниже, чтобы открыть приложение!`,
-                {
-                    reply_markup: {
-                        // Убираем старую клавиатуру если была + показываем inline кнопку
-                        inline_keyboard: [[{ text: "🎡 Открыть Whoosh Бонусы", web_app: { url: miniAppUrl } }]]
-                    }
-                }
-            );
-            // Убираем Reply Keyboard если она осталась у пользователя
-            await send('​', { reply_markup: REMOVE_KEYBOARD }); // невидимый символ
+            await send(`Привет, ${firstName}! 👋\n\nНажми кнопку <b>Whoosh Бонусы</b> внизу, чтобы открыть приложение 🛴`);
             return res.status(200).send('ok');
         }
 
