@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Whoosh — Лояльность</title>
+  <title>Whoosh — Бонусы</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -11,541 +11,591 @@
   <style>
     :root {
       --y: #FFD500;
-      --y-dim: #F0C800;
-      --black: #111111;
-      --surface: #F5F5F7;
-      --card: #FFFFFF;
-      --card2: #F0F0F0;
-      --muted: #888888;
+      --y-soft: rgba(255,213,0,0.12);
+      --y-border: rgba(255,213,0,0.3);
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
       --text: #111111;
-      --text-sec: #666666;
+      --text-sec: #777777;
+      --border: #EBEBEB;
       --radius: 16px;
+      --nav-h: 60px;
       --drum-item-h: 80px;
       --drum-card-gap: 10px;
       --drum-view-h: calc(3 * var(--drum-item-h) + 2 * var(--drum-card-gap));
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    html { min-height: 100dvh; background: var(--black); }
+    html { min-height: 100dvh; background: var(--bg); }
     html, body {
       font-family: 'Manrope', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
-    body {
-      min-height: 100dvh;
-      width: 100%;
-      color: var(--text);
-      background: var(--surface);
-    }
+    body { min-height: 100dvh; color: var(--text); background: var(--bg); }
+    body.auth-mode { background: #fff; }
 
-    body.auth-mode { background: #FFFFFF; }
-
-    .screen { display: none; }
-    .screen.is-active { display: flex; }
-
-    /* ——— Загрузка ——— */
+    /* ——— BOOT ——— */
     .boot-loading {
-      position: fixed; inset: 0; z-index: 1000;
-      display: none; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: #FFFFFF; padding: 24px;
+      position: fixed; inset: 0; z-index: 200;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      background: #fff; padding: 24px;
     }
     .boot-loading.is-visible { display: flex; }
     .boot-loading__spinner {
       width: 44px; height: 44px;
-      border: 3px solid rgba(255,213,0,0.15);
-      border-top-color: var(--y);
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-      margin-bottom: 20px;
+      border: 3px solid rgba(255,213,0,0.2); border-top-color: var(--y);
+      border-radius: 50%; animation: spin 0.75s linear infinite; margin-bottom: 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .boot-loading__text {
-      font-size: 0.82rem; font-weight: 600;
-      color: var(--text-sec); text-align: center;
-      max-width: 260px; line-height: 1.5;
-    }
+    .boot-loading__text { font-size: 0.82rem; font-weight: 600; color: var(--text-sec); text-align: center; }
 
-    /* ——— Авторизация ——— */
+    /* ——— AUTH ——— */
+    .screen { display: none; }
+    .screen.is-active { display: flex; }
     .auth-screen {
       flex-direction: column; align-items: center; justify-content: center;
-      min-height: 100dvh; padding: 40px 24px; width: 100%;
-      background: #FFFFFF;
+      min-height: 100dvh; padding: 40px 24px; background: #fff;
     }
-
     .auth-logo-wrap {
-      width: 80px; height: 80px;
-      background: var(--y);
-      border-radius: 22px;
+      width: 80px; height: 80px; background: var(--y); border-radius: 22px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 32px;
-      box-shadow: 0 0 40px rgba(255,213,0,0.3);
+      margin-bottom: 28px; box-shadow: 0 8px 32px rgba(255,213,0,0.25);
     }
     .auth-logo { width: 52px; height: 52px; object-fit: contain; }
-
-    .auth-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.2rem; letter-spacing: 0.1em;
-      color: var(--text); margin-bottom: 8px;
-    }
-    .auth-sub {
-      font-size: 0.82rem; color: var(--text-sec);
-      margin-bottom: 36px; text-align: center;
-      max-width: 280px; line-height: 1.55;
-    }
-
-    .auth-field-label {
-      align-self: stretch; max-width: 360px;
-      font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      margin-bottom: 10px; color: var(--text-sec);
-    }
+    .auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 0.1em; margin-bottom: 8px; }
+    .auth-sub { font-size: 0.82rem; color: var(--text-sec); margin-bottom: 32px; text-align: center; max-width: 280px; line-height: 1.55; }
+    .auth-field-label { align-self: stretch; max-width: 360px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; color: var(--text-sec); }
     .auth-input {
-      width: 100%; max-width: 360px;
-      padding: 17px 20px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 1.05rem; font-weight: 600;
-      letter-spacing: 0.04em;
-      border: 1.5px solid #E5E5E5;
-      border-radius: var(--radius);
-      background: #FFFFFF;
-      color: #111111;
-      margin-bottom: 16px;
-      transition: border-color 0.2s;
+      width: 100%; max-width: 360px; padding: 17px 20px;
+      font-family: 'Manrope', sans-serif; font-size: 1rem; font-weight: 600;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: #fff; color: var(--text); margin-bottom: 14px; transition: border-color 0.2s;
     }
-    .auth-input::placeholder { color: #444; font-weight: 500; }
+    .auth-input::placeholder { color: #bbb; }
     .auth-input:focus { outline: none; border-color: var(--y); }
-
     .btn-auth-enter {
-      width: 100%; max-width: 360px;
-      padding: 19px 24px;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.1rem; letter-spacing: 0.15em;
-      border: none; border-radius: var(--radius);
-      background: var(--y); color: var(--black);
-      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      width: 100%; max-width: 360px; padding: 19px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 0.15em;
+      border: none; border-radius: var(--radius); background: var(--y); color: #111; cursor: pointer;
+      transition: opacity 0.15s;
     }
-    .btn-auth-enter:active { opacity: 0.85; transform: scale(0.98); }
-    .btn-auth-enter:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-auth-enter:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ——— Главный экран ——— */
+    /* ——— APP SHELL ——— */
     .app {
-      width: 100%; max-width: 520px;
-      min-height: 100dvh; margin: 0 auto;
-      display: flex; flex-direction: column;
-      padding: max(16px, env(safe-area-inset-top,0)) 20px max(20px, env(safe-area-inset-bottom,0));
-      background: var(--surface);
+      display: none; flex-direction: column;
+      width: 100%; max-width: 520px; margin: 0 auto;
+      min-height: 100dvh;
     }
+    .app.is-active { display: flex; }
 
-    /* Header */
-    header {
+    /* ——— TOP BAR ——— */
+    .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      width: 100%; padding-bottom: 20px; flex-shrink: 0;
+      padding: max(14px, env(safe-area-inset-top,0px)) 20px 14px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; position: sticky; top: 0; z-index: 10;
     }
-    .header-logo-wrap {
-      width: 40px; height: 40px; background: var(--y);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    .topbar-logo { display: flex; align-items: center; gap: 10px; }
+    .topbar-logo-icon {
+      width: 36px; height: 36px; background: var(--y); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
     }
-    .header-logo { width: 26px; height: 26px; object-fit: contain; }
-    .header-center { text-align: center; flex: 1; }
-    .header-brand {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.3rem; letter-spacing: 0.2em; color: var(--text);
-      line-height: 1;
+    .topbar-logo-icon img { width: 24px; height: 24px; object-fit: contain; }
+    .topbar-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; letter-spacing: 0.15em; line-height: 1; }
+    .topbar-sub { font-size: 0.58rem; font-weight: 600; color: var(--text-sec); letter-spacing: 0.08em; text-transform: uppercase; }
+    .burger-btn {
+      width: 36px; height: 36px; border: none; background: none; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 4px;
     }
-    .header-sub {
-      font-size: 0.62rem; font-weight: 600;
-      color: var(--text-sec); letter-spacing: 0.08em;
-      text-transform: uppercase; margin-top: 2px;
+    .burger-btn span {
+      display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px;
+      transition: transform 0.25s, opacity 0.2s;
     }
-    .header-right { width: 40px; } /* spacer */
+    .burger-btn.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .burger-btn.is-open span:nth-child(2) { opacity: 0; }
+    .burger-btn.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* Subtitle pill */
-    .subtitle-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,213,0,0.2);
-      border: 1px solid rgba(255,213,0,0.4);
-      border-radius: 999px;
-      padding: 6px 14px;
-      font-size: 0.72rem; font-weight: 600;
-      color: #111111;
-      margin-bottom: 4px;
-      align-self: center;
+    /* ——— SIDEBAR ——— */
+    .sidebar-overlay {
+      position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.3);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
     }
-    .subtitle-pill::before { content: '⚡'; font-size: 0.75rem; }
-
-    /* Main stack */
-    .main-stack {
-      flex: 1 1 auto;
+    .sidebar-overlay.is-open { opacity: 1; pointer-events: auto; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 60;
+      width: 260px; background: var(--surface);
+      padding: max(20px, env(safe-area-inset-top,0px)) 0 max(20px, env(safe-area-inset-bottom,0px));
+      transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 16px; min-height: 0; width: 100%; padding: 4px 0;
     }
+    .sidebar.is-open { transform: translateX(0); }
+    .sidebar-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .sidebar-logo {
+      width: 44px; height: 44px; background: var(--y); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
+    .sidebar-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.1em; }
+    .sidebar-tagline { font-size: 0.65rem; color: var(--text-sec); font-weight: 500; }
+    .nav-list { list-style: none; flex: 1; padding: 4px 0; }
+    .nav-item button {
+      width: 100%; display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border: none; background: none; cursor: pointer;
+      font-family: 'Manrope', sans-serif; font-size: 0.9rem; font-weight: 600;
+      color: var(--text-sec); text-align: left; border-radius: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item button:hover { background: var(--bg); }
+    .nav-item button.is-active { color: var(--text); background: var(--y-soft); }
+    .nav-item button .nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+    .sidebar-km {
+      margin: 0 16px 8px; padding: 14px 16px;
+      background: var(--y-soft); border: 1px solid var(--y-border);
+      border-radius: 12px;
+    }
+    .sidebar-km__label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); margin-bottom: 4px; }
+    .sidebar-km__val { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.04em; line-height: 1; color: var(--text); }
+    .sidebar-km__track { height: 4px; border-radius: 999px; background: rgba(0,0,0,0.08); overflow: hidden; margin-top: 8px; }
+    .sidebar-km__fill { height: 100%; border-radius: inherit; background: var(--y); transition: width 0.4s ease; }
 
-    /* KM block */
-    .km-block {
-      width: 100%; background: #FFFFFF;
-      border-radius: var(--radius); padding: 16px 18px;
-      border: 1px solid #E8E8E8;
-    }
-    .km-block__top {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .km-block__label {
-      font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text-sec);
-    }
-    .km-block__value {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.5rem; letter-spacing: 0.05em;
-      color: var(--y); line-height: 1;
-    }
-    .km-block__track {
-      height: 6px; border-radius: 999px;
-      background: rgba(255,255,255,0.06); overflow: hidden;
-    }
-    .km-block__fill {
-      height: 100%; width: 0%; border-radius: inherit;
-      background: linear-gradient(90deg, var(--y-dim), var(--y));
-      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-      box-shadow: 0 0 12px rgba(255,213,0,0.4);
-    }
+    /* ——— PAGES ——— */
+    .page { display: none; flex: 1; flex-direction: column; overflow-y: auto; }
+    .page.is-active { display: flex; }
 
-    /* Drum */
-    .drum-assembly {
-      position: relative;
-      display: flex; flex-direction: row; align-items: center;
-      justify-content: center;
-      width: 100%; flex-shrink: 0;
+    /* ——— WHEEL PAGE ——— */
+    .wheel-page {
+      padding: 20px 20px max(20px, env(safe-area-inset-bottom,0px));
+      gap: 16px; align-items: center;
     }
+    .wheel-km-card {
+      width: 100%; background: var(--surface); border-radius: var(--radius);
+      padding: 16px 18px; border: 1px solid var(--border);
+    }
+    .wheel-km-card__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .wheel-km-card__label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); }
+    .wheel-km-card__val { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.04em; color: var(--text); }
+    .wheel-km-card__track { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
+    .wheel-km-card__fill { height: 100%; border-radius: inherit; background: var(--y); transition: width 0.5s ease; box-shadow: 0 0 8px rgba(255,213,0,0.4); }
 
+    .drum-assembly { position: relative; display: flex; align-items: center; width: 100%; }
+    .drum-pointer {
+      flex-shrink: 0; width: 0; height: 0;
+      border-style: solid; border-width: 10px 0 10px 16px;
+      border-color: transparent transparent transparent #111;
+      margin-right: 10px;
+    }
     .drum-viewport {
-      position: relative; flex: 1; min-width: 0;
-      height: var(--drum-view-h); overflow: hidden;
-      border-radius: var(--radius);
-      background: var(--card);
-      border: 1px solid #2A2A2A;
+      flex: 1; height: var(--drum-view-h); overflow: hidden;
+      border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border);
+      position: relative;
     }
-
-    .drum-fade {
-      position: absolute; left: 0; right: 0; z-index: 2;
-      pointer-events: none; height: 38%;
-    }
-    .drum-fade--top {
-      top: 0;
-      background: linear-gradient(to bottom, #FFFFFF 0%, transparent 100%);
-    }
-    .drum-fade--bottom {
-      bottom: 0;
-      background: linear-gradient(to top, #FFFFFF 0%, transparent 100%);
-    }
-
-    /* Active slot highlight */
     .drum-active-line {
       position: absolute; left: 0; right: 0; z-index: 1;
       top: 50%; transform: translateY(-50%);
       height: var(--drum-item-h);
-      background: rgba(255,213,0,0.08);
-      border-top: 1px solid rgba(255,213,0,0.15);
-      border-bottom: 1px solid rgba(255,213,0,0.15);
+      background: var(--y-soft);
+      border-top: 1.5px solid var(--y-border);
+      border-bottom: 1.5px solid var(--y-border);
       pointer-events: none;
     }
-
-    .drum-strip {
-      will-change: transform;
-      display: flex; flex-direction: column;
-      gap: var(--drum-card-gap);
-      padding: 0 4px;
+    .drum-fade {
+      position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none; height: 38%;
     }
-
+    .drum-fade--top { top: 0; background: linear-gradient(to bottom, #fff 0%, transparent 100%); }
+    .drum-fade--bottom { bottom: 0; background: linear-gradient(to top, #fff 0%, transparent 100%); }
+    .drum-strip { will-change: transform; display: flex; flex-direction: column; gap: var(--drum-card-gap); padding: 0 4px; }
     .drum-card {
       height: var(--drum-item-h); flex-shrink: 0;
-      display: flex; flex-direction: row; align-items: center;
-      gap: 14px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 14px; padding: 10px 14px;
       border-radius: 12px;
-      background: transparent;
     }
-
     .drum-card__icon {
-      width: 50px; height: 50px;
-      background: var(--y);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; overflow: hidden;
+      width: 50px; height: 50px; background: var(--y); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;
     }
-    .drum-card__logo {
-      width: 32px; height: 32px; object-fit: contain;
-      pointer-events: none;
-    }
-    .drum-card__big {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.6rem; letter-spacing: 0.04em;
-      color: #111111; line-height: 1;
-    }
-    .drum-card__small {
-      margin-top: 3px;
-      font-size: 0.62rem; font-weight: 700;
-      color: var(--text-sec); text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
+    .drum-card__logo { width: 32px; height: 32px; object-fit: contain; pointer-events: none; }
+    .drum-card__big { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.04em; color: var(--text); line-height: 1; }
+    .drum-card__small { margin-top: 3px; font-size: 0.62rem; font-weight: 700; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.08em; }
 
-    /* Pointer */
-    .drum-pointer {
-      flex-shrink: 0;
-      width: 0; height: 0;
-      border-style: solid;
-      border-width: 10px 0 10px 16px;
-      border-color: transparent transparent transparent var(--y);
-      margin-right: 10px;
-      filter: drop-shadow(0 0 6px rgba(255,213,0,0.5));
-    }
-
-    /* Hint */
-    .hint {
-      font-size: 0.72rem; font-weight: 500;
-      color: var(--text-sec); text-align: center;
-      line-height: 1.5; max-width: 320px; padding: 0 8px;
-    }
-
-    /* Admin panel */
-    .admin-km-panel {
-      width: 100%; display: flex; justify-content: center; margin-top: -4px;
-    }
-    .btn-admin-km {
-      padding: 8px 20px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 0.65rem; font-weight: 800;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      border: 1px solid rgba(255,213,0,0.4);
-      border-radius: 999px; cursor: pointer;
-      color: var(--y); background: rgba(255,213,0,0.08);
-      transition: background 0.15s;
-    }
-    .btn-admin-km:active { background: rgba(255,213,0,0.15); }
-
-    /* Spin button */
+    .spin-hint { font-size: 0.72rem; font-weight: 500; color: var(--text-sec); text-align: center; line-height: 1.5; }
     .btn-spin {
-      width: 100%;
-      padding: 22px 20px;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.2rem; letter-spacing: 0.18em;
-      border: none; border-radius: var(--radius);
-      cursor: pointer; color: var(--black);
-      background: var(--y);
-      box-shadow: 0 4px 24px rgba(255,213,0,0.25);
-      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
-      position: relative; overflow: hidden;
-    }
-    .btn-spin::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .btn-spin:active:not(:disabled) { transform: scale(0.98); box-shadow: 0 2px 12px rgba(255,213,0,0.2); }
-    .btn-spin:disabled:not(.is-waiting) {
-      background: #2A2A2A; color: #555;
-      cursor: not-allowed; box-shadow: none;
-    }
-    .btn-spin.is-waiting { opacity: 0.75; }
-    .btn-spin:disabled.is-waiting { background: var(--y); color: var(--black); }
-    .btn-spin--long { font-size: clamp(0.75rem, 3.5vw, 1rem); letter-spacing: 0.1em; padding: 20px 14px; }
-
-    /* Overlay */
-    .overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(6px);
-      display: flex; align-items: flex-end; justify-content: center;
-      padding: 0 0 max(16px, env(safe-area-inset-bottom));
-      z-index: 100; opacity: 0; pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-    .overlay.is-open { opacity: 1; pointer-events: auto; }
-
-    /* Modal — bottom sheet */
-    .modal {
-      width: 100%; max-width: 480px;
-      background: #FFFFFF;
-      color: #111111;
-      border-radius: 24px 24px 16px 16px;
-      padding: 8px 24px 28px;
-      box-shadow: 0 -8px 48px rgba(0,0,0,0.4);
-      transform: translateY(40px);
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .overlay.is-open .modal { transform: translateY(0); }
-
-    .modal-handle {
-      width: 40px; height: 4px; border-radius: 999px;
-      background: #E0E0E0; margin: 12px auto 20px;
-    }
-
-    .modal h2 {
-      font-size: 0.6rem; font-weight: 800;
-      letter-spacing: 0.25em; text-transform: uppercase;
-      text-align: center; margin-bottom: 6px;
-      color: var(--text-sec);
-    }
-    .modal-prize {
-      font-family: 'Bebas Neue', sans-serif;
-      text-align: center; font-size: 2rem;
-      letter-spacing: 0.05em;
-      color: var(--text); margin-bottom: 16px; line-height: 1.1;
-    }
-    .modal-promo-label {
-      text-align: center; font-size: 0.6rem; font-weight: 700;
-      letter-spacing: 0.15em; text-transform: uppercase;
-      color: var(--text-sec); margin-bottom: 8px;
-    }
-    .modal-promo-code {
-      text-align: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(1.4rem, 6vw, 1.9rem);
-      letter-spacing: 0.06em;
-      margin: 0 0 20px;
-      padding: 14px;
-      background: rgba(255,213,0,0.12);
-      border: 1px dashed rgba(255,213,0,0.5);
-      border-radius: var(--radius);
-      color: #111111;
-      word-break: break-all;
-    }
-    .modal-physical-notice {
-      text-align: center; font-size: 0.8rem; font-weight: 700;
-      line-height: 1.45; margin-bottom: 16px;
-      color: var(--text-sec);
-    }
-    .modal-actions { display: flex; flex-direction: column; gap: 10px; }
-
-    .btn-contact-tg {
-      display: block; width: 100%; padding: 16px;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1rem; letter-spacing: 0.12em;
-      text-align: center; text-decoration: none;
-      border-radius: var(--radius);
-      background: var(--y); color: var(--black);
-      transition: opacity 0.15s;
-    }
-    .btn-copy-promo {
-      padding: 16px; font-family: 'Bebas Neue', sans-serif;
-      font-size: 1rem; letter-spacing: 0.12em;
-      border: 1.5px solid rgba(0,0,0,0.15);
-      border-radius: var(--radius);
-      background: transparent; color: #111111; cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-copy-promo:active { background: rgba(255,213,0,0.08); }
-
-    .btn-claim {
-      padding: 18px; font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.1rem; letter-spacing: 0.15em;
-      border: none; border-radius: var(--radius);
-      background: var(--y); color: var(--black); cursor: pointer;
-      box-shadow: 0 4px 20px rgba(255,213,0,0.2);
+      width: 100%; padding: 22px; font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.25rem; letter-spacing: 0.2em; border: none; border-radius: var(--radius);
+      background: var(--y); color: #111; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255,213,0,0.3);
       transition: opacity 0.15s, transform 0.1s;
     }
-    .btn-claim:active { transform: scale(0.98); }
-    .btn-claim:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-secondary {
-      padding: 14px; font-family: 'Manrope', sans-serif;
-      font-size: 0.78rem; font-weight: 600;
-      border: 1px solid #E8E8E8;
-      border-radius: var(--radius);
-      background: transparent; color: var(--text-sec); cursor: pointer;
-      transition: border-color 0.15s;
+    .btn-spin:active:not(:disabled) { transform: scale(0.98); }
+    .btn-spin:disabled:not(.is-waiting) { background: #E5E5E5; color: #999; cursor: not-allowed; box-shadow: none; font-size: 0.85rem; letter-spacing: 0.08em; }
+    .btn-spin.is-waiting { opacity: 0.75; }
+    .btn-spin--long { font-size: 0.9rem; letter-spacing: 0.1em; padding: 20px; }
+    .admin-km-panel { display: flex; justify-content: center; }
+    .btn-admin-km {
+      padding: 8px 20px; font-family: 'Manrope', sans-serif; font-size: 0.65rem; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1px solid var(--y-border); border-radius: 999px; cursor: pointer;
+      color: #111; background: var(--y-soft);
     }
-    .btn-secondary:active { border-color: #444; }
+
+    /* ——— BALANCE PAGE ——— */
+    .balance-page { padding: 20px; gap: 12px; }
+    .balance-hero {
+      background: var(--y); border-radius: 20px; padding: 24px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .balance-hero__label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(0,0,0,0.5); margin-bottom: 6px; }
+    .balance-hero__km { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 0.04em; line-height: 1; color: #111; }
+    .balance-hero__sub { font-size: 0.75rem; font-weight: 600; color: rgba(0,0,0,0.55); margin-top: 4px; }
+    .balance-track-wrap { margin-top: 16px; width: 100%; }
+    .balance-track { height: 8px; border-radius: 999px; background: rgba(0,0,0,0.12); overflow: hidden; }
+    .balance-track-fill { height: 100%; border-radius: inherit; background: #111; transition: width 0.5s ease; }
+    .balance-track-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.6rem; font-weight: 700; color: rgba(0,0,0,0.45); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card {
+      background: var(--surface); border-radius: var(--radius); padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .stat-card__icon { font-size: 1.3rem; margin-bottom: 8px; }
+    .stat-card__val { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.04em; line-height: 1; color: var(--text); }
+    .stat-card__label { font-size: 0.62rem; font-weight: 600; color: var(--text-sec); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .spin-cta {
+      background: var(--surface); border-radius: var(--radius); padding: 18px;
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .spin-cta__text { font-size: 0.82rem; font-weight: 600; line-height: 1.4; }
+    .spin-cta__text b { font-weight: 800; }
+    .btn-spin-cta {
+      flex-shrink: 0; padding: 12px 20px; font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.95rem; letter-spacing: 0.12em;
+      border: none; border-radius: 10px; background: var(--y); color: #111; cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* ——— RULES PAGE ——— */
+    .rules-page { padding: 20px; gap: 12px; }
+    .rules-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; line-height: 1.1; }
+    .rule-card {
+      background: var(--surface); border-radius: var(--radius); padding: 18px;
+      border: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start;
+    }
+    .rule-num {
+      flex-shrink: 0; width: 32px; height: 32px; background: var(--y); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.04em;
+    }
+    .rule-text { font-size: 0.82rem; line-height: 1.55; font-weight: 500; }
+    .rule-text b { font-weight: 800; }
+    .prizes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .prize-chip {
+      background: var(--surface); border-radius: 12px; padding: 12px 14px;
+      border: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
+    }
+    .prize-chip__icon { font-size: 1.3rem; flex-shrink: 0; }
+    .prize-chip__name { font-size: 0.75rem; font-weight: 700; line-height: 1.3; }
+    .prize-chip__chance { font-size: 0.6rem; color: var(--text-sec); font-weight: 500; margin-top: 2px; }
+    .section-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-sec); padding-left: 2px; }
+
+    /* ——— SUPPORT PAGE ——— */
+    .support-page { padding: 20px; gap: 12px; }
+    .support-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; }
+    .support-card {
+      background: var(--surface); border-radius: var(--radius); padding: 18px;
+      border: 1px solid var(--border);
+    }
+    .support-card__icon { font-size: 1.5rem; margin-bottom: 10px; }
+    .support-card__title { font-size: 0.82rem; font-weight: 800; margin-bottom: 6px; }
+    .support-card__text { font-size: 0.78rem; color: var(--text-sec); line-height: 1.55; }
+    .btn-tg {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 16px; margin-top: 14px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.12em;
+      border: none; border-radius: var(--radius); background: var(--y); color: #111;
+      cursor: pointer; text-decoration: none;
+    }
+
+    /* ——— CHAT PAGE ——— */
+    .chat-page { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px 16px 8px;
+      display: flex; flex-direction: column; gap: 10px;
+      scroll-behavior: smooth;
+    }
+    .msg { display: flex; flex-direction: column; max-width: 82%; }
+    .msg--bot { align-self: flex-start; }
+    .msg--user { align-self: flex-end; }
+    .msg__bubble {
+      padding: 11px 14px; border-radius: 16px;
+      font-size: 0.84rem; line-height: 1.5; font-weight: 500;
+    }
+    .msg--bot .msg__bubble { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); }
+    .msg--user .msg__bubble { background: var(--y); color: #111; border-bottom-right-radius: 4px; }
+    .msg__time { font-size: 0.58rem; color: var(--text-sec); margin-top: 4px; font-weight: 500; }
+    .msg--user .msg__time { text-align: right; }
+    .typing-bubble { display: flex; gap: 4px; align-items: center; padding: 12px 14px; }
+    .typing-bubble span {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--text-sec);
+      animation: bounce 1.2s ease infinite;
+    }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+    .chat-input-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px max(12px, env(safe-area-inset-bottom,0px));
+      background: var(--surface); border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1; padding: 12px 16px; font-family: 'Manrope', sans-serif;
+      font-size: 0.88rem; font-weight: 500;
+      border: 1.5px solid var(--border); border-radius: 999px;
+      background: var(--bg); color: var(--text); outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input:focus { border-color: var(--y); }
+    .btn-send {
+      width: 42px; height: 42px; flex-shrink: 0;
+      border: none; border-radius: 50%; background: var(--y); color: #111;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: opacity 0.15s;
+    }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ——— PRIZE MODAL ——— */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: 0 0 max(16px, env(safe-area-inset-bottom));
+      z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .overlay.is-open { opacity: 1; pointer-events: auto; }
+    .modal {
+      width: 100%; max-width: 480px; background: var(--surface);
+      border-radius: 24px 24px 16px 16px; padding: 8px 24px 28px;
+      box-shadow: 0 -8px 48px rgba(0,0,0,0.12);
+      transform: translateY(40px); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .overlay.is-open .modal { transform: translateY(0); }
+    .modal-handle { width: 40px; height: 4px; border-radius: 999px; background: var(--border); margin: 12px auto 20px; }
+    .modal h2 { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.25em; text-transform: uppercase; text-align: center; margin-bottom: 6px; color: var(--text-sec); }
+    .modal-prize { font-family: 'Bebas Neue', sans-serif; text-align: center; font-size: 2rem; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .modal-promo-label { text-align: center; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-sec); margin-bottom: 8px; }
+    .modal-promo-code {
+      text-align: center; font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.4rem,6vw,1.9rem); letter-spacing: 0.06em;
+      margin: 0 0 20px; padding: 14px;
+      background: var(--y-soft); border: 1px dashed var(--y-border);
+      border-radius: var(--radius); color: var(--text); word-break: break-all;
+    }
+    .modal-physical-notice { text-align: center; font-size: 0.8rem; font-weight: 600; line-height: 1.45; margin-bottom: 16px; color: var(--text-sec); }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+    .btn-contact-tg {
+      display: block; width: 100%; padding: 16px; font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem; letter-spacing: 0.12em; text-align: center; text-decoration: none;
+      border-radius: var(--radius); background: var(--y); color: #111;
+    }
+    .btn-copy-promo {
+      padding: 16px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.12em;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--text); cursor: pointer;
+    }
+    .btn-claim {
+      padding: 18px; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.15em;
+      border: none; border-radius: var(--radius); background: var(--y); color: #111; cursor: pointer;
+    }
+    .btn-claim:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 14px; font-family: 'Manrope', sans-serif; font-size: 0.78rem; font-weight: 600;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--text-sec); cursor: pointer;
+    }
 
     @media (max-height: 700px) {
       :root { --drum-item-h: 72px; }
-      .km-block { padding: 13px 16px; }
-      .btn-spin { padding: 18px 20px; }
+      .btn-spin { padding: 18px; }
     }
   </style>
 </head>
 <body>
-  <div class="boot-loading" id="bootLoading" aria-live="polite">
-    <div class="boot-loading__spinner" aria-hidden="true"></div>
-    <p class="boot-loading__text">Подключение к серверам Whoosh...</p>
+  <!-- Boot -->
+  <div class="boot-loading" id="bootLoading">
+    <div class="boot-loading__spinner"></div>
+    <p class="boot-loading__text">Подключение к Whoosh...</p>
   </div>
 
+  <!-- Auth -->
   <div class="screen auth-screen" id="authScreen" hidden>
     <div class="auth-logo-wrap">
-      <img class="auth-logo" src="/whoosh.png" alt="Whoosh" width="52" height="52" />
+      <img class="auth-logo" src="/whoosh.png" alt="Whoosh" />
     </div>
     <p class="auth-title">WHOOSH</p>
     <p class="auth-sub">Войдите по номеру телефона, чтобы открыть барабан бонусов</p>
     <label class="auth-field-label" for="phoneInput">Телефон</label>
-    <input
-      class="auth-input"
-      id="phoneInput"
-      type="tel"
-      inputmode="tel"
-      autocomplete="tel"
-      placeholder="+7 (999) 000-00-00"
-    />
+    <input class="auth-input" id="phoneInput" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (999) 000-00-00" />
     <button type="button" class="btn-auth-enter" id="authEnterBtn">ВОЙТИ</button>
   </div>
 
-  <div class="app" id="mainApp" hidden>
-    <header>
-      <div class="header-logo-wrap">
-        <img class="header-logo" src="/whoosh.png" alt="Whoosh" width="26" height="26" />
-      </div>
-      <div class="header-center">
-        <div class="header-brand">WHOOSH</div>
-        <div class="header-sub">Бонусная программа</div>
-      </div>
-      <div class="header-right"></div>
-    </header>
-
-    <div class="main-stack">
-      <div class="subtitle-pill" id="subtitleLine">Первый прокрут бесплатно</div>
-
-      <div class="km-block" id="kmBlock">
-        <div class="km-block__top">
-          <span class="km-block__label">Ваш пробег</span>
-          <span class="km-block__value" id="kmBlockValue">0 КМ</span>
-        </div>
-        <div class="km-block__track" aria-hidden="true">
-          <div class="km-block__fill" id="kmBlockFill"></div>
+  <!-- App -->
+  <div class="app" id="mainApp">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-logo">
+        <div class="topbar-logo-icon"><img src="/whoosh.png" alt="W" /></div>
+        <div>
+          <div class="topbar-brand">WHOOSH</div>
+          <div class="topbar-sub">Бонусная программа</div>
         </div>
       </div>
+      <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
 
+    <!-- Sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><img src="/whoosh.png" alt="W" /></div>
+        <div>
+          <div class="sidebar-brand">WHOOSH</div>
+          <div class="sidebar-tagline">Бонусная программа</div>
+        </div>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item"><button data-page="wheel" class="is-active"><span class="nav-icon">🎡</span> Колесо</button></li>
+        <li class="nav-item"><button data-page="chat"><span class="nav-icon">💬</span> Чат с ИИ</button></li>
+        <li class="nav-item"><button data-page="balance"><span class="nav-icon">📊</span> Баланс</button></li>
+        <li class="nav-item"><button data-page="rules"><span class="nav-icon">❓</span> Правила</button></li>
+        <li class="nav-item"><button data-page="support"><span class="nav-icon">🆘</span> Поддержка</button></li>
+      </ul>
+      <div class="sidebar-km">
+        <div class="sidebar-km__label">Пробег</div>
+        <div class="sidebar-km__val" id="sidebarKm">0 КМ</div>
+        <div class="sidebar-km__track"><div class="sidebar-km__fill" id="sidebarKmFill"></div></div>
+      </div>
+    </div>
+
+    <!-- Pages -->
+
+    <!-- 🎡 Wheel -->
+    <div class="page wheel-page is-active" id="pageWheel">
+      <div class="wheel-km-card">
+        <div class="wheel-km-card__top">
+          <span class="wheel-km-card__label">Ваш пробег</span>
+          <span class="wheel-km-card__val" id="kmBlockValue">0 КМ</span>
+        </div>
+        <div class="wheel-km-card__track"><div class="wheel-km-card__fill" id="kmBlockFill"></div></div>
+      </div>
       <div class="drum-assembly" id="drumAssembly">
-        <div class="drum-pointer" aria-hidden="true"></div>
+        <div class="drum-pointer"></div>
         <div class="drum-viewport" id="drumViewport">
-          <div class="drum-active-line" aria-hidden="true"></div>
-          <div class="drum-fade drum-fade--top" aria-hidden="true"></div>
-          <div class="drum-fade drum-fade--bottom" aria-hidden="true"></div>
+          <div class="drum-active-line"></div>
+          <div class="drum-fade drum-fade--top"></div>
+          <div class="drum-fade drum-fade--bottom"></div>
           <div class="drum-strip" id="drumStrip"></div>
         </div>
       </div>
-
-      <p class="hint" id="hintLine">Первый прокрут бесплатно. Далее — 250 км с баланса.</p>
-
+      <p class="spin-hint" id="hintLine">Первый прокрут бесплатно. Далее — 250 км с баланса.</p>
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
+    </div>
+
+    <!-- 💬 Chat -->
+    <div class="page chat-page" id="pageChat">
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg msg--bot">
+          <div class="msg__bubble">Привет! Я ассистент Whoosh 🛴 Спроси меня про акцию, баланс или призы.</div>
+          <div class="msg__time">сейчас</div>
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Написать сообщение..." />
+        <button class="btn-send" id="chatSendBtn">➤</button>
+      </div>
+    </div>
+
+    <!-- 📊 Balance -->
+    <div class="page balance-page" id="pageBalance">
+      <div class="balance-hero">
+        <div class="balance-hero__label">Ваш пробег</div>
+        <div class="balance-hero__km" id="balanceKm">0</div>
+        <div class="balance-hero__sub">километров</div>
+        <div class="balance-track-wrap">
+          <div class="balance-track"><div class="balance-track-fill" id="balanceTrackFill"></div></div>
+          <div class="balance-track-label"><span>0</span><span>250 км = 1 прокрут</span></div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card__icon">🎡</div>
+          <div class="stat-card__val" id="statSpins">0</div>
+          <div class="stat-card__label">Прокрутов доступно</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">⏳</div>
+          <div class="stat-card__val" id="statNeed">250</div>
+          <div class="stat-card__label">км до прокрута</div>
+        </div>
+      </div>
+      <div class="spin-cta">
+        <div class="spin-cta__text">Готов крутить? <b>Испытай удачу прямо сейчас!</b></div>
+        <button class="btn-spin-cta" id="balanceSpinBtn">КРУТИТЬ</button>
+      </div>
+    </div>
+
+    <!-- ❓ Rules -->
+    <div class="page rules-page" id="pageRules">
+      <div class="rules-title">ПРАВИЛА АКЦИИ</div>
+      <div class="rule-card"><div class="rule-num">1</div><div class="rule-text"><b>Первый прокрут — бесплатно</b> для каждого участника без исключений.</div></div>
+      <div class="rule-card"><div class="rule-num">2</div><div class="rule-text">Каждый следующий прокрут стоит <b>250 км</b> накопленного пробега.</div></div>
+      <div class="rule-card"><div class="rule-num">3</div><div class="rule-text">Километры копятся за <b>реальные поездки</b> на самокатах Whoosh. Привяжи номер телефона в приложении.</div></div>
+      <div class="rule-card"><div class="rule-num">4</div><div class="rule-text">Выиграл <b>iPhone 16 или AirPods 4</b>? Напиши администратору <b>@graceqqq</b> для получения приза.</div></div>
+      <div class="section-label">Призы</div>
+      <div class="prizes-grid">
+        <div class="prize-chip"><div class="prize-chip__icon">📱</div><div><div class="prize-chip__name">iPhone 16</div><div class="prize-chip__chance">Шанс 0.01%</div></div></div>
+        <div class="prize-chip"><div class="prize-chip__icon">🎧</div><div><div class="prize-chip__name">AirPods 4</div><div class="prize-chip__chance">Редкий</div></div></div>
+        <div class="prize-chip"><div class="prize-chip__icon">🛴</div><div><div class="prize-chip__name">Pass на год</div><div class="prize-chip__chance">365 дней</div></div></div>
+        <div class="prize-chip"><div class="prize-chip__icon">🎟</div><div><div class="prize-chip__name">Промокоды</div><div class="prize-chip__chance">Скидки и старты</div></div></div>
+      </div>
+    </div>
+
+    <!-- 🆘 Support -->
+    <div class="page support-page" id="pageSupport">
+      <div class="support-title">ПОДДЕРЖКА</div>
+      <div class="support-card">
+        <div class="support-card__icon">🏆</div>
+        <div class="support-card__title">Выиграл крупный приз?</div>
+        <div class="support-card__text">Если ты выиграл iPhone 16 или AirPods 4 — свяжись с администратором для верификации и получения приза.</div>
+        <a class="btn-tg" href="https://t.me/graceqqq" id="contactTgSupport">Написать @graceqqq</a>
+      </div>
+      <div class="support-card">
+        <div class="support-card__icon">💬</div>
+        <div class="support-card__title">Вопросы по акции</div>
+        <div class="support-card__text">По любым вопросам о правилах, промокодах и начислении километров — напиши нам или воспользуйся чатом с ИИ-ассистентом.</div>
+        <button class="btn-tg" id="supportChatBtn" style="margin-top:14px">Открыть чат с ИИ</button>
+      </div>
     </div>
   </div>
 
-  <div class="overlay" id="prizeOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <!-- Prize Modal -->
+  <div class="overlay" id="prizeOverlay" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-handle"></div>
       <h2 id="modalTitle">Поздравляем</h2>
       <p class="modal-prize" id="modalPrize"></p>
       <p class="modal-physical-notice" id="modalPhysicalNotice" hidden></p>
       <p class="modal-promo-label" id="modalPromoLabel">Промокод</p>
-      <p class="modal-promo-code" id="modalPromoCode" aria-live="polite"></p>
+      <p class="modal-promo-code" id="modalPromoCode"></p>
       <div class="modal-actions">
         <a class="btn-contact-tg" id="contactTgBtn" href="https://t.me/graceqqq" rel="noopener noreferrer" hidden>СВЯЗАТЬСЯ</a>
-        <button type="button" class="btn-copy-promo" id="copyPromoBtn"></button>
-        <button type="button" class="btn-claim" id="claimBtn"></button>
+        <button type="button" class="btn-copy-promo" id="copyPromoBtn">СКОПИРОВАТЬ ПРОМОКОД</button>
+        <button type="button" class="btn-claim" id="claimBtn">ЗАБРАТЬ ПРИЗ</button>
         <button type="button" class="btn-secondary" id="closeModalBtn">Закрыть</button>
       </div>
     </div>
@@ -556,14 +606,7 @@
     const STRIP_POOL_REPEATS = 100;
     const PHYSICAL_PRIZE_CHAT_URL = "https://t.me/graceqqq";
     const DEMO_ADMIN_IDS = [821470232, 1106885262];
-
     const WHOOSH_LOGO_SRC = "/whoosh.png";
-    const LABEL_COPY_PROMO = "СКОПИРОВАТЬ ПРОМОКОД";
-    const LABEL_COPIED = "СКОПИРОВАНО";
-    const LABEL_CLAIM = "ЗАБРАТЬ ПРИЗ";
-    const LABEL_CONTACT = "СВЯЗАТЬСЯ";
-    const LABEL_SPIN = "КРУТИТЬ";
-    const LABEL_FREE_SPIN = "БЕСПЛАТНАЯ ПРОКРУТКА";
 
     const PRIZE_POOL = [
       { title: "iPhone 16", big: "16", small: "iPhone", weight: 0.01 },
@@ -573,95 +616,78 @@
       { title: "500 бонусов", big: "500", small: "бонусов", weight: 3, promoSlug: "500" },
       { title: "3 бесплатных старта", big: "3", small: "бесплатных старта", weight: 15, promoSlug: "START3" },
       { title: "100 бонусов", big: "100", small: "бонусов", weight: 35, promoSlug: "100" },
-      { title: "Скидка 10% на поездку", big: "10%", small: "на поездку", weight: 45.84, promoSlug: "RIDE10" },
+      { title: "Скидка 10%", big: "10%", small: "на поездку", weight: 45.84, promoSlug: "RIDE10" },
     ];
 
     const PROMO_RND = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
     function pickWeightedPrize() {
-      const r = Math.random() * 100;
-      let cum = 0;
-      for (let i = 0; i < PRIZE_POOL.length; i++) {
-        cum += PRIZE_POOL[i].weight;
-        if (r < cum) return PRIZE_POOL[i];
-      }
+      const r = Math.random() * 100; let cum = 0;
+      for (let i = 0; i < PRIZE_POOL.length; i++) { cum += PRIZE_POOL[i].weight; if (r < cum) return PRIZE_POOL[i]; }
       return PRIZE_POOL[PRIZE_POOL.length - 1];
     }
-
-    function cloneEntry(entry) {
-      return { title: entry.title, big: entry.big, small: entry.small, promoSlug: entry.promoSlug };
-    }
-
-    function isPhysicalPrize(entry) {
-      const t = entry && entry.title;
-      return t === "iPhone 16" || t === "AirPods 4";
-    }
-
+    function cloneEntry(e) { return { title: e.title, big: e.big, small: e.small, promoSlug: e.promoSlug }; }
+    function isPhysical(e) { return e && (e.title === "iPhone 16" || e.title === "AirPods 4"); }
     function generatePromo(prefix) {
-      let mid = String(prefix || "BONUS").replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "BONUS";
-      mid = mid.slice(0, 3);
-      while (mid.length < 3) mid += PROMO_RND.charAt(Math.floor(Math.random() * PROMO_RND.length));
-      let tail = "";
-      for (let i = 0; i < 4; i++) tail += PROMO_RND.charAt(Math.floor(Math.random() * PROMO_RND.length));
+      let mid = String(prefix || "BONUS").replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,3) || "BON";
+      while (mid.length < 3) mid += PROMO_RND[Math.floor(Math.random()*PROMO_RND.length)];
+      let tail = ""; for (let i=0;i<4;i++) tail += PROMO_RND[Math.floor(Math.random()*PROMO_RND.length)];
       return "WHOOSH-" + mid + "-" + tail;
     }
-
-    function promoForEntry(entry) {
-      if (isPhysicalPrize(entry)) return "";
-      return generatePromo(entry.promoSlug || "BONUS");
-    }
-
-    function buildStrip(winnerEntry) {
-      const strip = [];
-      for (let rep = 0; rep < STRIP_POOL_REPEATS; rep++) {
-        for (let i = 0; i < PRIZE_POOL.length; i++) strip.push(cloneEntry(PRIZE_POOL[i]));
-      }
-      strip.push(cloneEntry(winnerEntry));
-      // Add 2 cards after winner so it's visible in center with neighbours below
-      for (let i = 0; i < 2; i++) {
-        const idx = Math.floor(Math.random() * PRIZE_POOL.length);
-        strip.push(cloneEntry(PRIZE_POOL[idx]));
-      }
-      return strip;
+    function promoForEntry(e) { return isPhysical(e) ? "" : generatePromo(e.promoSlug || "BONUS"); }
+    function buildStrip(winner) {
+      const s = [];
+      for (let r=0;r<STRIP_POOL_REPEATS;r++) for (let i=0;i<PRIZE_POOL.length;i++) s.push(cloneEntry(PRIZE_POOL[i]));
+      s.push(cloneEntry(winner));
+      for (let i=0;i<2;i++) s.push(cloneEntry(PRIZE_POOL[Math.floor(Math.random()*PRIZE_POOL.length)]));
+      return s;
     }
 
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    function getTelegramUserId() {
+    function getTgUserId() {
       const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
       if (u && u.id != null) return u.id;
-      try {
-        const q = new URLSearchParams(window.location.search).get("telegramId");
-        if (q) { const n = Number(q); if (Number.isFinite(n)) return n; }
-      } catch (e) {}
+      try { const q = new URLSearchParams(location.search).get("telegramId"); if (q) { const n=Number(q); if(isFinite(n)) return n; } } catch(e) {}
       return null;
     }
-
-    function isDemoAdmin() {
-      const id = getTelegramUserId();
-      return id != null && DEMO_ADMIN_IDS.some(function(x) { return x == id; });
-    }
+    function isDemoAdmin() { const id=getTgUserId(); return id!=null && DEMO_ADMIN_IDS.some(x=>x==id); }
+    function getTgName() { return (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || "друг"; }
 
     let sessionUser = null;
     let spinning = false;
-    let currentPrizeText = "";
-    let currentPromoCode = "";
+    let currentPrize = "";
+    let currentPromo = "";
     let currentIsPhysical = false;
     let spinRafId = null;
     let spinTimeoutId = null;
 
+    // DOM refs
     const bootLoading = document.getElementById("bootLoading");
     const authScreen = document.getElementById("authScreen");
     const mainApp = document.getElementById("mainApp");
     const phoneInput = document.getElementById("phoneInput");
     const authEnterBtn = document.getElementById("authEnterBtn");
-    const subtitleLine = document.getElementById("subtitleLine");
+    const burgerBtn = document.getElementById("burgerBtn");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const sidebarKm = document.getElementById("sidebarKm");
+    const sidebarKmFill = document.getElementById("sidebarKmFill");
     const kmBlockValue = document.getElementById("kmBlockValue");
     const kmBlockFill = document.getElementById("kmBlockFill");
     const spinBtn = document.getElementById("spinBtn");
+    const hintLine = document.getElementById("hintLine");
     const drumStrip = document.getElementById("drumStrip");
     const drumViewport = document.getElementById("drumViewport");
+    const balanceKm = document.getElementById("balanceKm");
+    const balanceTrackFill = document.getElementById("balanceTrackFill");
+    const statSpins = document.getElementById("statSpins");
+    const statNeed = document.getElementById("statNeed");
+    const balanceSpinBtn = document.getElementById("balanceSpinBtn");
+    const chatMessages = document.getElementById("chatMessages");
+    const chatInput = document.getElementById("chatInput");
+    const chatSendBtn = document.getElementById("chatSendBtn");
     const prizeOverlay = document.getElementById("prizeOverlay");
     const modalPrize = document.getElementById("modalPrize");
     const modalPhysicalNotice = document.getElementById("modalPhysicalNotice");
@@ -671,346 +697,309 @@
     const copyPromoBtn = document.getElementById("copyPromoBtn");
     const claimBtn = document.getElementById("claimBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
+    const contactTgSupport = document.getElementById("contactTgSupport");
+    const supportChatBtn = document.getElementById("supportChatBtn");
 
-    copyPromoBtn.textContent = LABEL_COPY_PROMO;
-    claimBtn.textContent = LABEL_CLAIM;
-    contactTgBtn.textContent = LABEL_CONTACT;
-    contactTgBtn.href = PHYSICAL_PRIZE_CHAT_URL;
-
+    // ——— NAVIGATION ———
     function showBootLoading(on) { bootLoading.classList.toggle("is-visible", !!on); }
-    function setBodyAuthMode(on) { document.body.classList.toggle("auth-mode", !!on); }
 
-    function showAuthOnly() {
+    function showAuth() {
       authScreen.hidden = false; authScreen.classList.add("is-active");
-      mainApp.hidden = true; setBodyAuthMode(true);
+      mainApp.classList.remove("is-active"); document.body.classList.add("auth-mode");
     }
-
-    function showMainOnly() {
+    function showMain() {
       authScreen.hidden = true; authScreen.classList.remove("is-active");
-      mainApp.hidden = false; setBodyAuthMode(false);
-      injectDemoAdminPanel();
+      mainApp.classList.add("is-active"); document.body.classList.remove("auth-mode");
+      injectDemoPanel();
     }
 
-    function injectDemoAdminPanel() {
+    function openSidebar() {
+      sidebar.classList.add("is-open"); sidebarOverlay.classList.add("is-open"); burgerBtn.classList.add("is-open");
+    }
+    function closeSidebar() {
+      sidebar.classList.remove("is-open"); sidebarOverlay.classList.remove("is-open"); burgerBtn.classList.remove("is-open");
+    }
+
+    function navigateTo(pageId) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("is-active"));
+      document.getElementById("page" + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add("is-active");
+      document.querySelectorAll(".nav-item button").forEach(b => b.classList.toggle("is-active", b.dataset.page === pageId));
+      closeSidebar();
+      if (pageId === "balance") refreshBalance();
+    }
+
+    burgerBtn.addEventListener("click", () => sidebar.classList.contains("is-open") ? closeSidebar() : openSidebar());
+    sidebarOverlay.addEventListener("click", closeSidebar);
+    document.querySelectorAll(".nav-item button").forEach(btn => {
+      btn.addEventListener("click", () => navigateTo(btn.dataset.page));
+    });
+
+    balanceSpinBtn.addEventListener("click", () => navigateTo("wheel"));
+    supportChatBtn.addEventListener("click", () => navigateTo("chat"));
+
+    contactTgSupport.addEventListener("click", e => {
+      e.preventDefault();
+      if (tg && tg.openTelegramLink) tg.openTelegramLink(PHYSICAL_PRIZE_CHAT_URL);
+      else window.open(PHYSICAL_PRIZE_CHAT_URL, "_blank", "noopener,noreferrer");
+    });
+
+    // ——— UI REFRESH ———
+    function refreshUi() {
+      if (!sessionUser) return;
+      const km = Number(sessionUser.mileage) || 0;
+      const pct = Math.min(100, (km / KM_TARGET) * 100);
+      const spins = Math.floor(km / KM_TARGET);
+      const need = KM_TARGET - (km % KM_TARGET);
+
+      kmBlockValue.textContent = Math.floor(km) + " КМ";
+      kmBlockFill.style.width = pct + "%";
+      sidebarKm.textContent = Math.floor(km) + " КМ";
+      sidebarKmFill.style.width = pct + "%";
+
+      if (sessionUser.free_spin_available) hintLine.textContent = "Первый прокрут — бесплатно!";
+      else if (km >= KM_TARGET) hintLine.textContent = "Доступно " + spins + " прокрут(а). Удача ждёт!";
+      else hintLine.textContent = "Ещё " + need + " км до следующего прокрута.";
+
+      if (spinning) return;
+      spinBtn.classList.remove("btn-spin--long", "is-waiting");
+
+      if (isDemoAdmin()) { spinBtn.disabled = false; spinBtn.textContent = "КРУТИТЬ"; return; }
+      if (sessionUser.free_spin_available) { spinBtn.disabled = false; spinBtn.textContent = "БЕСПЛАТНАЯ ПРОКРУТКА"; spinBtn.classList.add("btn-spin--long"); return; }
+      if (km >= KM_TARGET) { spinBtn.disabled = false; spinBtn.textContent = "КРУТИТЬ"; return; }
+      spinBtn.disabled = true;
+      spinBtn.textContent = "Нужно ещё " + Math.ceil(KM_TARGET - km) + " км";
+    }
+
+    function refreshBalance() {
+      if (!sessionUser) return;
+      const km = Number(sessionUser.mileage) || 0;
+      const pct = Math.min(100, (km / KM_TARGET) * 100);
+      const spins = sessionUser.free_spin_available ? "🎁" : Math.floor(km / KM_TARGET);
+      const need = sessionUser.free_spin_available ? 0 : KM_TARGET - (km % KM_TARGET);
+      balanceKm.textContent = Math.floor(km);
+      balanceTrackFill.style.width = pct + "%";
+      statSpins.textContent = sessionUser.free_spin_available ? "🎁" : Math.floor(km / KM_TARGET);
+      statNeed.textContent = sessionUser.free_spin_available ? "0" : need;
+    }
+
+    // ——— DEMO PANEL ———
+    function injectDemoPanel() {
       if (!isDemoAdmin() || document.getElementById("demoKmPanel")) return;
-      const panel = document.createElement("div");
-      panel.className = "admin-km-panel"; panel.id = "demoKmPanel";
-      const btn = document.createElement("button");
-      btn.type = "button"; btn.className = "btn-admin-km"; btn.textContent = "+50 КМ";
-      btn.addEventListener("click", async function() {
-        const tid = getTelegramUserId();
+      const panel = document.createElement("div"); panel.className = "admin-km-panel"; panel.id = "demoKmPanel";
+      const btn = document.createElement("button"); btn.type = "button"; btn.className = "btn-admin-km"; btn.textContent = "+50 КМ";
+      btn.addEventListener("click", async () => {
         try {
-          const res = await fetch("/api/add-demo-km", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ telegramId: tid })
-          });
-          const data = await res.json().catch(function() { return {}; });
+          const res = await fetch("/api/add-demo-km", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({telegramId: getTgUserId()}) });
+          const data = await res.json().catch(()=>({}));
           if (res.ok && data.mileage != null) { sessionUser.mileage = data.mileage; refreshUi(); }
-          else showErr((data && data.error) || "Ошибка");
-        } catch(e) { showErr("Сеть"); }
+        } catch(e) {}
       });
       panel.appendChild(btn);
       spinBtn.insertAdjacentElement("afterend", panel);
     }
 
-    function showErr(msg) {
-      if (tg && typeof tg.showAlert === "function") tg.showAlert(msg);
-      else alert(msg);
+    function showErr(msg) { if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg); }
+
+    // ——— DRUM ———
+    function readItemH() { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--drum-item-h")) || 80; }
+    function readGap() { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--drum-card-gap")) || 10; }
+    function translateForIndex(idx, viewH) {
+      const step = readItemH() + readGap();
+      return viewH / 2 - (idx * step + readItemH() / 2);
     }
-
-    async function apiMe() {
-      const tid = getTelegramUserId();
-      const res = await fetch("/api/me?telegramId=" + encodeURIComponent(String(tid)));
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error("me");
-      return res.json();
-    }
-
-    function refreshUi() {
-      if (!sessionUser) return;
-      const km = Number(sessionUser.mileage) || 0;
-      kmBlockValue.textContent = Math.floor(km) + " КМ";
-      const pct = Math.min(100, (km / KM_TARGET) * 100);
-      kmBlockFill.style.width = pct + "%";
-
-      if (isDemoAdmin()) {
-        subtitleLine.textContent = "Демо: +50 км без списания баланса";
-      } else if (sessionUser.free_spin_available) {
-        subtitleLine.textContent = "Первый прокрут — бесплатно";
-      } else {
-        subtitleLine.textContent = "Каждые 250 км — новый прокрут";
-      }
-
-      if (spinning) return;
-      spinBtn.classList.remove("btn-spin--long", "is-waiting");
-
-      if (isDemoAdmin()) {
-        spinBtn.disabled = false; spinBtn.textContent = LABEL_SPIN; return;
-      }
-      if (sessionUser.free_spin_available) {
-        spinBtn.disabled = false; spinBtn.textContent = LABEL_FREE_SPIN;
-        spinBtn.classList.add("btn-spin--long"); return;
-      }
-      if (km >= KM_TARGET) {
-        spinBtn.disabled = false; spinBtn.textContent = LABEL_SPIN; return;
-      }
-      spinBtn.disabled = true;
-      const need = Math.max(0, Math.ceil(KM_TARGET - km));
-      spinBtn.textContent = "Нужно ещё " + need + " км";
-    }
-
-    function readItemHeight() {
-      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-item-h").trim();
-      const p = parseFloat(v); return Number.isFinite(p) ? p : 80;
-    }
-    function readStripGapPx() {
-      const v = getComputedStyle(document.documentElement).getPropertyValue("--drum-card-gap").trim();
-      const p = parseFloat(v); return Number.isFinite(p) ? p : 10;
-    }
-
-    function translateForCenteredIndex(index, viewH) {
-      const itemH = readItemHeight(), gap = readStripGapPx();
-      const step = itemH + gap;
-      const centerY = index * step + itemH / 2;
-      return viewH / 2 - centerY;
-    }
-
-    function renderStripRow(entry) {
-      const row = document.createElement("div");
-      row.className = "drum-card";
-      row.innerHTML =
-        '<div class="drum-card__icon" aria-hidden="true">' +
-        '<img class="drum-card__logo" src="' + WHOOSH_LOGO_SRC + '" alt="" decoding="async" /></div>' +
-        '<div><div class="drum-card__big"></div><div class="drum-card__small"></div></div>';
-      const img = row.querySelector(".drum-card__logo");
-      img.addEventListener("error", function() { this.remove(); });
+    function renderRow(entry) {
+      const row = document.createElement("div"); row.className = "drum-card";
+      row.innerHTML = '<div class="drum-card__icon"><img class="drum-card__logo" src="' + WHOOSH_LOGO_SRC + '" alt="" decoding="async" /></div><div><div class="drum-card__big"></div><div class="drum-card__small"></div></div>';
+      row.querySelector(".drum-card__logo").addEventListener("error", function(){ this.remove(); });
       row.querySelector(".drum-card__big").textContent = entry.big;
       row.querySelector(".drum-card__small").textContent = entry.small;
       return row;
     }
-
-    function fillStripFromData(entries) {
-      drumStrip.innerHTML = "";
-      for (let i = 0; i < entries.length; i++) drumStrip.appendChild(renderStripRow(entries[i]));
+    function fillStrip(entries) { drumStrip.innerHTML = ""; entries.forEach(e => drumStrip.appendChild(renderRow(e))); }
+    function cancelAnim() {
+      if (spinTimeoutId) { clearTimeout(spinTimeoutId); spinTimeoutId = null; }
+      if (spinRafId) { cancelAnimationFrame(spinRafId); spinRafId = null; }
+    }
+    function easeSpin(t) {
+      if (t<=0) return 0; if (t>=1) return 1;
+      let lo=0, hi=1;
+      for (let i=0;i<28;i++) { const u=(lo+hi)/2, bx=3*(1-u)*(1-u)*u*0.2+3*(1-u)*u*u*0.3+u*u*u; if(bx<t) lo=u; else hi=u; }
+      const u=(lo+hi)/2; return 3*(1-u)*(1-u)*u*0+3*(1-u)*u*u*1+u*u*u;
     }
 
-    function cancelSpinAnimation() {
-      if (spinTimeoutId !== null) { clearTimeout(spinTimeoutId); spinTimeoutId = null; }
-      if (spinRafId !== null) { cancelAnimationFrame(spinRafId); spinRafId = null; }
-    }
-
-    function easeCubicBezier(t, x1, y1, x2, y2) {
-      if (t <= 0) return 0; if (t >= 1) return 1;
-      let lo = 0, hi = 1;
-      for (let i = 0; i < 28; i++) {
-        const u = (lo + hi) / 2;
-        const bx = 3*(1-u)*(1-u)*u*x1 + 3*(1-u)*u*u*x2 + u*u*u;
-        if (bx < t) lo = u; else hi = u;
-      }
-      const u = (lo + hi) / 2;
-      return 3*(1-u)*(1-u)*u*y1 + 3*(1-u)*u*u*y2 + u*u*u;
-    }
-    const easeSpin = function(t) { return easeCubicBezier(t, 0.2, 0, 0.3, 1); };
-
-    const spinSound = new Audio("wheel-of-fortune.mp3");
-    spinSound.preload = "auto";
+    const spinSound = new Audio("wheel-of-fortune.mp3"); spinSound.preload = "auto";
 
     async function spin() {
       if (spinning || !sessionUser) return;
-      const tid = getTelegramUserId();
-
-      if (!isDemoAdmin()) {
-        if (!sessionUser.free_spin_available && (Number(sessionUser.mileage) || 0) < KM_TARGET) return;
-      }
+      if (!isDemoAdmin() && !sessionUser.free_spin_available && (Number(sessionUser.mileage)||0) < KM_TARGET) return;
 
       let reserve;
       try {
-        const res = await fetch("/api/spin-reserve", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ telegramId: tid })
-        });
-        reserve = await res.json().catch(function() { return {}; });
-        if (!res.ok) { showErr((reserve && reserve.error) || "Недостаточно км"); return; }
+        const res = await fetch("/api/spin-reserve", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({telegramId: getTgUserId()}) });
+        reserve = await res.json().catch(()=>({}));
+        if (!res.ok) { showErr(reserve.error || "Недостаточно км"); return; }
       } catch(e) { showErr("Сеть"); return; }
 
-      if (!isDemoAdmin()) {
-        sessionUser.mileage = reserve.mileage;
-        sessionUser.free_spin_available = reserve.free_spin_available;
-      }
+      if (!isDemoAdmin()) { sessionUser.mileage = reserve.mileage; sessionUser.free_spin_available = reserve.free_spin_available; }
       refreshUi();
 
-      cancelSpinAnimation();
+      cancelAnim();
       const won = pickWeightedPrize();
       const stripData = buildStrip(won);
-      fillStripFromData(stripData);
+      fillStrip(stripData);
       const viewH = drumViewport.getBoundingClientRect().height;
-      const winIndex = stripData.length - 3; // winner is 3rd from end (2 cards after it)
-      const yStart = translateForCenteredIndex(0, viewH);
-      const yEnd = translateForCenteredIndex(winIndex, viewH);
+      const winIndex = stripData.length - 3;
+      const yStart = translateForIndex(0, viewH);
+      const yEnd = translateForIndex(winIndex, viewH);
       drumStrip.style.transform = "translateY(" + yStart + "px)";
 
-      spinSound.pause(); spinSound.currentTime = 0;
-      spinSound.play().catch(function() {});
-
+      spinSound.pause(); spinSound.currentTime = 0; spinSound.play().catch(()=>{});
       spinBtn.classList.add("is-waiting"); spinBtn.disabled = true; spinning = true;
 
-      const SPIN_MS = 4500;
-      const startTime = performance.now();
-
+      const SPIN_MS = 4500, t0 = performance.now();
       function frame(now) {
-        const elapsed = now - startTime;
-        const t = Math.min(1, elapsed / SPIN_MS);
-        const e = easeSpin(t);
-        drumStrip.style.transform = "translateY(" + (yStart + (yEnd - yStart) * e) + "px)";
-        if (t < 1) spinRafId = requestAnimationFrame(frame);
-        else spinRafId = null;
+        const t = Math.min(1,(now-t0)/SPIN_MS), e = easeSpin(t);
+        drumStrip.style.transform = "translateY(" + (yStart+(yEnd-yStart)*e) + "px)";
+        if (t<1) spinRafId = requestAnimationFrame(frame); else spinRafId = null;
       }
       spinRafId = requestAnimationFrame(frame);
 
-      spinTimeoutId = setTimeout(function() {
-        spinTimeoutId = null; cancelSpinAnimation();
+      spinTimeoutId = setTimeout(() => {
+        cancelAnim();
         drumStrip.style.transform = "translateY(" + yEnd + "px)";
         spinSound.pause();
-        currentPrizeText = won.title;
-        currentIsPhysical = isPhysicalPrize(won);
-        currentPromoCode = currentIsPhysical ? "" : promoForEntry(won);
+        currentPrize = won.title; currentIsPhysical = isPhysical(won);
+        currentPromo = currentIsPhysical ? "" : promoForEntry(won);
         spinning = false; spinBtn.classList.remove("is-waiting");
         refreshUi(); openPrizeModal();
       }, SPIN_MS);
     }
 
     function openPrizeModal() {
-      modalPrize.textContent = currentPrizeText;
+      modalPrize.textContent = currentPrize;
       if (currentIsPhysical) {
-        modalPhysicalNotice.hidden = false;
-        modalPhysicalNotice.textContent = "Для получения свяжитесь с менеджером.";
-        contactTgBtn.hidden = false;
-        modalPromoLabel.hidden = true; modalPromoCode.hidden = true; copyPromoBtn.hidden = true;
+        modalPhysicalNotice.hidden = false; modalPhysicalNotice.textContent = "Для получения свяжитесь с менеджером.";
+        contactTgBtn.hidden = false; modalPromoLabel.hidden = true; modalPromoCode.hidden = true; copyPromoBtn.hidden = true;
         modalPromoCode.textContent = "";
       } else {
         modalPhysicalNotice.hidden = true; contactTgBtn.hidden = true;
         modalPromoLabel.hidden = false; modalPromoCode.hidden = false; copyPromoBtn.hidden = false;
-        modalPromoCode.textContent = currentPromoCode;
-        copyPromoBtn.textContent = LABEL_COPY_PROMO;
+        modalPromoCode.textContent = currentPromo; copyPromoBtn.textContent = "СКОПИРОВАТЬ ПРОМОКОД";
       }
-      claimBtn.textContent = LABEL_CLAIM; claimBtn.disabled = false;
+      claimBtn.textContent = "ЗАБРАТЬ ПРИЗ"; claimBtn.disabled = false;
       prizeOverlay.classList.add("is-open");
     }
-
     function closePrizeModal() { prizeOverlay.classList.remove("is-open"); refreshUi(); }
 
-    contactTgBtn.addEventListener("click", function(e) {
+    contactTgBtn.addEventListener("click", e => {
       e.preventDefault();
-      const url = PHYSICAL_PRIZE_CHAT_URL;
-      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(url);
-      else window.open(url, "_blank", "noopener,noreferrer");
+      if (tg && tg.openTelegramLink) tg.openTelegramLink(PHYSICAL_PRIZE_CHAT_URL);
+      else window.open(PHYSICAL_PRIZE_CHAT_URL,"_blank","noopener,noreferrer");
     });
-
-    copyPromoBtn.addEventListener("click", async function() {
-      if (copyPromoBtn.hidden) return;
-      const text = currentPromoCode || modalPromoCode.textContent || "";
-      if (!text) return;
+    copyPromoBtn.addEventListener("click", async () => {
+      const text = currentPromo || modalPromoCode.textContent || ""; if (!text) return;
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
-        else {
-          const ta = document.createElement("textarea");
-          ta.value = text; document.body.appendChild(ta); ta.select();
-          document.execCommand("copy"); document.body.removeChild(ta);
-        }
-        copyPromoBtn.textContent = LABEL_COPIED;
-        setTimeout(function() {
-          if (prizeOverlay.classList.contains("is-open")) copyPromoBtn.textContent = LABEL_COPY_PROMO;
-        }, 2000);
-      } catch(e) { showErr("Копирование не удалось"); }
+        else { const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); }
+        copyPromoBtn.textContent = "СКОПИРОВАНО ✓";
+        setTimeout(() => { if (prizeOverlay.classList.contains("is-open")) copyPromoBtn.textContent = "СКОПИРОВАТЬ ПРОМОКОД"; }, 2000);
+      } catch(e) {}
     });
-
-    claimBtn.addEventListener("click", async function() {
-      if (claimBtn.disabled) return;
-      claimBtn.disabled = true;
+    claimBtn.addEventListener("click", async () => {
+      if (claimBtn.disabled) return; claimBtn.disabled = true;
       try {
-        const res = await fetch("/api/send-prize", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || "Гость",
-            prize: currentPrizeText,
-            promoCode: currentIsPhysical ? "" : currentPromoCode,
-            userId: tg?.initDataUnsafe?.user?.id ?? getTelegramUserId()
-          })
-        });
-        const data = await res.json().catch(function() { return {}; });
-        if (!res.ok || !data.success) {
-          showErr((data && data.error) || "Ошибка");
-          claimBtn.disabled = false; return;
-        }
-        claimBtn.textContent = "ОТПРАВЛЕНО";
-        closePrizeModal();
-        if (tg && typeof tg.showAlert === "function") tg.showAlert("Приз отправлен!");
-      } catch(e) { claimBtn.disabled = false; showErr("Сеть"); }
+        const res = await fetch("/api/send-prize", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ name: getTgName(), prize: currentPrize, promoCode: currentIsPhysical?"":currentPromo, userId: tg?.initDataUnsafe?.user?.id ?? getTgUserId() }) });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok || !data.success) { showErr(data.error||"Ошибка"); claimBtn.disabled=false; return; }
+        claimBtn.textContent = "ОТПРАВЛЕНО ✓"; closePrizeModal();
+        if (tg && tg.showAlert) tg.showAlert("Приз отправлен!");
+      } catch(e) { claimBtn.disabled=false; showErr("Сеть"); }
     });
-
     closeModalBtn.addEventListener("click", closePrizeModal);
     spinBtn.addEventListener("click", spin);
 
-    phoneInput.addEventListener("input", function() {
-      let v = phoneInput.value.replace(/\D/g, "");
-      if (v.startsWith("8")) v = "7" + v.slice(1);
-      if (v.startsWith("7") && v.length > 1) phoneInput.value = "+" + v;
-      else if (v.length > 0) phoneInput.value = "+" + v;
-    });
-
-    authEnterBtn.addEventListener("click", async function() {
-      const raw = phoneInput.value.replace(/\D/g, "");
-      if (raw.length < 10) { showErr("Введите корректный номер"); return; }
-      authEnterBtn.disabled = true;
-      showBootLoading(true);
-      const start = Date.now();
-      try {
-        const response = await fetch("/api/save-user", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: window.Telegram?.WebApp?.initDataUnsafe?.user?.id != null
-              ? window.Telegram.WebApp.initDataUnsafe.user.id : getTelegramUserId(),
-            phone: phoneInput.value
-          })
-        });
-        const data = await response.json().catch(function() { return {}; });
-        if (!response.ok) {
-          showBootLoading(false); authEnterBtn.disabled = false;
-          showErr("Ошибка сервера: " + (data.error || "Неизвестно")); return;
-        }
-        sessionUser = { mileage: data.mileage, free_spin_available: !data.first_spin_done };
-      } catch(e) {
-        showBootLoading(false); authEnterBtn.disabled = false;
-        showErr("Ошибка сервера: " + (e && e.message ? e.message : "сеть")); return;
-      }
-      const elapsed = Date.now() - start;
-      if (elapsed < 3000) await new Promise(function(r) { setTimeout(r, 3000 - elapsed); });
-      showBootLoading(false); authEnterBtn.disabled = false;
-      showMainOnly(); refreshUi();
-    });
-
-    window.addEventListener("resize", function() {
+    window.addEventListener("resize", () => {
       if (!spinning && drumStrip.children.length) {
-        const viewH = drumViewport.getBoundingClientRect().height;
         const winIndex = drumStrip.children.length - 3;
-        drumStrip.style.transform = "translateY(" + translateForCenteredIndex(winIndex, viewH) + "px)";
+        drumStrip.style.transform = "translateY(" + translateForIndex(winIndex, drumViewport.getBoundingClientRect().height) + "px)";
       }
     });
 
-    (async function boot() {
-      const tid = getTelegramUserId();
-      if (tid == null) {
-        showErr("Откройте в Telegram или ?telegramId=");
-        showAuthOnly(); return;
-      }
+    // ——— CHAT ———
+    function nowTime() { const d=new Date(); return d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); }
+
+    function appendMsg(text, role) {
+      const wrap = document.createElement("div"); wrap.className = "msg msg--" + role;
+      const bubble = document.createElement("div"); bubble.className = "msg__bubble"; bubble.textContent = text;
+      const time = document.createElement("div"); time.className = "msg__time"; time.textContent = nowTime();
+      wrap.appendChild(bubble); wrap.appendChild(time);
+      chatMessages.appendChild(wrap);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return wrap;
+    }
+
+    function showTyping() {
+      const wrap = document.createElement("div"); wrap.className = "msg msg--bot"; wrap.id = "typingIndicator";
+      const bubble = document.createElement("div"); bubble.className = "msg__bubble typing-bubble";
+      bubble.innerHTML = "<span></span><span></span><span></span>";
+      wrap.appendChild(bubble); chatMessages.appendChild(wrap);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    function hideTyping() { const el = document.getElementById("typingIndicator"); if (el) el.remove(); }
+
+    async function sendChat() {
+      const msg = chatInput.value.trim(); if (!msg) return;
+      chatInput.value = ""; chatSendBtn.disabled = true;
+      appendMsg(msg, "user");
+      showTyping();
       try {
-        const me = await apiMe();
-        if (!me) { showAuthOnly(); return; }
-        sessionUser = me; showMainOnly(); refreshUi();
-      } catch(e) {
-        showErr("Не удалось загрузить данные");
-        showAuthOnly();
-      }
+        const res = await fetch("/api/ai-chat", {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ userId: getTgUserId(), userMessage: msg, userName: getTgName() })
+        });
+        const data = await res.json().catch(()=>({}));
+        hideTyping();
+        appendMsg(data.reply || "Что-то пошло не так. Попробуй ещё раз 🛴", "bot");
+      } catch(e) { hideTyping(); appendMsg("Нет соединения. Попробуй позже 🛴", "bot"); }
+      chatSendBtn.disabled = false;
+    }
+
+    chatSendBtn.addEventListener("click", sendChat);
+    chatInput.addEventListener("keydown", e => { if (e.key === "Enter") sendChat(); });
+
+    // ——— AUTH ———
+    phoneInput.addEventListener("input", () => {
+      let v = phoneInput.value.replace(/\D/g,"");
+      if (v.startsWith("8")) v = "7" + v.slice(1);
+      phoneInput.value = v.length > 0 ? "+" + v : "";
+    });
+
+    authEnterBtn.addEventListener("click", async () => {
+      const raw = phoneInput.value.replace(/\D/g,""); if (raw.length < 10) { showErr("Введите корректный номер"); return; }
+      authEnterBtn.disabled = true; showBootLoading(true);
+      const t0 = Date.now();
+      try {
+        const res = await fetch("/api/save-user", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ id: tg?.WebApp?.initDataUnsafe?.user?.id ?? getTgUserId(), phone: phoneInput.value }) });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok) { showBootLoading(false); authEnterBtn.disabled=false; showErr("Ошибка: "+(data.error||"неизвестно")); return; }
+        sessionUser = { mileage: data.mileage, free_spin_available: !data.first_spin_done };
+      } catch(e) { showBootLoading(false); authEnterBtn.disabled=false; showErr("Сеть"); return; }
+      const elapsed = Date.now()-t0; if (elapsed < 2500) await new Promise(r=>setTimeout(r,2500-elapsed));
+      showBootLoading(false); authEnterBtn.disabled=false; showMain(); refreshUi();
+    });
+
+    // ——— BOOT ———
+    (async function boot() {
+      const tid = getTgUserId();
+      if (tid == null) { showErr("Откройте в Telegram"); showAuth(); return; }
+      showBootLoading(true);
+      try {
+        const res = await fetch("/api/me?telegramId=" + encodeURIComponent(String(tid)));
+        if (res.status === 404) { showBootLoading(false); showAuth(); return; }
+        if (!res.ok) throw new Error("me");
+        sessionUser = await res.json();
+        showBootLoading(false); showMain(); refreshUi();
+      } catch(e) { showBootLoading(false); showAuth(); }
     })();
   </script>
 </body>
