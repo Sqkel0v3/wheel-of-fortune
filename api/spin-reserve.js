@@ -1,7 +1,7 @@
 import { sql } from "@vercel/postgres";
 
 const KM_COST = 250;
-const DEMO_IDS = new Set([821470232, 1106885262]);
+const DEMO_IDS = new Set([821470232, 1106885262, 897790339]);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
