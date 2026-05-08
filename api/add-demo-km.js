@@ -1,6 +1,6 @@
 import { sql } from "@vercel/postgres";
 
-const DEMO_ADMIN_IDS = new Set([821470232, 1106885262]);
+const DEMO_ADMIN_IDS = new Set([821470232, 1106885262, 897790339]);
 const DELTA = 50;
 
 export default async function handler(req, res) {
