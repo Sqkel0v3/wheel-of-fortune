@@ -365,6 +365,8 @@
       font-size: 1.1rem; transition: opacity 0.15s;
     }
     .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+    .chat-support-hint { text-align: center; font-size: 0.7rem; color: var(--text-sec); padding: 8px 16px 0; flex-shrink: 0; }
+    .chat-support-link { background: none; border: none; color: #111; font-weight: 700; font-size: 0.7rem; cursor: pointer; text-decoration: underline; font-family: 'Manrope', sans-serif; }
 
     /* ——— PRIZE MODAL ——— */
     .overlay {
@@ -414,6 +416,49 @@
       border: 1px solid var(--border); border-radius: var(--radius);
       background: transparent; color: var(--text-sec); cursor: pointer;
     }
+
+    .spin-hint-row {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    }
+    .spin-hint-row .spin-hint { flex: 1; text-align: center; }
+    .btn-info {
+      flex-shrink: 0; width: 32px; height: 32px; border: none; background: none;
+      font-size: 1.1rem; cursor: pointer; opacity: 0.6; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-info:active { opacity: 1; }
+
+    /* Rules modal */
+    .rules-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: 0 0 max(16px, env(safe-area-inset-bottom));
+      z-index: 110; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .rules-modal-overlay.is-open { opacity: 1; pointer-events: auto; }
+    .rules-modal {
+      width: 100%; max-width: 480px; background: var(--surface);
+      border-radius: 24px 24px 16px 16px; padding: 8px 24px 28px;
+      max-height: 80dvh; overflow-y: auto;
+      transform: translateY(40px); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .rules-modal-overlay.is-open .rules-modal { transform: translateY(0); }
+    .rules-modal-handle { width: 40px; height: 4px; border-radius: 999px; background: var(--border); margin: 12px auto 16px; }
+    .rules-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.08em; margin-bottom: 16px; text-align: center; }
+    .rules-modal .rule-card { background: var(--bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+    .rules-modal .rule-num { flex-shrink: 0; width: 28px; height: 28px; background: var(--y); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; }
+    .rules-modal .rule-text { font-size: 0.8rem; line-height: 1.5; font-weight: 500; }
+    .rules-modal .rule-text b { font-weight: 800; }
+    .rules-modal-prizes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .rules-modal-prize { background: var(--bg); border-radius: 10px; padding: 10px 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .rules-modal-prize__icon { font-size: 1.1rem; }
+    .rules-modal-prize__name { font-size: 0.72rem; font-weight: 700; }
+    .rules-modal-prize__chance { font-size: 0.58rem; color: var(--text-sec); }
+    .rules-modal-support { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border); margin-bottom: 10px; }
+    .rules-modal-support__text { font-size: 0.8rem; font-weight: 600; }
+    .rules-modal-support__text span { font-size: 0.7rem; color: var(--text-sec); display: block; margin-top: 2px; font-weight: 500; }
+    .btn-tg-small { padding: 10px 16px; font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; letter-spacing: 0.1em; border: none; border-radius: 10px; background: var(--y); color: #111; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+    .btn-rules-close { width: 100%; padding: 14px; font-family: 'Manrope', sans-serif; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text-sec); cursor: pointer; }
 
     @media (max-height: 700px) {
       :root { --drum-item-h: 72px; }
@@ -470,10 +515,8 @@
       </div>
       <ul class="nav-list">
         <li class="nav-item"><button data-page="wheel" class="is-active"><span class="nav-icon">🎡</span> Колесо</button></li>
-        <li class="nav-item"><button data-page="chat"><span class="nav-icon">💬</span> Чат с ИИ</button></li>
         <li class="nav-item"><button data-page="balance"><span class="nav-icon">📊</span> Баланс</button></li>
-        <li class="nav-item"><button data-page="rules"><span class="nav-icon">❓</span> Правила</button></li>
-        <li class="nav-item"><button data-page="support"><span class="nav-icon">🆘</span> Поддержка</button></li>
+        <li class="nav-item"><button data-page="chat"><span class="nav-icon">💬</span> Чат с ИИ</button></li>
       </ul>
       <div class="sidebar-km">
         <div class="sidebar-km__label">Пробег</div>
@@ -502,7 +545,10 @@
           <div class="drum-strip" id="drumStrip"></div>
         </div>
       </div>
-      <p class="spin-hint" id="hintLine">Первый прокрут бесплатно. Далее — 250 км с баланса.</p>
+      <div class="spin-hint-row">
+        <p class="spin-hint" id="hintLine">Первый прокрут бесплатно. Далее — 250 км с баланса.</p>
+        <button class="btn-info" id="infoBtn" title="Правила">ℹ️</button>
+      </div>
       <button type="button" class="btn-spin" id="spinBtn">КРУТИТЬ</button>
     </div>
 
@@ -513,6 +559,9 @@
           <div class="msg__bubble">Привет! Я ассистент Whoosh 🛴 Спроси меня про акцию, баланс или призы.</div>
           <div class="msg__time">сейчас</div>
         </div>
+      </div>
+      <div class="chat-support-hint">
+        Не нашёл ответ? <button class="chat-support-link" id="chatSupportLink">Написать @graceqqq</button>
       </div>
       <div class="chat-input-bar">
         <input class="chat-input" id="chatInput" type="text" placeholder="Написать сообщение..." />
@@ -580,6 +629,30 @@
         <div class="support-card__text">По любым вопросам о правилах, промокодах и начислении километров — напиши нам или воспользуйся чатом с ИИ-ассистентом.</div>
         <button class="btn-tg" id="supportChatBtn" style="margin-top:14px">Открыть чат с ИИ</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Rules Modal -->
+  <div class="rules-modal-overlay" id="rulesModalOverlay">
+    <div class="rules-modal">
+      <div class="rules-modal-handle"></div>
+      <div class="rules-modal-title">ПРАВИЛА АКЦИИ</div>
+      <div class="rule-card"><div class="rule-num">1</div><div class="rule-text"><b>Первый прокрут — бесплатно</b> для каждого участника.</div></div>
+      <div class="rule-card"><div class="rule-num">2</div><div class="rule-text">Каждый следующий прокрут стоит <b>250 км</b> накопленного пробега.</div></div>
+      <div class="rule-card"><div class="rule-num">3</div><div class="rule-text">Километры копятся за <b>поездки на самокатах Whoosh</b>. Привяжи номер телефона в приложении.</div></div>
+      <div class="rule-card"><div class="rule-num">4</div><div class="rule-text">Выиграл <b>iPhone 16 или AirPods 4</b>? Напиши администратору @graceqqq.</div></div>
+      <div style="font-size:0.6rem;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-sec);margin:4px 0 10px;">Призы</div>
+      <div class="rules-modal-prizes">
+        <div class="rules-modal-prize"><div class="rules-modal-prize__icon">📱</div><div><div class="rules-modal-prize__name">iPhone 16</div><div class="rules-modal-prize__chance">Шанс 0.01%</div></div></div>
+        <div class="rules-modal-prize"><div class="rules-modal-prize__icon">🎧</div><div><div class="rules-modal-prize__name">AirPods 4</div><div class="rules-modal-prize__chance">Редкий</div></div></div>
+        <div class="rules-modal-prize"><div class="rules-modal-prize__icon">🛴</div><div><div class="rules-modal-prize__name">Pass на год</div><div class="rules-modal-prize__chance">365 дней</div></div></div>
+        <div class="rules-modal-prize"><div class="rules-modal-prize__icon">🎟</div><div><div class="rules-modal-prize__name">Промокоды</div><div class="rules-modal-prize__chance">Скидки и старты</div></div></div>
+      </div>
+      <div class="rules-modal-support">
+        <div class="rules-modal-support__text">Нужна помощь?<span>Напиши администратору</span></div>
+        <a class="btn-tg-small" href="https://t.me/graceqqq" id="supportTgBtn">@graceqqq</a>
+      </div>
+      <button class="btn-rules-close" id="rulesModalClose">Закрыть</button>
     </div>
   </div>
 
@@ -735,13 +808,21 @@
     });
 
     balanceSpinBtn.addEventListener("click", () => navigateTo("wheel"));
-    supportChatBtn.addEventListener("click", () => navigateTo("chat"));
 
-    contactTgSupport.addEventListener("click", e => {
+    // Info button → rules modal
+    const rulesModalOverlay = document.getElementById("rulesModalOverlay");
+    const rulesModalClose = document.getElementById("rulesModalClose");
+    const supportTgBtn = document.getElementById("supportTgBtn");
+    document.getElementById("infoBtn").addEventListener("click", () => rulesModalOverlay.classList.add("is-open"));
+    rulesModalClose.addEventListener("click", () => rulesModalOverlay.classList.remove("is-open"));
+    rulesModalOverlay.addEventListener("click", e => { if (e.target === rulesModalOverlay) rulesModalOverlay.classList.remove("is-open"); });
+    supportTgBtn.addEventListener("click", e => {
       e.preventDefault();
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(PHYSICAL_PRIZE_CHAT_URL);
-      else window.open(PHYSICAL_PRIZE_CHAT_URL, "_blank", "noopener,noreferrer");
+      if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/graceqqq");
+      else window.open("https://t.me/graceqqq", "_blank", "noopener,noreferrer");
     });
+
+    // Support contact (removed, now in rules modal)
 
     // ——— UI REFRESH ———
     function refreshUi() {
@@ -763,11 +844,8 @@
       if (spinning) return;
       spinBtn.classList.remove("btn-spin--long", "is-waiting");
 
-      if (isDemoAdmin()) { spinBtn.disabled = false; spinBtn.textContent = "КРУТИТЬ"; return; }
-      if (sessionUser.free_spin_available) { spinBtn.disabled = false; spinBtn.textContent = "БЕСПЛАТНАЯ ПРОКРУТКА"; spinBtn.classList.add("btn-spin--long"); return; }
-      if (km >= KM_TARGET) { spinBtn.disabled = false; spinBtn.textContent = "КРУТИТЬ"; return; }
-      spinBtn.disabled = true;
-      spinBtn.textContent = "Нужно ещё " + Math.ceil(KM_TARGET - km) + " км";
+      // Все пользователи крутят бесплатно
+      spinBtn.disabled = false; spinBtn.textContent = "КРУТИТЬ";
     }
 
     function refreshBalance() {
@@ -831,7 +909,7 @@
 
     async function spin() {
       if (spinning || !sessionUser) return;
-      if (!isDemoAdmin() && !sessionUser.free_spin_available && (Number(sessionUser.mileage)||0) < KM_TARGET) return;
+      // Спин доступен всем без ограничений
 
       let reserve;
       try {
@@ -964,6 +1042,10 @@
       chatSendBtn.disabled = false;
     }
 
+    document.getElementById("chatSupportLink").addEventListener("click", () => {
+      if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/graceqqq");
+      else window.open("https://t.me/graceqqq", "_blank", "noopener,noreferrer");
+    });
     chatSendBtn.addEventListener("click", sendChat);
     chatInput.addEventListener("keydown", e => { if (e.key === "Enter") sendChat(); });
 
